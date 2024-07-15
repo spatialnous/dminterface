@@ -876,9 +876,9 @@ bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layer_name,
                 ShapeGraph::Column::CONNECTIVITY)));
 
         if (m_shapeGraphs.size() > 0)
-            unsetDisplayedShapeGraphRef();
-        else
             setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
+        else
+            unsetDisplayedShapeGraphRef();
     } catch (Communicator::CancelledException) {
         converted = false;
     }
@@ -930,9 +930,9 @@ bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layer_name, bo
         m_shapeGraphs.back().setDisplayedAttribute(-1);
 
         if (m_shapeGraphs.size() > 0)
-            unsetDisplayedShapeGraphRef();
-        else
             setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
+        else
+            unsetDisplayedShapeGraphRef();
 
     } catch (Communicator::CancelledException) {
         converted = false;
@@ -976,9 +976,9 @@ bool MetaGraphDX::convertDrawingToSegment(Communicator *comm, std::string layer_
         m_shapeGraphs[mapref].setDisplayedAttribute(ShapeGraph::Column::CONNECTIVITY);
 
         if (m_shapeGraphs.size() > 0)
-            unsetDisplayedShapeGraphRef();
-        else
             setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
+        else
+            unsetDisplayedShapeGraphRef();
     } catch (Communicator::CancelledException) {
         converted = false;
     }
@@ -1009,9 +1009,9 @@ bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layer_nam
         m_shapeGraphs.back().setDisplayedAttribute(-1);
 
         if (m_shapeGraphs.size() > 0)
-            unsetDisplayedShapeGraphRef();
-        else
             setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
+        else
+            unsetDisplayedShapeGraphRef();
     } catch (Communicator::CancelledException) {
         converted = false;
     }
@@ -1204,9 +1204,9 @@ bool MetaGraphDX::convertAxialToSegment(Communicator *comm, std::string layer_na
                 ShapeGraph::Column::CONNECTIVITY)));
 
         if (m_shapeGraphs.size() > 0)
-            unsetDisplayedShapeGraphRef();
-        else
             setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
+        else
+            unsetDisplayedShapeGraphRef();
     } catch (Communicator::CancelledException) {
         converted = false;
     }
