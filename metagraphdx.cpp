@@ -164,6 +164,7 @@ bool MetaGraphDX::setGrid(double spacing, const Point2f &offset) {
     m_state &= ~POINTMAPS;
 
     getDisplayedPointMap().getInternalMap().setGrid(spacing, offset);
+    getDisplayedPointMap().setDisplayedAttribute(-2);
 
     m_state |= POINTMAPS;
 
@@ -182,6 +183,7 @@ bool MetaGraphDX::makePoints(const Point2f &p, int fill_type, Communicator *comm
         std::vector<Line> lines = getShownDrawingFilesAsLines();
         getDisplayedPointMap().getInternalMap().blockLines(lines);
         getDisplayedPointMap().getInternalMap().makePoints(p, fill_type, communicator);
+        getDisplayedPointMap().setDisplayedAttribute(-2);
     } catch (Communicator::CancelledException) {
 
         // By this stage points almost certainly exist,
@@ -279,6 +281,7 @@ bool MetaGraphDX::makeGraph(Communicator *communicator, int algorithm, double ma
         // algorithm is now used for boundary graph option (as a simple boolean)
         graphMade = getDisplayedPointMap().getInternalMap().sparkGraph2(communicator,
                                                                         (algorithm != 0), maxdist);
+        getDisplayedPointMap().setDisplayedAttribute(PointMap::Column::CONNECTIVITY);
     } catch (Communicator::CancelledException) {
         graphMade = false;
     }
@@ -292,6 +295,8 @@ bool MetaGraphDX::makeGraph(Communicator *communicator, int algorithm, double ma
 
 bool MetaGraphDX::unmakeGraph(bool removeLinks) {
     bool graphUnmade = getDisplayedPointMap().getInternalMap().unmake(removeLinks);
+
+    getDisplayedPointMap().setDisplayedAttribute(-2);
 
     if (graphUnmade) {
         setViewClass(SHOWVGATOP);

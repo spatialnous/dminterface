@@ -8,6 +8,10 @@
 
 void PointMapDX::setDisplayedAttribute(int col) {
     if (m_displayed_attribute == col) {
+        if (getInternalMap().getAttributeTableHandle().getDisplayColIndex() !=
+            m_displayed_attribute) {
+            getInternalMap().getAttributeTableHandle().setDisplayColIndex(m_displayed_attribute);
+        }
         return;
     } else {
         m_displayed_attribute = col;
