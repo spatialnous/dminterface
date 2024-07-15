@@ -21,10 +21,10 @@ class ShapeMapDX : public AttributeMapDX {
     mutable int m_current_shape = -1;
     mutable std::vector<size_t> m_display_shapes;
 
-    mutable bool m_newshape; // if a new shape has been added
+    mutable bool m_newshape = false; // if a new shape has been added
 
-    mutable int m_curlinkline;
-    mutable int m_curunlinkpoint;
+    mutable int m_curlinkline = -1;
+    mutable int m_curunlinkpoint = -1;
 
     mutable bool m_showLines;
     mutable bool m_showFill;

@@ -220,6 +220,7 @@ class MetaGraphDX {
     bool getShowText() const { return m_showText; }
     bool makePoints(const Point2f &p, int semifilled,
                     Communicator *communicator = NULL); // override of PointMap
+    bool hasVisibleDrawingShapes();
     std::vector<std::pair<std::reference_wrapper<const ShapeMapDX>, int>> getShownDrawingMaps();
     std::vector<std::pair<std::reference_wrapper<const ShapeMap>, int>>
     getAsInternalMaps(std::vector<std::pair<std::reference_wrapper<const ShapeMapDX>, int>> maps);
@@ -343,6 +344,7 @@ class MetaGraphDX {
     const ShapeGraphDX &getDisplayedShapeGraph() const {
         return m_shapeGraphs[m_displayedShapegraph.value()];
     }
+    void unsetDisplayedShapeGraphRef() { m_displayedShapegraph = std::nullopt; }
     void setDisplayedShapeGraphRef(size_t map) {
         if (m_displayedShapegraph.has_value() && m_displayedShapegraph != map)
             getDisplayedShapeGraph().clearSel();
@@ -354,7 +356,7 @@ class MetaGraphDX {
         if (m_displayedShapegraph.has_value()) {
             if (m_shapeGraphs.size() == 1)
                 m_displayedShapegraph = std::nullopt;
-            else if (m_displayedShapegraph.value() != 0 && m_displayedShapegraph.value() >= i)
+            else if (m_displayedShapegraph.value() > 0 && m_displayedShapegraph.value() >= i)
                 m_displayedShapegraph.value()--;
         }
         m_shapeGraphs.erase(std::next(m_shapeGraphs.begin(), static_cast<int>(i)));
@@ -511,12 +513,13 @@ class MetaGraphDX {
             return getDisplayedDataMap().getSelSet();
     }
 
+  public:
+    void runAgentEngine(Communicator *comm, std::unique_ptr<IAnalysis> &analysis);
     // thru vision
     bool analyseThruVision(Communicator *comm = NULL,
                            std::optional<size_t> gatelayer = std::nullopt);
-    // BSP tree for making isovists
 
-  public:
+  public: // BSP tree for making isovists
     bool makeBSPtree(BSPNodeTree &bspNodeTree, Communicator *communicator = NULL);
     void resetBSPtree() { m_bspNodeTree.resetBSPtree(); }
     // returns 0: fail, 1: made isovist, 2: made isovist and added new shapemap layer

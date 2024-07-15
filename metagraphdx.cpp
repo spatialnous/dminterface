@@ -201,6 +201,18 @@ bool MetaGraphDX::clearPoints() {
     return b_return;
 }
 
+bool MetaGraphDX::hasVisibleDrawingShapes() {
+    // tries to find at least one visible shape
+    for (const auto &pixelGroup : m_drawingFiles) {
+        for (const auto &pixel : pixelGroup.second) {
+            if (pixel.isShown() && !pixel.getAllShapes().empty()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 std::vector<std::pair<std::reference_wrapper<const ShapeMapDX>, int>>
 MetaGraphDX::getShownDrawingMaps() {
     std::vector<std::pair<std::reference_wrapper<const ShapeMapDX>, int>> maps;
@@ -863,7 +875,11 @@ bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layer_name,
             static_cast<int>(m_shapeGraphs.back().getAttributeTable().getColumnIndex(
                 ShapeGraph::Column::CONNECTIVITY)));
 
-        setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
+        int newIdx = m_shapeGraphs.size() - 1;
+        if (newIdx < 0)
+            unsetDisplayedShapeGraphRef();
+        else
+            setDisplayedShapeGraphRef(newIdx);
     } catch (Communicator::CancelledException) {
         converted = false;
     }
@@ -913,7 +929,12 @@ bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layer_name, bo
 
         m_shapeGraphs.back().overrideDisplayedAttribute(-2); // <- override if it's already showing
         m_shapeGraphs.back().setDisplayedAttribute(-1);
-        setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
+
+        int newIdx = m_shapeGraphs.size() - 1;
+        if (newIdx < 0)
+            unsetDisplayedShapeGraphRef();
+        else
+            setDisplayedShapeGraphRef(newIdx);
 
     } catch (Communicator::CancelledException) {
         converted = false;
@@ -956,7 +977,11 @@ bool MetaGraphDX::convertDrawingToSegment(Communicator *comm, std::string layer_
             MapConverter::convertDrawingToSegment(comm, layer_name, shownMapsInternal));
         m_shapeGraphs[mapref].setDisplayedAttribute(ShapeGraph::Column::CONNECTIVITY);
 
-        setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
+        int newIdx = m_shapeGraphs.size() - 1;
+        if (newIdx < 0)
+            unsetDisplayedShapeGraphRef();
+        else
+            setDisplayedShapeGraphRef(newIdx);
     } catch (Communicator::CancelledException) {
         converted = false;
     }
@@ -985,7 +1010,11 @@ bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layer_nam
 
         m_shapeGraphs.back().overrideDisplayedAttribute(-2); // <- override if it's already showing
         m_shapeGraphs.back().setDisplayedAttribute(-1);
-        setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
+        int newIdx = m_shapeGraphs.size() - 1;
+        if (newIdx < 0)
+            unsetDisplayedShapeGraphRef();
+        else
+            setDisplayedShapeGraphRef(newIdx);
     } catch (Communicator::CancelledException) {
         converted = false;
     }
@@ -1177,7 +1206,11 @@ bool MetaGraphDX::convertAxialToSegment(Communicator *comm, std::string layer_na
             static_cast<int>(m_shapeGraphs.back().getAttributeTable().getColumnIndex(
                 ShapeGraph::Column::CONNECTIVITY)));
 
-        setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
+        int newIdx = m_shapeGraphs.size() - 1;
+        if (newIdx < 0)
+            unsetDisplayedShapeGraphRef();
+        else
+            setDisplayedShapeGraphRef(newIdx);
     } catch (Communicator::CancelledException) {
         converted = false;
     }
@@ -1821,6 +1854,29 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
     return true;
 }
 
+// Agent functionality: some of it still kept here with the metagraph
+// (to allow push value to layer and back again)
+
+void MetaGraphDX::runAgentEngine(Communicator *comm, std::unique_ptr<IAnalysis> &analysis) {
+    if (!hasDisplayedPointMap()) {
+        throw(depthmapX::RuntimeException("No Pointmap on display"));
+    }
+    auto &map = getDisplayedPointMap();
+    auto agentAnalysis = dynamic_cast<AgentAnalysis *>(analysis.get());
+    if (!agentAnalysis) {
+        throw(depthmapX::RuntimeException("No agent analysis provided to runAgentEngine function"));
+    }
+    agentAnalysis->run(comm);
+
+    if (agentAnalysis->setTooRecordTrails()) {
+        m_state |= DATAMAPS;
+    }
+    map.overrideDisplayedAttribute(-2);
+    auto displaycol =
+        map.getInternalMap().getAttributeTable().getColumnIndex(AgentAnalysis::Column::GATE_COUNTS);
+    map.setDisplayedAttribute(displaycol);
+}
+
 // Thru vision
 // TODO: Undocumented functionality
 bool MetaGraphDX::analyseThruVision(Communicator *comm, std::optional<size_t> gatelayer) {
@@ -1895,7 +1951,9 @@ int MetaGraphDX::getDisplayedMapType() {
     case VIEWVGA:
         return ShapeMap::POINTMAP;
     case VIEWAXIAL:
-        return getDisplayedShapeGraph().getMapType();
+        return hasDisplayedShapeGraph() && getDisplayedShapeGraphRef() != static_cast<size_t>(-1)
+                   ? getDisplayedShapeGraph().getMapType()
+                   : ShapeMap::EMPTYMAP;
     case VIEWDATA:
         return getDisplayedDataMap().getMapType();
     }
@@ -2157,6 +2215,7 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromStream(std::istream &stream,
                     newMapDX.setDisplayedAttribute(std::get<2>(*ddIt));
                     ddIt++;
                 }
+                gddIt++;
             }
             gddIt++;
         }

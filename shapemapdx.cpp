@@ -444,7 +444,7 @@ float ShapeMapDX::getSelectedAvg(size_t attributeIdx) {
 
 bool ShapeMapDX::clearSel() {
     // note, only clear if need be, as m_attributes->deselectAll is slow
-    if (m_selectionSet.size()) {
+    if (!m_selectionSet.empty()) {
         m_selectionSet.clear();
     }
     return true;
@@ -452,7 +452,7 @@ bool ShapeMapDX::clearSel() {
 
 QtRegion ShapeMapDX::getSelBounds() {
     QtRegion r;
-    if (m_selectionSet.size()) {
+    if (!m_selectionSet.empty()) {
         for (auto &shapeRef : m_selectionSet) {
             r = runion(r, getInternalMap().getAllShapes().at(shapeRef).getBoundingBox());
         }
