@@ -875,11 +875,10 @@ bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layer_name,
             static_cast<int>(m_shapeGraphs.back().getAttributeTable().getColumnIndex(
                 ShapeGraph::Column::CONNECTIVITY)));
 
-        int newIdx = m_shapeGraphs.size() - 1;
-        if (newIdx < 0)
+        if (m_shapeGraphs.size() > 0)
             unsetDisplayedShapeGraphRef();
         else
-            setDisplayedShapeGraphRef(newIdx);
+            setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
     } catch (Communicator::CancelledException) {
         converted = false;
     }
@@ -930,11 +929,10 @@ bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layer_name, bo
         m_shapeGraphs.back().overrideDisplayedAttribute(-2); // <- override if it's already showing
         m_shapeGraphs.back().setDisplayedAttribute(-1);
 
-        int newIdx = m_shapeGraphs.size() - 1;
-        if (newIdx < 0)
+        if (m_shapeGraphs.size() > 0)
             unsetDisplayedShapeGraphRef();
         else
-            setDisplayedShapeGraphRef(newIdx);
+            setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
 
     } catch (Communicator::CancelledException) {
         converted = false;
@@ -977,11 +975,10 @@ bool MetaGraphDX::convertDrawingToSegment(Communicator *comm, std::string layer_
             MapConverter::convertDrawingToSegment(comm, layer_name, shownMapsInternal));
         m_shapeGraphs[mapref].setDisplayedAttribute(ShapeGraph::Column::CONNECTIVITY);
 
-        int newIdx = m_shapeGraphs.size() - 1;
-        if (newIdx < 0)
+        if (m_shapeGraphs.size() > 0)
             unsetDisplayedShapeGraphRef();
         else
-            setDisplayedShapeGraphRef(newIdx);
+            setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
     } catch (Communicator::CancelledException) {
         converted = false;
     }
@@ -1010,11 +1007,11 @@ bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layer_nam
 
         m_shapeGraphs.back().overrideDisplayedAttribute(-2); // <- override if it's already showing
         m_shapeGraphs.back().setDisplayedAttribute(-1);
-        int newIdx = m_shapeGraphs.size() - 1;
-        if (newIdx < 0)
+
+        if (m_shapeGraphs.size() > 0)
             unsetDisplayedShapeGraphRef();
         else
-            setDisplayedShapeGraphRef(newIdx);
+            setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
     } catch (Communicator::CancelledException) {
         converted = false;
     }
@@ -1206,11 +1203,10 @@ bool MetaGraphDX::convertAxialToSegment(Communicator *comm, std::string layer_na
             static_cast<int>(m_shapeGraphs.back().getAttributeTable().getColumnIndex(
                 ShapeGraph::Column::CONNECTIVITY)));
 
-        int newIdx = m_shapeGraphs.size() - 1;
-        if (newIdx < 0)
+        if (m_shapeGraphs.size() > 0)
             unsetDisplayedShapeGraphRef();
         else
-            setDisplayedShapeGraphRef(newIdx);
+            setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
     } catch (Communicator::CancelledException) {
         converted = false;
     }
@@ -1872,9 +1868,7 @@ void MetaGraphDX::runAgentEngine(Communicator *comm, std::unique_ptr<IAnalysis> 
         m_state |= DATAMAPS;
     }
     map.overrideDisplayedAttribute(-2);
-    auto displaycol =
-        map.getInternalMap().getAttributeTable().getColumnIndex(AgentAnalysis::Column::GATE_COUNTS);
-    map.setDisplayedAttribute(displaycol);
+    map.setDisplayedAttribute(AgentAnalysis::Column::GATE_COUNTS);
 }
 
 // Thru vision
