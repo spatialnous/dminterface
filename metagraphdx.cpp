@@ -204,7 +204,7 @@ bool MetaGraphDX::clearPoints() {
 bool MetaGraphDX::hasVisibleDrawingShapes() {
     // tries to find at least one visible shape
     for (const auto &pixelGroup : m_drawingFiles) {
-        for (const auto &pixel : pixelGroup.second) {
+        for (const auto &pixel : pixelGroup.maps) {
             if (pixel.isShown() && !pixel.getAllShapes().empty()) {
                 return true;
             }
@@ -301,7 +301,7 @@ bool MetaGraphDX::unmakeGraph(bool removeLinks) {
 }
 
 bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
-                                bool simple_version) // <- options copied to keep thread safe
+                               bool simple_version) // <- options copied to keep thread safe
 {
     bool analysisCompleted = false;
 
@@ -558,7 +558,7 @@ bool MetaGraphDX::moveSelShape(const Line &line) {
 // returns 0: fail, 1: made isovist, 2: made isovist and added new shapemap
 // layer
 int MetaGraphDX::makeIsovist(Communicator *communicator, const Point2f &p, double startangle,
-                              double endangle, bool) {
+                             double endangle, bool) {
     int isovistMade = 0;
     // first make isovist
     Isovist iso;
@@ -859,7 +859,7 @@ bool MetaGraphDX::convertDrawingToAxial(Communicator *comm, std::string layer_na
 }
 
 bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layer_name, bool keeporiginal,
-                                      bool pushvalues) {
+                                     bool pushvalues) {
     int oldstate = m_state;
 
     m_state &= ~SHAPEGRAPHS;
@@ -904,7 +904,7 @@ bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layer_name,
 // typeflag: -1 convert drawing to convex, 0 or 1, convert data to convex (1 is
 // pushvalues)
 bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layer_name, bool keeporiginal,
-                                   int shapeMapType, bool copydata) {
+                                  int shapeMapType, bool copydata) {
     int oldstate = m_state;
 
     m_state &= ~SHAPEGRAPHS; // and convex maps...
@@ -997,7 +997,7 @@ bool MetaGraphDX::convertDrawingToSegment(Communicator *comm, std::string layer_
 }
 
 bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layer_name,
-                                        bool keeporiginal, bool pushvalues) {
+                                       bool keeporiginal, bool pushvalues) {
     int oldstate = m_state;
 
     m_state &= ~SHAPEGRAPHS;
@@ -1039,7 +1039,7 @@ bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layer_nam
 // note: type flag says whether this is graph to data map or drawing to data map
 
 bool MetaGraphDX::convertToData(Communicator *, std::string layer_name, bool keeporiginal,
-                                 int shapeMapType, bool copydata) {
+                                int shapeMapType, bool copydata) {
     int oldstate = m_state;
 
     m_state &= ~DATAMAPS;
@@ -1120,7 +1120,7 @@ bool MetaGraphDX::convertToData(Communicator *, std::string layer_name, bool kee
 }
 
 bool MetaGraphDX::convertToDrawing(Communicator *, std::string layer_name,
-                                    bool fromDisplayedDataMap) {
+                                   bool fromDisplayedDataMap) {
     bool converted = false;
 
     int oldstate = m_state;
@@ -1184,7 +1184,7 @@ bool MetaGraphDX::convertToDrawing(Communicator *, std::string layer_name,
 }
 
 bool MetaGraphDX::convertAxialToSegment(Communicator *comm, std::string layer_name,
-                                         bool keeporiginal, bool pushvalues, double stubremoval) {
+                                        bool keeporiginal, bool pushvalues, double stubremoval) {
     if (!hasDisplayedShapeGraph()) {
         return false;
     }
@@ -1373,7 +1373,7 @@ bool MetaGraphDX::makeFewestLineMap(Communicator *communicator, int replace) {
 }
 
 bool MetaGraphDX::analyseAxial(Communicator *communicator, Options options,
-                                bool forceLegacyColumnOrder) // options copied to keep thread safe
+                               bool forceLegacyColumnOrder) // options copied to keep thread safe
 {
     m_state &= ~SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
                              // during reload)
@@ -1447,7 +1447,7 @@ bool MetaGraphDX::analyseSegmentsTulip(
 }
 
 bool MetaGraphDX::analyseSegmentsAngular(Communicator *communicator,
-                                          Options options) // <- options copied to keep thread safe
+                                         Options options) // <- options copied to keep thread safe
 {
     m_state &= ~SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
                              // during reload)
@@ -1530,7 +1530,7 @@ bool MetaGraphDX::analyseTopoMetMultipleRadii(
 }
 
 bool MetaGraphDX::analyseTopoMet(Communicator *communicator,
-                                  Options options) // <- options copied to keep thread safe
+                                 Options options) // <- options copied to keep thread safe
 {
     m_state &= ~SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
                              // during reload)
@@ -1580,7 +1580,7 @@ bool MetaGraphDX::analyseTopoMet(Communicator *communicator,
 }
 
 size_t MetaGraphDX::loadLineData(Communicator *communicator, const std::string &fileName,
-                                  int load_type) {
+                                 int load_type) {
 
     depthmapX::ImportFileType importFileType = depthmapX::ImportFileType::DXF;
     if (load_type & DXF) {
@@ -1597,7 +1597,7 @@ size_t MetaGraphDX::loadLineData(Communicator *communicator, const std::string &
 }
 
 size_t MetaGraphDX::loadLineData(Communicator *communicator, const std::string &fileName,
-                                  depthmapX::ImportFileType importFileType, bool replace) {
+                                 depthmapX::ImportFileType importFileType, bool replace) {
 
     // if bsp tree exists
     m_bspNodeTree.destroy();
@@ -1712,7 +1712,7 @@ void MetaGraphDX::updateParentRegions(ShapeMap &shapeMap) {
 // layers
 
 bool MetaGraphDX::pushValuesToLayer(int desttype, size_t destlayer, PushValues::Func push_func,
-                                     bool count_col) {
+                                    bool count_col) {
     auto sourcetype = m_viewClass;
     auto sourcelayer = getDisplayedMapRef().value();
     size_t col_in = static_cast<size_t>(getDisplayedAttribute());
@@ -1744,8 +1744,8 @@ bool MetaGraphDX::pushValuesToLayer(int desttype, size_t destlayer, PushValues::
 // the full ubercontrol version:
 
 bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int desttype,
-                                     size_t destlayer, std::optional<size_t> colIn, size_t colOut,
-                                     PushValues::Func pushFunc, bool createCountCol) {
+                                    size_t destlayer, std::optional<size_t> colIn, size_t colOut,
+                                    PushValues::Func pushFunc, bool createCountCol) {
     AttributeTable &table_out = getAttributeTable(desttype, destlayer);
 
     std::optional<std::string> countColName = std::nullopt;
@@ -1986,8 +1986,7 @@ bool MetaGraphDX::hasVisibleDrawingLayers() {
 
 QtRegion MetaGraphDX::getBoundingBox() const {
     QtRegion bounds = m_metaGraph.region;
-    if (bounds.atZero() &&
-        ((getState() & MetaGraphDX::SHAPEGRAPHS) == MetaGraphDX::SHAPEGRAPHS)) {
+    if (bounds.atZero() && ((getState() & MetaGraphDX::SHAPEGRAPHS) == MetaGraphDX::SHAPEGRAPHS)) {
         bounds = getDisplayedShapeGraph().getRegion();
     }
     if (bounds.atZero() && ((getState() & MetaGraphDX::DATAMAPS) == MetaGraphDX::DATAMAPS)) {
@@ -2125,7 +2124,7 @@ void MetaGraphDX::setDisplayedAttribute(int col) {
 // const and non-const versions:
 
 AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
-                                                std::optional<size_t> layer) {
+                                               std::optional<size_t> layer) {
     AttributeTable *tab = NULL;
     if (!type.has_value()) {
         type = m_viewClass;
@@ -2148,7 +2147,7 @@ AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
 }
 
 const AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
-                                                      std::optional<size_t> layer) const {
+                                                     std::optional<size_t> layer) const {
     const AttributeTable *tab = NULL;
     if (!type.has_value()) {
         type = m_viewClass & VIEWFRONT;
@@ -2187,7 +2186,7 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromFile(const std::string &file
 }
 
 MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromStream(std::istream &stream,
-                                                            const std::string &) {
+                                                           const std::string &) {
     m_state = 0; // <- clear the state out
 
     // clear BSP tree if it exists:
@@ -2266,7 +2265,7 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromStream(std::istream &stream,
 }
 
 MetaGraphReadWrite::ReadStatus MetaGraphDX::write(const std::string &filename, int version,
-                                                   bool currentlayer, bool ignoreDisplayData) {
+                                                  bool currentlayer, bool ignoreDisplayData) {
     std::ofstream stream;
 
     int oldstate = m_state;

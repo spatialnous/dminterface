@@ -15,6 +15,7 @@
 
 #include "salalib/bspnodetree.h"
 #include "salalib/connector.h"
+#include "salalib/ianalysis.h"
 #include "salalib/importtypedefs.h"
 #include "salalib/isovist.h"
 #include "salalib/metagraph.h"
@@ -307,9 +308,7 @@ class MetaGraphDX {
 
     bool hasDisplayedDataMap() const { return m_displayedDatamap.has_value(); }
     ShapeMapDX &getDisplayedDataMap() { return m_dataMaps[m_displayedDatamap.value()]; }
-    const ShapeMapDX &getDisplayedDataMap() const {
-        return m_dataMaps[m_displayedDatamap.value()];
-    }
+    const ShapeMapDX &getDisplayedDataMap() const { return m_dataMaps[m_displayedDatamap.value()]; }
     size_t getDisplayedDataMapRef() const { return m_displayedDatamap.value(); }
 
     void removeDataMap(size_t i) {
