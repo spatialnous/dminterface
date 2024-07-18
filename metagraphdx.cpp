@@ -38,7 +38,6 @@
 #include "genlib/comm.h"
 #include "genlib/p2dpoly.h"
 
-#include <math.h>
 #include <sstream>
 #include <tuple>
 
