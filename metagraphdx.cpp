@@ -325,9 +325,12 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                 std::set<PixelRef> origins;
                 for (auto &sel : map.getSelSet())
                     origins.insert(sel);
-                analysisCompleted = VGAVisualGlobalDepth(origins)
-                                        .run(communicator, map.getInternalMap(), false)
-                                        .completed;
+                auto analysis = VGAVisualGlobalDepth(map.getInternalMap(), origins);
+                auto analysisResult = analysis.run(communicator);
+                analysis.copyResultToMap(analysisResult.getAttributes(),
+                                         analysisResult.getAttributeData(), map.getInternalMap(),
+                                         analysisResult.columnStats);
+                analysisCompleted = analysisResult.completed;
 
                 // force redisplay:
                 map.setDisplayedAttribute(-2);
@@ -358,9 +361,12 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                 std::set<PixelRef> origins;
                 for (auto &sel : map.getSelSet())
                     origins.insert(sel);
-                analysisCompleted = VGAMetricDepth(origins)
-                                        .run(communicator, map.getInternalMap(), false)
-                                        .completed;
+                auto analysis = VGAMetricDepth(map.getInternalMap(), origins);
+                auto analysisResult = analysis.run(communicator);
+                analysis.copyResultToMap(analysisResult.getAttributes(),
+                                         analysisResult.getAttributeData(), map.getInternalMap(),
+                                         analysisResult.columnStats);
+                analysisCompleted = analysisResult.completed;
                 map.setDisplayedAttribute(-2);
                 map.setDisplayedAttribute(VGAMetricDepth::Column::METRIC_STEP_SHORTEST_PATH_LENGTH);
             } else if (m_viewClass & VIEWAXIAL &&
@@ -378,8 +384,12 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             for (auto &sel : map.getSelSet()) {
                 origins.insert(sel);
             }
-            analysisCompleted =
-                VGAAngularDepth(origins).run(communicator, map.getInternalMap(), false).completed;
+            auto analysis = VGAAngularDepth(map.getInternalMap(), origins);
+            auto analysisResult = analysis.run(communicator);
+            analysis.copyResultToMap(analysisResult.getAttributes(),
+                                     analysisResult.getAttributeData(), map.getInternalMap(),
+                                     analysisResult.columnStats);
+            analysisCompleted = analysisResult.completed;
             map.setDisplayedAttribute(-2);
             map.setDisplayedAttribute(VGAAngularDepth::Column::ANGULAR_STEP_DEPTH);
         } else if (options.point_depth_selection == 4) {
@@ -399,9 +409,13 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
         } else if (options.output_type == AnalysisType::ISOVIST) {
             auto shapes = getShownDrawingFilesAsShapes();
             auto &map = getDisplayedPointMap();
-            analysisCompleted = VGAIsovist(shapes)
-                                    .run(communicator, map.getInternalMap(), simple_version)
-                                    .completed;
+            auto analysis = VGAIsovist(map.getInternalMap(), shapes);
+            analysis.setSimpleVersion(simple_version);
+            AnalysisResult analysisResult = analysis.run(communicator);
+            analysis.copyResultToMap(analysisResult.getAttributes(),
+                                     analysisResult.getAttributeData(), map.getInternalMap(),
+                                     analysisResult.columnStats);
+            analysisCompleted = analysisResult.completed;
             map.setDisplayedAttribute(-2);
             map.setDisplayedAttribute(VGAIsovist::Column::ISOVIST_AREA);
         } else if (options.output_type == AnalysisType::VISUAL) {
@@ -409,17 +423,26 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             bool globalResult = true;
             if (options.local) {
                 auto &map = getDisplayedPointMap();
-                localResult = VGAVisualLocal(options.gates_only)
-                                  .run(communicator, map.getInternalMap(), simple_version)
-                                  .completed;
+                auto analysis = VGAVisualLocal(map.getInternalMap(), options.gates_only);
+                auto analysisResult = analysis.run(communicator);
+                analysis.copyResultToMap(analysisResult.getAttributes(),
+                                         analysisResult.getAttributeData(), map.getInternalMap(),
+                                         analysisResult.columnStats);
+                localResult = analysisResult.completed;
                 map.setDisplayedAttribute(-2);
                 map.setDisplayedAttribute(VGAVisualLocal::Column::VISUAL_CLUSTERING_COEFFICIENT);
             }
             if (options.global) {
                 auto &map = getDisplayedPointMap();
-                globalResult = VGAVisualGlobal(options.radius, options.gates_only)
-                                   .run(communicator, map.getInternalMap(), simple_version)
-                                   .completed;
+                auto analysis =
+                    VGAVisualGlobal(map.getInternalMap(), options.radius, options.gates_only);
+                analysis.setSimpleVersion(simple_version);
+                analysis.setLegacyWriteMiscs(true);
+                auto analysisResult = analysis.run(communicator);
+                analysis.copyResultToMap(analysisResult.getAttributes(),
+                                         analysisResult.getAttributeData(), map.getInternalMap(),
+                                         analysisResult.columnStats);
+                globalResult = analysisResult.completed;
                 map.setDisplayedAttribute(-2);
                 map.setDisplayedAttribute(VGAVisualGlobal::getColumnWithRadius(
                     VGAVisualGlobal::Column::VISUAL_INTEGRATION_HH, options.radius));
@@ -427,27 +450,36 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             analysisCompleted = globalResult & localResult;
         } else if (options.output_type == AnalysisType::METRIC) {
             auto &map = getDisplayedPointMap();
-            analysisCompleted = VGAMetric(options.radius, options.gates_only)
-                                    .run(communicator, map.getInternalMap(), simple_version)
-                                    .completed;
+            auto analysis = VGAMetric(map.getInternalMap(), options.radius, options.gates_only);
+            auto analysisResult = analysis.run(communicator);
+            analysis.copyResultToMap(analysisResult.getAttributes(),
+                                     analysisResult.getAttributeData(), map.getInternalMap(),
+                                     analysisResult.columnStats);
+            analysisCompleted = analysisResult.completed;
             map.overrideDisplayedAttribute(-2);
             map.setDisplayedAttribute(VGAMetric::getColumnWithRadius(
                 VGAMetric::Column::METRIC_MEAN_SHORTEST_PATH_DISTANCE, options.radius,
                 map.getInternalMap().getRegion()));
         } else if (options.output_type == AnalysisType::ANGULAR) {
             auto &map = getDisplayedPointMap();
-            analysisCompleted = VGAAngular(options.radius, options.gates_only)
-                                    .run(communicator, map.getInternalMap(), simple_version)
-                                    .completed;
+            auto analysis = VGAAngular(map.getInternalMap(), options.radius, options.gates_only);
+            auto analysisResult = analysis.run(communicator);
+            analysis.copyResultToMap(analysisResult.getAttributes(),
+                                     analysisResult.getAttributeData(), map.getInternalMap(),
+                                     analysisResult.columnStats);
+            analysisCompleted = analysisResult.completed;
             map.overrideDisplayedAttribute(-2);
             map.setDisplayedAttribute(
                 VGAAngular::getColumnWithRadius(VGAAngular::Column::ANGULAR_MEAN_DEPTH,
                                                 options.radius, map.getInternalMap().getRegion()));
         } else if (options.output_type == AnalysisType::THRU_VISION) {
             auto &map = getDisplayedPointMap();
-            analysisCompleted = VGAThroughVision()
-                                    .run(communicator, map.getInternalMap(), simple_version)
-                                    .completed;
+            auto analysis = VGAThroughVision(map.getInternalMap());
+            auto analysisResult = analysis.run(communicator);
+            analysis.copyResultToMap(analysisResult.getAttributes(),
+                                     analysisResult.getAttributeData(), map.getInternalMap(),
+                                     analysisResult.columnStats);
+            analysisCompleted = analysisResult.completed;
             map.overrideDisplayedAttribute(-2);
             map.setDisplayedAttribute(VGAThroughVision::Column::THROUGH_VISION);
         }
@@ -1894,7 +1926,7 @@ bool MetaGraphDX::analyseThruVision(Communicator *comm, std::optional<size_t> ga
 
     try {
         analysisCompleted =
-            VGAThroughVision().run(comm, getDisplayedPointMap().getInternalMap(), false).completed;
+            VGAThroughVision(getDisplayedPointMap().getInternalMap()).run(comm).completed;
     } catch (Communicator::CancelledException) {
         analysisCompleted = false;
     }
