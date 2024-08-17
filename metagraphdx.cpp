@@ -30,6 +30,7 @@
 #include "salalib/vgamodules/vgaisovist.h"
 #include "salalib/vgamodules/vgametric.h"
 #include "salalib/vgamodules/vgametricdepth.h"
+#include "salalib/vgamodules/vgametricdepthlinkcost.h"
 #include "salalib/vgamodules/vgathroughvision.h"
 #include "salalib/vgamodules/vgavisualglobal.h"
 #include "salalib/vgamodules/vgavisualglobaldepth.h"
@@ -361,11 +362,17 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                 std::set<PixelRef> origins;
                 for (auto &sel : map.getSelSet())
                     origins.insert(sel);
-                auto analysis = VGAMetricDepth(map.getInternalMap(), origins);
-                auto analysisResult = analysis.run(communicator);
-                analysis.copyResultToMap(analysisResult.getAttributes(),
-                                         analysisResult.getAttributeData(), map.getInternalMap(),
-                                         analysisResult.columnStats);
+                std::unique_ptr<IVGAMetric> analysis =
+                    map.getAttributeTable().hasColumn(
+                        VGAMetricDepthLinkCost::Column::LINK_METRIC_COST)
+                        ? std::unique_ptr<IVGAMetric>(
+                              new VGAMetricDepthLinkCost(map.getInternalMap(), origins))
+                        : std::unique_ptr<IVGAMetric>(
+                              new VGAMetricDepth(map.getInternalMap(), origins));
+                auto analysisResult = analysis->run(communicator);
+                analysis->copyResultToMap(analysisResult.getAttributes(),
+                                          analysisResult.getAttributeData(), map.getInternalMap(),
+                                          analysisResult.columnStats);
                 analysisCompleted = analysisResult.completed;
                 map.setDisplayedAttribute(-2);
                 map.setDisplayedAttribute(VGAMetricDepth::Column::METRIC_STEP_SHORTEST_PATH_LENGTH);
