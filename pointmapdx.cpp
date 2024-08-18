@@ -114,8 +114,8 @@ bool PointMapDX::setCurSel(QtRegion &r, bool add) {
 
     // n.b., assumes constrain set to true (for if you start the selection off the
     // grid)
-    s_bl = getInternalMap().pixelate(r.bottom_left, true);
-    s_tr = getInternalMap().pixelate(r.top_right, true);
+    s_bl = getInternalMap().pixelate(r.bottomLeft, true);
+    s_tr = getInternalMap().pixelate(r.topRight, true);
 
     if (!add) {
         m_sel_bounds = r;
@@ -172,7 +172,7 @@ void PointMapDX::setScreenPixel(double unit) {
 
 void PointMapDX::makeViewportPoints(const QtRegion &viewport) const {
     // n.b., relies on "constrain" being set to true
-    bl = pixelate(viewport.bottom_left, true);
+    bl = pixelate(viewport.bottomLeft, true);
     cur = bl;   // cursor for points
     cur.x -= 1; // findNext expects to find cur.x in the -1 position
     rc = bl;    // cursor for grid lines
@@ -180,7 +180,7 @@ void PointMapDX::makeViewportPoints(const QtRegion &viewport) const {
     prc.x -= 1;
     prc.y -= 1;
     // n.b., relies on "constrain" being set to true
-    tr = pixelate(viewport.top_right, true);
+    tr = pixelate(viewport.topRight, true);
     curmergeline = -1;
 
     m_finished = false;

@@ -82,7 +82,7 @@ class PointMapDX : public AttributeMapDX {
     double getDisplayMaxValue() const {
         return (m_displayed_attribute != -1)
                    ? getInternalMap().getDisplayMaxValue(static_cast<size_t>(m_displayed_attribute))
-                   : getInternalMap().pixelate(getInternalMap().getRegion().top_right).x;
+                   : getInternalMap().pixelate(getInternalMap().getRegion().topRight).x;
     }
 
     const DisplayParams &getDisplayParams() const {

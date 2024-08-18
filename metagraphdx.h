@@ -124,8 +124,8 @@ class MetaGraphDX {
     std::string &getName() { return m_metaGraph.name; }
     const QtRegion &getRegion() { return m_metaGraph.region; }
     void setRegion(Point2f &bottomLeft, Point2f &topRight) {
-        m_metaGraph.region.bottom_left = bottomLeft;
-        m_metaGraph.region.top_right = topRight;
+        m_metaGraph.region.bottomLeft = bottomLeft;
+        m_metaGraph.region.topRight = topRight;
     }
     MetaGraphReadWrite::ReadStatus getReadStatus() const { return m_readStatus; };
     bool isShown() const {
