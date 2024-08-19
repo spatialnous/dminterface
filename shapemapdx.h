@@ -104,30 +104,30 @@ class ShapeMapDX : public AttributeMapDX {
 
     void clearAll();
 
-    int makePointShapeWithRef(const Point2f &point, int shape_ref, bool tempshape = false,
+    int makePointShapeWithRef(const Point2f &point, int shapeRef, bool tempshape = false,
                               const std::map<int, float> &extraAttributes = std::map<int, float>());
     int makePointShape(const Point2f &point, bool tempshape = false,
                        const std::map<int, float> &extraAttributes = std::map<int, float>());
-    int makeLineShapeWithRef(const Line &line, int shape_ref, bool through_ui = false,
+    int makeLineShapeWithRef(const Line &line, int shapeRef, bool throughUi = false,
                              bool tempshape = false,
                              const std::map<int, float> &extraAttributes = std::map<int, float>());
-    int makeLineShape(const Line &line, bool through_ui = false, bool tempshape = false,
+    int makeLineShape(const Line &line, bool throughUi = false, bool tempshape = false,
                       const std::map<int, float> &extraAttributes = std::map<int, float>());
-    int makePolyShapeWithRef(const std::vector<Point2f> &points, bool open, int shape_ref,
+    int makePolyShapeWithRef(const std::vector<Point2f> &points, bool open, int shapeRef,
                              bool tempshape = false,
                              const std::map<int, float> &extraAttributes = std::map<int, float>());
     int makePolyShape(const std::vector<Point2f> &points, bool open, bool tempshape = false,
                       const std::map<int, float> &extraAttributes = std::map<int, float>());
-    int makeShape(const SalaShape &poly, int override_shape_ref = -1,
+    int makeShape(const SalaShape &poly, int overrideShapeRef = -1,
                   const std::map<int, float> &extraAttributes = std::map<int, float>());
     int makeShapeFromPointSet(const PointMapDX &pointmap);
 
     bool moveShape(int shaperef, const Line &line, bool undoing = false);
 
     int polyBegin(const Line &line);
-    bool polyAppend(int shape_ref, const Point2f &point);
-    bool polyClose(int shape_ref);
-    bool polyCancel(int shape_ref);
+    bool polyAppend(int shapeRef, const Point2f &point);
+    bool polyClose(int shapeRef);
+    bool polyCancel(int shapeRef);
 
     bool removeSelected();
     void removeShape(int shaperef, bool undoing);
@@ -163,8 +163,8 @@ class ShapeMapDX : public AttributeMapDX {
 
     bool isValid() const { return !m_invalidate; }
 
-    void getPolygonDisplay(bool &show_lines, bool &show_fill, bool &show_centroids);
-    void setPolygonDisplay(bool show_lines, bool show_fill, bool show_centroids);
+    void getPolygonDisplay(bool &showLines, bool &showFill, bool &showCentroids);
+    void setPolygonDisplay(bool showLines, bool showFill, bool showCentroids);
 
     std::vector<std::pair<SimpleLine, PafColor>> //
     getAllLinesWithColour(const std::set<int> &selSet);

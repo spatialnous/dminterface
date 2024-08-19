@@ -206,7 +206,7 @@ class MetaGraphDX {
     int getState() const { return m_state; }
     // use with caution: only very rarely needed outside MetaGraph itself
     void setState(int state) { m_state = state; }
-    size_t loadLineData(Communicator *communicator, const std::string &fileName, int load_type);
+    size_t loadLineData(Communicator *communicator, const std::string &fileName, int loadType);
     size_t loadLineData(Communicator *communicator, const std::string &fileName,
                         depthmapX::ImportFileType importFileType, bool replace);
     size_t addDrawingFile(std::string name, std::vector<ShapeMap> &&maps);
@@ -220,7 +220,7 @@ class MetaGraphDX {
     void setShowText(bool showText) { m_showText = showText; }
     bool getShowText() const { return m_showText; }
     bool makePoints(const Point2f &p, int semifilled,
-                    Communicator *communicator = NULL); // override of PointMap
+                    Communicator *communicator = nullptr); // override of PointMap
     bool hasVisibleDrawingShapes();
     std::vector<std::pair<std::reference_wrapper<const ShapeMapDX>, int>> getShownDrawingMaps();
     std::vector<std::pair<std::reference_wrapper<const ShapeMap>, int>>
@@ -230,7 +230,7 @@ class MetaGraphDX {
     bool makeGraph(Communicator *communicator, int algorithm, double maxdist);
     bool unmakeGraph(bool removeLinks);
     bool analyseGraph(Communicator *communicator, Options options,
-                      bool simple_version); // <- options copied to keep thread safe
+                      bool simpleVersion); // <- options copied to keep thread safe
     //
     // helpers for editing maps
     bool isEditableMap();
@@ -241,9 +241,9 @@ class MetaGraphDX {
     bool moveSelShape(const Line &line);
     // onto polys as well:
     int polyBegin(const Line &line);
-    bool polyAppend(int shape_ref, const Point2f &point);
-    bool polyClose(int shape_ref);
-    bool polyCancel(int shape_ref);
+    bool polyAppend(int shapeRef, const Point2f &point);
+    bool polyClose(int shapeRef);
+    bool polyCancel(int shapeRef);
     //
     size_t addShapeGraph(ShapeGraphDX &&shapeGraph);
     size_t addShapeGraph(ShapeGraph &&shapeGraph);
@@ -253,18 +253,18 @@ class MetaGraphDX {
     //
     // various map conversions
     bool convertDrawingToAxial(Communicator *comm,
-                               std::string layer_name); // n.b., name copied for thread safety
-    bool convertDataToAxial(Communicator *comm, std::string layer_name, bool keeporiginal,
+                               std::string layerName); // n.b., name copied for thread safety
+    bool convertDataToAxial(Communicator *comm, std::string layerName, bool keeporiginal,
                             bool pushvalues);
-    bool convertDrawingToSegment(Communicator *comm, std::string layer_name);
-    bool convertDataToSegment(Communicator *comm, std::string layer_name, bool keeporiginal,
+    bool convertDrawingToSegment(Communicator *comm, std::string layerName);
+    bool convertDataToSegment(Communicator *comm, std::string layerName, bool keeporiginal,
                               bool pushvalues);
-    bool convertToData(Communicator *, std::string layer_name, bool keeporiginal, int shapeMapType,
+    bool convertToData(Communicator *, std::string layerName, bool keeporiginal, int shapeMapType,
                        bool copydata);
-    bool convertToDrawing(Communicator *, std::string layer_name, bool fromDisplayedDataMap);
-    bool convertToConvex(Communicator *comm, std::string layer_name, bool keeporiginal,
+    bool convertToDrawing(Communicator *, std::string layerName, bool fromDisplayedDataMap);
+    bool convertToConvex(Communicator *comm, std::string layerName, bool keeporiginal,
                          int shapeMapType, bool copydata);
-    bool convertAxialToSegment(Communicator *comm, std::string layer_name, bool keeporiginal,
+    bool convertAxialToSegment(Communicator *comm, std::string layerName, bool keeporiginal,
                                bool pushvalues, double stubremoval);
     int loadMifMap(Communicator *comm, std::istream &miffile, std::istream &midfile);
     bool makeAllLineMap(Communicator *communicator, const Point2f &seed);
@@ -293,10 +293,10 @@ class MetaGraphDX {
         }
         return false;
     }
-    bool pushValuesToLayer(int desttype, size_t destlayer, PushValues::Func push_func,
-                           bool count_col = false);
+    bool pushValuesToLayer(int desttype, size_t destlayer, PushValues::Func pushFunc,
+                           bool countCol = false);
     bool pushValuesToLayer(int sourcetype, size_t sourcelayer, int desttype, size_t destlayer,
-                           std::optional<size_t> colIn, size_t col_out, PushValues::Func pushFunc,
+                           std::optional<size_t> colIn, size_t colOut, PushValues::Func pushFunc,
                            bool createCountCol = false);
     //
     std::optional<size_t> getDisplayedMapRef() const;
@@ -515,17 +515,17 @@ class MetaGraphDX {
   public:
     void runAgentEngine(Communicator *comm, std::unique_ptr<IAnalysis> &analysis);
     // thru vision
-    bool analyseThruVision(Communicator *comm = NULL,
+    bool analyseThruVision(Communicator *comm = nullptr,
                            std::optional<size_t> gatelayer = std::nullopt);
 
   public: // BSP tree for making isovists
-    bool makeBSPtree(BSPNodeTree &bspNodeTree, Communicator *communicator = NULL);
+    bool makeBSPtree(BSPNodeTree &bspNodeTree, Communicator *communicator = nullptr);
     void resetBSPtree() { m_bspNodeTree.resetBSPtree(); }
     // returns 0: fail, 1: made isovist, 2: made isovist and added new shapemap layer
     int makeIsovist(Communicator *communicator, const Point2f &p, double startangle = 0,
                     double endangle = 0, bool = true);
     // returns 0: fail, 1: made isovist, 2: made isovist and added new shapemap layer
-    int makeIsovistPath(Communicator *communicator, double fov_angle = 2.0 * M_PI, bool = true);
+    int makeIsovistPath(Communicator *communicator, double fovAngle = 2.0 * M_PI, bool = true);
     bool makeIsovist(const Point2f &p, Isovist &iso);
 
   protected:

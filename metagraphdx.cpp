@@ -172,13 +172,13 @@ bool MetaGraphDX::setGrid(double spacing, const Point2f &offset) {
 }
 
 // AV TV // semifilled
-bool MetaGraphDX::makePoints(const Point2f &p, int fill_type, Communicator *communicator) {
+bool MetaGraphDX::makePoints(const Point2f &p, int fillType, Communicator *communicator) {
     //   m_state &= ~POINTS;
 
     try {
         std::vector<Line> lines = getShownDrawingFilesAsLines();
         getDisplayedPointMap().getInternalMap().blockLines(lines);
-        getDisplayedPointMap().getInternalMap().makePoints(p, fill_type, communicator);
+        getDisplayedPointMap().getInternalMap().makePoints(p, fillType, communicator);
         getDisplayedPointMap().setDisplayedAttribute(-2);
     } catch (Communicator::CancelledException) {
 
@@ -302,7 +302,7 @@ bool MetaGraphDX::unmakeGraph(bool removeLinks) {
 }
 
 bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
-                               bool simple_version) // <- options copied to keep thread safe
+                               bool simpleVersion) // <- options copied to keep thread safe
 {
     bool analysisCompleted = false;
 
@@ -413,7 +413,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             auto shapes = getShownDrawingFilesAsShapes();
             auto &map = getDisplayedPointMap();
             auto analysis = VGAIsovist(map.getInternalMap(), shapes);
-            analysis.setSimpleVersion(simple_version);
+            analysis.setSimpleVersion(simpleVersion);
             AnalysisResult analysisResult = analysis.run(communicator);
             analysis.copyResultToMap(analysisResult.getAttributes(),
                                      analysisResult.getAttributeData(), map.getInternalMap(),
@@ -439,7 +439,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                 auto &map = getDisplayedPointMap();
                 auto analysis =
                     VGAVisualGlobal(map.getInternalMap(), options.radius, options.gatesOnly);
-                analysis.setSimpleVersion(simple_version);
+                analysis.setSimpleVersion(simpleVersion);
                 analysis.setLegacyWriteMiscs(true);
                 auto analysisResult = analysis.run(communicator);
                 analysis.copyResultToMap(analysisResult.getAttributes(),
@@ -506,7 +506,7 @@ bool MetaGraphDX::isEditableMap() {
 }
 
 ShapeMapDX &MetaGraphDX::getEditableMap() {
-    ShapeMapDX *map = NULL;
+    ShapeMapDX *map = nullptr;
     if (m_viewClass & VIEWAXIAL) {
         map = &(getDisplayedShapeGraph());
     } else if (m_viewClass & VIEWDATA) {
@@ -514,7 +514,7 @@ ShapeMapDX &MetaGraphDX::getEditableMap() {
     } else {
         // still to do: allow editing of drawing layers
     }
-    if (map == NULL || !map->isEditable()) {
+    if (map == nullptr || !map->isEditable()) {
         throw 0;
     }
     return *map;
@@ -536,28 +536,28 @@ int MetaGraphDX::polyBegin(const Line &line) {
     return map.polyBegin(line);
 }
 
-bool MetaGraphDX::polyAppend(int shape_ref, const Point2f &point) {
+bool MetaGraphDX::polyAppend(int shapeRef, const Point2f &point) {
     if (!isEditableMap()) {
         return false;
     }
     auto &map = getEditableMap();
-    return map.polyAppend(shape_ref, point);
+    return map.polyAppend(shapeRef, point);
 }
 
-bool MetaGraphDX::polyClose(int shape_ref) {
+bool MetaGraphDX::polyClose(int shapeRef) {
     if (!isEditableMap()) {
         return false;
     }
     auto &map = getEditableMap();
-    return map.polyClose(shape_ref);
+    return map.polyClose(shapeRef);
 }
 
-bool MetaGraphDX::polyCancel(int shape_ref) {
+bool MetaGraphDX::polyCancel(int shapeRef) {
     if (!isEditableMap()) {
         return false;
     }
     auto &map = getEditableMap();
-    return map.polyCancel(shape_ref);
+    return map.polyCancel(shapeRef);
 }
 
 bool MetaGraphDX::moveSelShape(const Line &line) {
@@ -865,7 +865,7 @@ void MetaGraphDX::removeDisplayedMap() {
 
 //////////////////////////////////////////////////////////////////
 
-bool MetaGraphDX::convertDrawingToAxial(Communicator *comm, std::string layer_name) {
+bool MetaGraphDX::convertDrawingToAxial(Communicator *comm, std::string layerName) {
     int oldstate = m_state;
 
     m_state &= ~SHAPEGRAPHS;
@@ -879,7 +879,7 @@ bool MetaGraphDX::convertDrawingToAxial(Communicator *comm, std::string layer_na
             mapLayer.first.get().setShow(false);
         }
         auto mapref =
-            addShapeGraph(MapConverter::convertDrawingToAxial(comm, layer_name, shownMapsInternal));
+            addShapeGraph(MapConverter::convertDrawingToAxial(comm, layerName, shownMapsInternal));
         m_shapeGraphs[mapref].setDisplayedAttribute(ShapeGraph::Column::CONNECTIVITY);
 
         setDisplayedShapeGraphRef(mapref);
@@ -897,7 +897,7 @@ bool MetaGraphDX::convertDrawingToAxial(Communicator *comm, std::string layer_na
     return converted;
 }
 
-bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layer_name, bool keeporiginal,
+bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layerName, bool keeporiginal,
                                      bool pushvalues) {
     int oldstate = m_state;
 
@@ -907,7 +907,7 @@ bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layer_name,
 
     try {
         addShapeGraph(MapConverter::convertDataToAxial(
-            comm, layer_name, getDisplayedDataMap().getInternalMap(), pushvalues));
+            comm, layerName, getDisplayedDataMap().getInternalMap(), pushvalues));
 
         m_shapeGraphs.back().overrideDisplayedAttribute(-2); // <- override if it's already showing
         m_shapeGraphs.back().setDisplayedAttribute(
@@ -941,7 +941,7 @@ bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layer_name,
 
 // typeflag: -1 convert drawing to convex, 0 or 1, convert data to convex (1 is
 // pushvalues)
-bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layer_name, bool keeporiginal,
+bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layerName, bool keeporiginal,
                                   int shapeMapType, bool copydata) {
     int oldstate = m_state;
 
@@ -956,12 +956,11 @@ bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layer_name, bo
             for (auto &pixel : shownMaps) {
                 pixel.first.get().setShow(false);
             }
-            addShapeGraph(
-                MapConverter::convertDrawingToConvex(comm, layer_name, shownMapsInternal));
+            addShapeGraph(MapConverter::convertDrawingToConvex(comm, layerName, shownMapsInternal));
             converted = true;
         } else if (shapeMapType == ShapeMap::DATAMAP) {
             addShapeGraph(MapConverter::convertDataToConvex(
-                comm, layer_name, getDisplayedDataMap().getInternalMap(), copydata));
+                comm, layerName, getDisplayedDataMap().getInternalMap(), copydata));
             converted = true;
         }
 
@@ -994,7 +993,7 @@ bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layer_name, bo
     return converted;
 }
 
-bool MetaGraphDX::convertDrawingToSegment(Communicator *comm, std::string layer_name) {
+bool MetaGraphDX::convertDrawingToSegment(Communicator *comm, std::string layerName) {
     int oldstate = m_state;
 
     m_state &= ~SHAPEGRAPHS;
@@ -1011,7 +1010,7 @@ bool MetaGraphDX::convertDrawingToSegment(Communicator *comm, std::string layer_
         }
 
         auto mapref = addShapeGraph(
-            MapConverter::convertDrawingToSegment(comm, layer_name, shownMapsInternal));
+            MapConverter::convertDrawingToSegment(comm, layerName, shownMapsInternal));
         m_shapeGraphs[mapref].setDisplayedAttribute(ShapeGraph::Column::CONNECTIVITY);
 
         if (m_shapeGraphs.size() > 0)
@@ -1032,8 +1031,8 @@ bool MetaGraphDX::convertDrawingToSegment(Communicator *comm, std::string layer_
     return converted;
 }
 
-bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layer_name,
-                                       bool keeporiginal, bool pushvalues) {
+bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layerName, bool keeporiginal,
+                                       bool pushvalues) {
     int oldstate = m_state;
 
     m_state &= ~SHAPEGRAPHS;
@@ -1042,7 +1041,7 @@ bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layer_nam
 
     try {
         addShapeGraph(MapConverter::convertDataToSegment(
-            comm, layer_name, getDisplayedDataMap().getInternalMap(), pushvalues));
+            comm, layerName, getDisplayedDataMap().getInternalMap(), pushvalues));
 
         m_shapeGraphs.back().overrideDisplayedAttribute(-2); // <- override if it's already showing
         m_shapeGraphs.back().setDisplayedAttribute(-1);
@@ -1074,7 +1073,7 @@ bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layer_nam
 
 // note: type flag says whether this is graph to data map or drawing to data map
 
-bool MetaGraphDX::convertToData(Communicator *, std::string layer_name, bool keeporiginal,
+bool MetaGraphDX::convertToData(Communicator *, std::string layerName, bool keeporiginal,
                                 int shapeMapType, bool copydata) {
     int oldstate = m_state;
 
@@ -1087,7 +1086,7 @@ bool MetaGraphDX::convertToData(Communicator *, std::string layer_name, bool kee
         // simply move the shapes from the drawing layer
         // note however that more than one layer might be combined:
         // create map layer...
-        m_dataMaps.emplace_back(layer_name, ShapeMap::DATAMAP);
+        m_dataMaps.emplace_back(layerName, ShapeMap::DATAMAP);
         auto destmapref = m_dataMaps.size() - 1;
         auto &destmap = m_dataMaps.back();
         auto &table = destmap.getAttributeTable();
@@ -1155,7 +1154,7 @@ bool MetaGraphDX::convertToData(Communicator *, std::string layer_name, bool kee
     return converted;
 }
 
-bool MetaGraphDX::convertToDrawing(Communicator *, std::string layer_name,
+bool MetaGraphDX::convertToDrawing(Communicator *, std::string layerName,
                                    bool fromDisplayedDataMap) {
     bool converted = false;
 
@@ -1183,7 +1182,7 @@ bool MetaGraphDX::convertToDrawing(Communicator *, std::string layer_name,
                 m_drawingFiles.emplace_back("Converted Maps");
                 group = std::prev(m_drawingFiles.end());
             }
-            group->maps.emplace_back(layer_name, ShapeMap::DRAWINGMAP);
+            group->maps.emplace_back(layerName, ShapeMap::DRAWINGMAP);
             group->maps.back().copy(*sourcemap, ShapeMap::COPY_GEOMETRY);
             //
             // dummy set still required:
@@ -1219,7 +1218,7 @@ bool MetaGraphDX::convertToDrawing(Communicator *, std::string layer_name,
     return converted;
 }
 
-bool MetaGraphDX::convertAxialToSegment(Communicator *comm, std::string layer_name,
+bool MetaGraphDX::convertAxialToSegment(Communicator *comm, std::string layerName,
                                         bool keeporiginal, bool pushvalues, double stubremoval) {
     if (!hasDisplayedShapeGraph()) {
         return false;
@@ -1235,7 +1234,7 @@ bool MetaGraphDX::convertAxialToSegment(Communicator *comm, std::string layer_na
     try {
         addShapeGraph(
             MapConverter::convertAxialToSegment(comm, getDisplayedShapeGraph().getInternalMap(),
-                                                layer_name, keeporiginal, pushvalues, stubremoval));
+                                                layerName, keeporiginal, pushvalues, stubremoval));
 
         m_shapeGraphs.back().overrideDisplayedAttribute(-2); // <- override if it's already showing
         m_shapeGraphs.back().setDisplayedAttribute(
@@ -1614,20 +1613,20 @@ bool MetaGraphDX::analyseTopoMet(Communicator *communicator,
 }
 
 size_t MetaGraphDX::loadLineData(Communicator *communicator, const std::string &fileName,
-                                 int load_type) {
+                                 int loadType) {
 
     depthmapX::ImportFileType importFileType = depthmapX::ImportFileType::DXF;
-    if (load_type & DXF) {
+    if (loadType & DXF) {
         importFileType = depthmapX::ImportFileType::DXF;
     }
-    if (load_type & CAT) {
+    if (loadType & CAT) {
         importFileType = depthmapX::ImportFileType::CAT;
-    } else if (load_type & RT1) {
+    } else if (loadType & RT1) {
         importFileType = depthmapX::ImportFileType::RT1;
-    } else if (load_type & NTF) {
+    } else if (loadType & NTF) {
         importFileType = depthmapX::ImportFileType::NTF;
     }
-    return loadLineData(communicator, fileName, importFileType, load_type & REPLACE);
+    return loadLineData(communicator, fileName, importFileType, loadType & REPLACE);
 }
 
 size_t MetaGraphDX::loadLineData(Communicator *communicator, const std::string &fileName,
@@ -1745,8 +1744,8 @@ void MetaGraphDX::updateParentRegions(ShapeMap &shapeMap) {
 // the tidy(ish) version: still needs to be at top level and switch between
 // layers
 
-bool MetaGraphDX::pushValuesToLayer(int desttype, size_t destlayer, PushValues::Func push_func,
-                                    bool count_col) {
+bool MetaGraphDX::pushValuesToLayer(int desttype, size_t destlayer, PushValues::Func pushFunc,
+                                    bool countCol) {
     auto sourcetype = m_viewClass;
     auto sourcelayer = getDisplayedMapRef().value();
     size_t colIn = static_cast<size_t>(getDisplayedAttribute());
@@ -1766,7 +1765,7 @@ bool MetaGraphDX::pushValuesToLayer(int desttype, size_t destlayer, PushValues::
     size_t colOut = tableOut.insertOrResetColumn(name);
 
     bool valuesPushed = pushValuesToLayer(sourcetype, sourcelayer, desttype, destlayer, colIn,
-                                          colOut, push_func, count_col);
+                                          colOut, pushFunc, countCol);
 
     m_state = oldstate;
 
@@ -2157,7 +2156,7 @@ void MetaGraphDX::setDisplayedAttribute(int col) {
 
 AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
                                                std::optional<size_t> layer) {
-    AttributeTable *tab = NULL;
+    AttributeTable *tab = nullptr;
     if (!type.has_value()) {
         type = m_viewClass;
     }
@@ -2180,7 +2179,7 @@ AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
 
 const AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
                                                      std::optional<size_t> layer) const {
-    const AttributeTable *tab = NULL;
+    const AttributeTable *tab = nullptr;
     if (!type.has_value()) {
         type = m_viewClass & VIEWFRONT;
     }

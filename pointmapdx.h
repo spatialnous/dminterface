@@ -150,7 +150,7 @@ class PointMapDX : public AttributeMapDX {
 
     bool refInSelectedSet(const PixelRef &ref) const;
 
-    void setScreenPixel(double m_unit);
+    void setScreenPixel(double mUnit);
     void makeViewportPoints(const QtRegion &viewport) const;
     bool findNextPoint() const;
     Point2f getNextPointLocation() const { return getInternalMap().getPoint(m_cur).getLocation(); }

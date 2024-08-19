@@ -156,42 +156,42 @@ void ShapeMapDX::makeViewportShapes(const QtRegion &viewport) const {
     m_curunlinkpoint = -1;
 }
 
-int ShapeMapDX::makePointShapeWithRef(const Point2f &point, int shape_ref, bool tempshape,
+int ShapeMapDX::makePointShapeWithRef(const Point2f &point, int shapeRef, bool tempshape,
                                       const std::map<int, float> &extraAttributes) {
-    int shapeRef =
-        getInternalMap().makePointShapeWithRef(point, shape_ref, tempshape, extraAttributes);
+    int newShapeRef =
+        getInternalMap().makePointShapeWithRef(point, shapeRef, tempshape, extraAttributes);
     if (!tempshape) {
         m_newshape = true;
     }
-    return shapeRef;
+    return newShapeRef;
 }
 
-int ShapeMapDX::makeLineShape(const Line &line, bool through_ui, bool tempshape,
+int ShapeMapDX::makeLineShape(const Line &line, bool throughUi, bool tempshape,
                               const std::map<int, float> &extraAttributes) {
-    return makeLineShapeWithRef(line, getInternalMap().getNextShapeKey(), through_ui, tempshape,
+    return makeLineShapeWithRef(line, getInternalMap().getNextShapeKey(), throughUi, tempshape,
                                 extraAttributes);
 }
 
-int ShapeMapDX::makeLineShapeWithRef(const Line &line, int shape_ref, bool through_ui,
-                                     bool tempshape, const std::map<int, float> &extraAttributes) {
+int ShapeMapDX::makeLineShapeWithRef(const Line &line, int shapeRef, bool throughUi, bool tempshape,
+                                     const std::map<int, float> &extraAttributes) {
     // note, map must have editable flag on if we are to make a shape through the
     // user interface:
-    if (through_ui && !m_editable) {
+    if (throughUi && !m_editable) {
         return -1;
     }
-    int shapeRef = getInternalMap().makeLineShapeWithRef(line, shape_ref, through_ui, tempshape,
-                                                         extraAttributes);
+    int newShapeRef = getInternalMap().makeLineShapeWithRef(line, shapeRef, throughUi, tempshape,
+                                                            extraAttributes);
 
     if (!tempshape) {
         m_newshape = true;
     }
 
-    if (through_ui) {
+    if (throughUi) {
         // update displayed attribute if through ui:
         invalidateDisplayedAttribute();
         setDisplayedAttribute(m_displayedAttribute);
     }
-    return shapeRef;
+    return newShapeRef;
 }
 
 int ShapeMapDX::makePolyShape(const std::vector<Point2f> &points, bool open, bool tempshape,
@@ -200,19 +200,19 @@ int ShapeMapDX::makePolyShape(const std::vector<Point2f> &points, bool open, boo
                                 extraAttributes);
 }
 
-int ShapeMapDX::makePolyShapeWithRef(const std::vector<Point2f> &points, bool open, int shape_ref,
+int ShapeMapDX::makePolyShapeWithRef(const std::vector<Point2f> &points, bool open, int shapeRef,
                                      bool tempshape, const std::map<int, float> &extraAttributes) {
-    int shapeRef =
-        getInternalMap().makePolyShapeWithRef(points, open, shape_ref, tempshape, extraAttributes);
+    int newShapeRef =
+        getInternalMap().makePolyShapeWithRef(points, open, shapeRef, tempshape, extraAttributes);
     if (!tempshape) {
         m_newshape = true;
     }
-    return shapeRef;
+    return newShapeRef;
 }
 
-int ShapeMapDX::makeShape(const SalaShape &poly, int override_shape_ref,
+int ShapeMapDX::makeShape(const SalaShape &poly, int overrideShapeRef,
                           const std::map<int, float> &extraAttributes) {
-    int shapeRef = getInternalMap().makeShape(poly, override_shape_ref, extraAttributes);
+    int shapeRef = getInternalMap().makeShape(poly, overrideShapeRef, extraAttributes);
     m_newshape = true;
     return shapeRef;
 }
@@ -250,13 +250,13 @@ int ShapeMapDX::polyBegin(const Line &line) {
     return newShapeRef;
 }
 
-bool ShapeMapDX::polyAppend(int shape_ref, const Point2f &point) {
-    return getInternalMap().polyAppend(shape_ref, point);
+bool ShapeMapDX::polyAppend(int shapeRef, const Point2f &point) {
+    return getInternalMap().polyAppend(shapeRef, point);
 }
-bool ShapeMapDX::polyClose(int shape_ref) { return getInternalMap().polyClose(shape_ref); }
+bool ShapeMapDX::polyClose(int shapeRef) { return getInternalMap().polyClose(shapeRef); }
 
-bool ShapeMapDX::polyCancel(int shape_ref) {
-    bool polyCancelled = getInternalMap().polyCancel(shape_ref);
+bool ShapeMapDX::polyCancel(int shapeRef) {
+    bool polyCancelled = getInternalMap().polyCancel(shapeRef);
 
     // update displayed attribute
     invalidateDisplayedAttribute();
@@ -383,16 +383,16 @@ Point2f ShapeMapDX::getNextUnlinkPoint() const {
     return Point2f();
 }
 
-void ShapeMapDX::getPolygonDisplay(bool &show_lines, bool &show_fill, bool &show_centroids) {
-    show_lines = m_showLines;
-    show_fill = m_showFill;
-    show_centroids = m_showCentroids;
+void ShapeMapDX::getPolygonDisplay(bool &showLines, bool &showFill, bool &showCentroids) {
+    showLines = m_showLines;
+    showFill = m_showFill;
+    showCentroids = m_showCentroids;
 }
 
-void ShapeMapDX::setPolygonDisplay(bool show_lines, bool show_fill, bool show_centroids) {
-    m_showLines = show_lines;
-    m_showFill = show_fill;
-    m_showCentroids = show_centroids;
+void ShapeMapDX::setPolygonDisplay(bool showLines, bool showFill, bool showCentroids) {
+    m_showLines = showLines;
+    m_showFill = showFill;
+    m_showCentroids = showCentroids;
 }
 
 std::vector<std::pair<SimpleLine, PafColor>>
