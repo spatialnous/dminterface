@@ -13,7 +13,7 @@
 // Options for mean depth calculations
 struct Options {
     // Output type, see above
-    AnalysisType output_type;
+    AnalysisType outputType;
     // Options for the summary type:
     int local;
     int global;
@@ -23,23 +23,23 @@ struct Options {
     // include measures that can be derived: RA, RRA and total depth
     bool fulloutput;
 
-    RadiusType radius_type;
+    RadiusType radiusType;
     double radius; // <- n.b. for metric integ radius is floating point
     // radius has to go up to a list (phase out radius as is)
-    std::set<double> radius_set;
+    std::set<double> radiusSet;
     //
-    int point_depth_selection;
-    int tulip_bins;
-    bool process_in_memory;
-    bool sel_only;
-    bool gates_only;
+    int pointDepthSelection;
+    int tulipBins;
+    bool processInMemory;
+    bool selOnly;
+    bool gatesOnly;
     // for pushing to a gates layer
     int gatelayer;
     // a column to weight measures by:
-    int weighted_measure_col;
-    int weighted_measure_col2; // EFEF
-    int routeweight_col;       // EFEF
-    std::string output_file;   // To save an output graph (for example)
+    int weightedMeasureCol;
+    int weightedMeasureCol2; // EFEF
+    int routeweightCol;      // EFEF
+    std::string outputFile;  // To save an output graph (for example)
     // default values
     Options() {
         local = 0;
@@ -47,15 +47,15 @@ struct Options {
         cliques = 0;
         choice = false;
         fulloutput = false;
-        point_depth_selection = 0;
-        tulip_bins = 1024;
+        pointDepthSelection = 0;
+        tulipBins = 1024;
         radius = -1;
-        radius_type = RadiusType::TOPOLOGICAL;
-        output_type = AnalysisType::ISOVIST;
-        process_in_memory = false;
-        gates_only = false;
-        sel_only = false;
+        radiusType = RadiusType::TOPOLOGICAL;
+        outputType = AnalysisType::ISOVIST;
+        processInMemory = false;
+        gatesOnly = false;
+        selOnly = false;
         gatelayer = -1;
-        weighted_measure_col = -1;
+        weightedMeasureCol = -1;
     }
 };

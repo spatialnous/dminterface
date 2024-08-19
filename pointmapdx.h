@@ -24,44 +24,44 @@ class PointMapDX : public AttributeMapDX {
 
     // Selection functionality
     int m_selection;
-    bool m_pinned_selection;
+    bool m_pinnedSelection;
     std::set<int> m_selectionSet; // n.b., m_selection_set stored as int for compatibility with
                                   // other map layers
-    mutable PixelRef s_bl;
-    mutable PixelRef s_tr;
+    mutable PixelRef m_sBl;
+    mutable PixelRef m_sTr;
 
-    mutable int curmergeline;
-    mutable QtRegion m_sel_bounds;
+    mutable int m_curmergeline;
+    mutable QtRegion m_selBounds;
 
-    int m_viewing_deprecated;
-    int m_draw_step;
+    int m_viewingDeprecated;
+    int m_drawStep;
 
     mutable bool m_finished = false;
-    mutable PixelRef bl;
-    mutable PixelRef cur; // cursor for points
-    mutable PixelRef rc;  // cursor for grid lines
-    mutable PixelRef prc; // cursor for point lines
-    mutable PixelRef tr;
+    mutable PixelRef m_bl;
+    mutable PixelRef m_cur; // cursor for points
+    mutable PixelRef m_rc;  // cursor for grid lines
+    mutable PixelRef m_prc; // cursor for point lines
+    mutable PixelRef m_tr;
 
   protected:
     // which attribute is currently displayed:
-    mutable int m_displayed_attribute;
+    mutable int m_displayedAttribute;
 
   public: // ctor
     PointMapDX(std::unique_ptr<PointMap> &&map) : AttributeMapDX(std::move(map)) {
         // -2 follows axial map convention, where -1 is the reference number
-        m_displayed_attribute = -2;
+        m_displayedAttribute = -2;
         m_selection = NO_SELECTION;
-        m_pinned_selection = false;
+        m_pinnedSelection = false;
 
         // screen
-        m_viewing_deprecated = -1;
-        m_draw_step = 1;
+        m_viewingDeprecated = -1;
+        m_drawStep = 1;
 
-        curmergeline = -1;
+        m_curmergeline = -1;
 
-        s_bl = NoPixel;
-        s_tr = NoPixel;
+        m_sBl = NoPixel;
+        m_sTr = NoPixel;
     };
     virtual ~PointMapDX() {}
     PointMapDX() = delete;
@@ -74,45 +74,44 @@ class PointMapDX : public AttributeMapDX {
     const PointMap &getInternalMap() const { return *static_cast<PointMap *>(m_map.get()); }
 
     double getDisplayMinValue() const {
-        return (m_displayed_attribute != -1)
-                   ? getInternalMap().getDisplayMinValue(static_cast<size_t>(m_displayed_attribute))
+        return (m_displayedAttribute != -1)
+                   ? getInternalMap().getDisplayMinValue(static_cast<size_t>(m_displayedAttribute))
                    : 0;
     }
 
     double getDisplayMaxValue() const {
-        return (m_displayed_attribute != -1)
-                   ? getInternalMap().getDisplayMaxValue(static_cast<size_t>(m_displayed_attribute))
+        return (m_displayedAttribute != -1)
+                   ? getInternalMap().getDisplayMaxValue(static_cast<size_t>(m_displayedAttribute))
                    : getInternalMap().pixelate(getInternalMap().getRegion().topRight).x;
     }
 
     const DisplayParams &getDisplayParams() const {
-        return getInternalMap().getDisplayParams(static_cast<size_t>(m_displayed_attribute));
+        return getInternalMap().getDisplayParams(static_cast<size_t>(m_displayedAttribute));
     }
     // make a local copy of the display params for access speed:
     void setDisplayParams(const DisplayParams &dp, bool applyToAll = false) {
-        getInternalMap().setDisplayParams(dp, static_cast<size_t>(m_displayed_attribute),
+        getInternalMap().setDisplayParams(dp, static_cast<size_t>(m_displayedAttribute),
                                           applyToAll);
     }
 
     void setDisplayedAttribute(int col);
     void setDisplayedAttribute(const std::string &col);
     // use set displayed attribute instead unless you are deliberately changing the column order:
-    void overrideDisplayedAttribute(int attribute) { m_displayed_attribute = attribute; }
+    void overrideDisplayedAttribute(int attribute) { m_displayedAttribute = attribute; }
     // now, there is a slightly odd thing here: the displayed attribute can go out of step with the
     // underlying attribute data if there is a delete of an attribute in idepthmap.h, so it just
     // needs checking before returning!
     int getDisplayedAttribute() const {
-        if (m_displayed_attribute ==
-            getInternalMap().getAttributeTableHandle().getDisplayColIndex())
-            return m_displayed_attribute;
+        if (m_displayedAttribute == getInternalMap().getAttributeTableHandle().getDisplayColIndex())
+            return m_displayedAttribute;
         if (getInternalMap().getAttributeTableHandle().getDisplayColIndex() != -2) {
-            m_displayed_attribute = getInternalMap().getAttributeTableHandle().getDisplayColIndex();
+            m_displayedAttribute = getInternalMap().getAttributeTableHandle().getDisplayColIndex();
         }
-        return m_displayed_attribute;
+        return m_displayedAttribute;
     }
 
     float getDisplayedSelectedAvg() {
-        return (getInternalMap().getDisplayedSelectedAvg(static_cast<size_t>(m_displayed_attribute),
+        return (getInternalMap().getDisplayedSelectedAvg(static_cast<size_t>(m_displayedAttribute),
                                                          m_selectionSet));
     }
 
@@ -134,14 +133,14 @@ class PointMapDX : public AttributeMapDX {
     const std::set<int> &getSelSet() const { return m_selectionSet; }
 
     int getSelCount() { return (int)m_selectionSet.size(); }
-    const QtRegion &getSelBounds() const { return m_sel_bounds; }
+    const QtRegion &getSelBounds() const { return m_selBounds; }
 
     bool clearPoints() {
         bool result = false;
         if (m_selection == NO_SELECTION) {
             result = getInternalMap().clearAllPoints();
         } else if (m_selection & SINGLE_SELECTION) {
-            result = getInternalMap().clearPointsInRange(s_bl, s_tr, m_selectionSet);
+            result = getInternalMap().clearPointsInRange(m_sBl, m_sTr, m_selectionSet);
         } else { // COMPOUND_SELECTION (note, need to test bitwise now)
             result = getInternalMap().clearPointsInRange(
                 PixelRef(0, 0),
@@ -159,7 +158,7 @@ class PointMapDX : public AttributeMapDX {
     void setScreenPixel(double m_unit);
     void makeViewportPoints(const QtRegion &viewport) const;
     bool findNextPoint() const;
-    Point2f getNextPointLocation() const { return getInternalMap().getPoint(cur).getLocation(); }
+    Point2f getNextPointLocation() const { return getInternalMap().getPoint(m_cur).getLocation(); }
     bool findNextRow() const;
     Line getNextRow() const;
     bool findNextPointRow() const;
@@ -192,7 +191,7 @@ class PointMapDX : public AttributeMapDX {
         if (!m_selectionSet.size()) {
             return false;
         }
-        auto pointsMerged = getInternalMap().mergePoints(p, m_sel_bounds, m_selectionSet);
+        auto pointsMerged = getInternalMap().mergePoints(p, m_selBounds, m_selectionSet);
 
         clearSel();
         return pointsMerged;

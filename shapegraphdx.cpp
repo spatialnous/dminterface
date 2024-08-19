@@ -8,7 +8,7 @@
 
 void ShapeGraphDX::makeConnections(const KeyVertices &keyvertices) {
     getInternalMap().makeConnections(keyvertices);
-    m_displayed_attribute = -1; // <- override if it's already showing
+    m_displayedAttribute = -1; // <- override if it's already showing
     auto conn_col =
         getInternalMap().getAttributeTable().getColumnIndex(ShapeGraph::Column::CONNECTIVITY);
 
@@ -31,7 +31,7 @@ void ShapeGraphDX::unlinkFromShapeMap(const ShapeMap &shapemap) {
 void ShapeGraphDX::makeSegmentConnections(std::vector<Connector> &connectionset) {
     getInternalMap().makeSegmentConnections(connectionset);
 
-    m_displayed_attribute = -2; // <- override if it's already showing
+    m_displayedAttribute = -2; // <- override if it's already showing
 
     auto uw_conn_col =
         getInternalMap().getAttributeTable().getColumnIndex(ShapeGraph::Column::CONNECTIVITY);

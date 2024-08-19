@@ -18,8 +18,8 @@ class ShapeMapDX : public AttributeMapDX {
     mutable bool m_show; // used when shape map is a drawing layer
     bool m_editable;
 
-    mutable int m_current_shape = -1;
-    mutable std::vector<size_t> m_display_shapes;
+    mutable int m_currentShape = -1;
+    mutable std::vector<size_t> m_displayShapes;
 
     mutable bool m_newshape = false; // if a new shape has been added
 
@@ -36,19 +36,19 @@ class ShapeMapDX : public AttributeMapDX {
     void moveData(ShapeMapDX &other) {
         getInternalMap().moveData(other.getInternalMap());
         m_show = other.isShown();
-        m_displayed_attribute = other.m_displayed_attribute;
-        m_display_shapes = std::move(other.m_display_shapes);
+        m_displayedAttribute = other.m_displayedAttribute;
+        m_displayShapes = std::move(other.m_displayShapes);
     }
 
   protected:
     // which attribute is currently displayed:
-    mutable int m_displayed_attribute;
+    mutable int m_displayedAttribute;
     mutable bool m_invalidate;
 
   public: // ctor
     ShapeMapDX(std::unique_ptr<ShapeMap> &&map) : AttributeMapDX(std::move(map)) {
         // -1 is the shape ref column (which will be shown by default)
-        m_displayed_attribute = -1;
+        m_displayedAttribute = -1;
         m_invalidate = false;
 
         // for polygons:
@@ -91,14 +91,14 @@ class ShapeMapDX : public AttributeMapDX {
     void setDisplayedAttribute(int col);
     void setDisplayedAttribute(const std::string &col);
     // use set displayed attribute instead unless you are deliberately changing the column order:
-    void overrideDisplayedAttribute(int attribute) { m_displayed_attribute = attribute; }
+    void overrideDisplayedAttribute(int attribute) { m_displayedAttribute = attribute; }
     // now, there is a slightly odd thing here: the displayed attribute can go out of step with the
     // underlying attribute data if there is a delete of an attribute in idepthmap.h, so it just
     // needs checking before returning!
     int getDisplayedAttribute() const;
 
     float getDisplayedSelectedAvg() {
-        return (getSelectedAvg(static_cast<size_t>(m_displayed_attribute)));
+        return (getSelectedAvg(static_cast<size_t>(m_displayedAttribute)));
     }
     float getDisplayedAverage();
     void invalidateDisplayedAttribute();

@@ -154,12 +154,12 @@ class MetaGraphDX {
     bool findNextShape(const ShapeMapGroup &spf, bool &nextlayer) const;
     bool findNextShape(bool &nextlayer) const;
     const SalaShape &getNextShape() const {
-        auto &currentDrawingFile = m_drawingFiles[static_cast<size_t>(m_current_layer)];
+        auto &currentDrawingFile = m_drawingFiles[static_cast<size_t>(currentLayer)];
         return currentDrawingFile
             .maps[static_cast<size_t>(currentDrawingFile.groupData.getCurrentLayer())]
             .getNextShape();
     }
-    mutable int m_current_layer;
+    mutable int currentLayer;
 
   public:
     int getVersion() {

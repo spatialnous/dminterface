@@ -9,39 +9,39 @@
 #include <numeric>
 
 void ShapeMapDX::init(size_t size, const QtRegion &r) {
-    m_display_shapes.clear();
+    m_displayShapes.clear();
     getInternalMap().init(size, r);
 }
 
 double ShapeMapDX::getDisplayMinValue() const {
-    return (m_displayed_attribute != -1)
-               ? getInternalMap().getDisplayMinValue(static_cast<size_t>(m_displayed_attribute))
+    return (m_displayedAttribute != -1)
+               ? getInternalMap().getDisplayMinValue(static_cast<size_t>(m_displayedAttribute))
                : 0;
 }
 
 double ShapeMapDX::getDisplayMaxValue() const {
-    return (m_displayed_attribute != -1)
-               ? getInternalMap().getDisplayMaxValue(static_cast<size_t>(m_displayed_attribute))
+    return (m_displayedAttribute != -1)
+               ? getInternalMap().getDisplayMaxValue(static_cast<size_t>(m_displayedAttribute))
                : getInternalMap().getDefaultMaxValue();
 }
 
 const DisplayParams &ShapeMapDX::getDisplayParams() const {
-    return getInternalMap().getDisplayParams(static_cast<size_t>(m_displayed_attribute));
+    return getInternalMap().getDisplayParams(static_cast<size_t>(m_displayedAttribute));
 }
 
 void ShapeMapDX::setDisplayParams(const DisplayParams &dp, bool applyToAll) {
-    getInternalMap().setDisplayParams(dp, static_cast<size_t>(m_displayed_attribute), applyToAll);
+    getInternalMap().setDisplayParams(dp, static_cast<size_t>(m_displayedAttribute), applyToAll);
 }
 
 void ShapeMapDX::setDisplayedAttribute(int col) {
-    if (!m_invalidate && m_displayed_attribute == col) {
+    if (!m_invalidate && m_displayedAttribute == col) {
         return;
     }
-    m_displayed_attribute = col;
+    m_displayedAttribute = col;
     m_invalidate = true;
 
     // always override at this stage:
-    getInternalMap().getAttributeTableHandle().setDisplayColIndex(m_displayed_attribute);
+    getInternalMap().getAttributeTableHandle().setDisplayColIndex(m_displayedAttribute);
 
     m_invalidate = false;
 }
@@ -52,42 +52,42 @@ void ShapeMapDX::setDisplayedAttribute(const std::string &col) {
 }
 
 int ShapeMapDX::getDisplayedAttribute() const {
-    if (m_displayed_attribute == getInternalMap().getAttributeTableHandle().getDisplayColIndex())
-        return m_displayed_attribute;
+    if (m_displayedAttribute == getInternalMap().getAttributeTableHandle().getDisplayColIndex())
+        return m_displayedAttribute;
     if (getInternalMap().getAttributeTableHandle().getDisplayColIndex() != -2) {
-        m_displayed_attribute = getInternalMap().getAttributeTableHandle().getDisplayColIndex();
+        m_displayedAttribute = getInternalMap().getAttributeTableHandle().getDisplayColIndex();
     }
-    return m_displayed_attribute;
+    return m_displayedAttribute;
 }
 
 float ShapeMapDX::getDisplayedAverage() {
     return (static_cast<float>(
-        getInternalMap().getDisplayedAverage(static_cast<size_t>(m_displayed_attribute))));
+        getInternalMap().getDisplayedAverage(static_cast<size_t>(m_displayedAttribute))));
 }
 
 void ShapeMapDX::invalidateDisplayedAttribute() { m_invalidate = true; }
 
 void ShapeMapDX::clearAll() {
-    m_display_shapes.clear();
+    m_displayShapes.clear();
     getInternalMap().clearAll();
-    m_displayed_attribute = -1;
+    m_displayedAttribute = -1;
 }
 
 int ShapeMapDX::makePointShape(const Point2f &point, bool tempshape,
-                                const std::map<int, float> &extraAttributes) {
+                               const std::map<int, float> &extraAttributes) {
     return makePointShapeWithRef(point, getInternalMap().getNextShapeKey(), tempshape,
                                  extraAttributes);
 }
 
 bool ShapeMapDX::read(std::istream &stream) {
 
-    m_display_shapes.clear();
+    m_displayShapes.clear();
 
     bool read = false;
-    std::tie(read, m_editable, m_show, m_displayed_attribute) = getInternalMap().read(stream);
+    std::tie(read, m_editable, m_show, m_displayedAttribute) = getInternalMap().read(stream);
 
     invalidateDisplayedAttribute();
-    setDisplayedAttribute(m_displayed_attribute);
+    setDisplayedAttribute(m_displayedAttribute);
 
     return true;
 }
@@ -103,7 +103,7 @@ bool ShapeMapDX::write(std::ostream &stream) {
     // TODO: Compatibility. The attribute columns will be stored sorted
     // alphabetically so the displayed attribute needs to match that
     auto sortedDisplayedAttribute = getInternalMap().getAttributeTable().getColumnSortedIndex(
-        static_cast<size_t>(m_displayed_attribute));
+        static_cast<size_t>(m_displayedAttribute));
     stream.write((char *)&sortedDisplayedAttribute, sizeof(sortedDisplayedAttribute));
     written = written && getInternalMap().writePart3(stream);
     return written;
@@ -117,22 +117,22 @@ bool ShapeMapDX::findNextShape(bool &nextlayer) const {
     }
 
     // TODO: Remove static_cast<size_t>(-1)
-    while ((++m_current_shape < (int)getInternalMap().getAllShapes().size()) &&
-           m_display_shapes[static_cast<size_t>(m_current_shape)] == static_cast<size_t>(-1))
+    while ((++m_currentShape < (int)getInternalMap().getAllShapes().size()) &&
+           m_displayShapes[static_cast<size_t>(m_currentShape)] == static_cast<size_t>(-1))
         ;
 
-    if (m_current_shape < (int)getInternalMap().getAllShapes().size()) {
+    if (m_currentShape < (int)getInternalMap().getAllShapes().size()) {
         return true;
     } else {
-        m_current_shape = (int)getInternalMap().getAllShapes().size();
+        m_currentShape = (int)getInternalMap().getAllShapes().size();
         nextlayer = true;
         return false;
     }
 }
 
 const SalaShape &ShapeMapDX::getNextShape() const {
-    auto x = m_display_shapes[static_cast<size_t>(m_current_shape)]; // x has display order in it
-    m_display_shapes[static_cast<size_t>(m_current_shape)] =
+    auto x = m_displayShapes[static_cast<size_t>(m_currentShape)]; // x has display order in it
+    m_displayShapes[static_cast<size_t>(m_currentShape)] =
         static_cast<size_t>(-1); // you've drawn it
     return depthmapX::getMapAtIndex(getInternalMap().getAllShapes(), x)->second;
 }
@@ -142,21 +142,21 @@ const SalaShape &ShapeMapDX::getNextShape() const {
 void ShapeMapDX::makeViewportShapes(const QtRegion &viewport) const {
 
     auto &shapes = getInternalMap().getAllShapes();
-    if (m_display_shapes.empty() || m_newshape) {
-        m_display_shapes.assign(shapes.size(), static_cast<size_t>(-1));
+    if (m_displayShapes.empty() || m_newshape) {
+        m_displayShapes.assign(shapes.size(), static_cast<size_t>(-1));
         m_newshape = false;
     }
 
-    m_current_shape = -1; // note: findNext expects first to be labelled -1
+    m_currentShape = -1; // note: findNext expects first to be labelled -1
 
-    m_display_shapes = getInternalMap().makeViewportShapes(viewport);
+    m_displayShapes = getInternalMap().makeViewportShapes(viewport);
 
     m_curlinkline = -1;
     m_curunlinkpoint = -1;
 }
 
 int ShapeMapDX::makePointShapeWithRef(const Point2f &point, int shape_ref, bool tempshape,
-                                       const std::map<int, float> &extraAttributes) {
+                                      const std::map<int, float> &extraAttributes) {
     int shapeRef =
         getInternalMap().makePointShapeWithRef(point, shape_ref, tempshape, extraAttributes);
     if (!tempshape) {
@@ -166,13 +166,13 @@ int ShapeMapDX::makePointShapeWithRef(const Point2f &point, int shape_ref, bool 
 }
 
 int ShapeMapDX::makeLineShape(const Line &line, bool through_ui, bool tempshape,
-                               const std::map<int, float> &extraAttributes) {
+                              const std::map<int, float> &extraAttributes) {
     return makeLineShapeWithRef(line, getInternalMap().getNextShapeKey(), through_ui, tempshape,
                                 extraAttributes);
 }
 
 int ShapeMapDX::makeLineShapeWithRef(const Line &line, int shape_ref, bool through_ui,
-                                      bool tempshape, const std::map<int, float> &extraAttributes) {
+                                     bool tempshape, const std::map<int, float> &extraAttributes) {
     // note, map must have editable flag on if we are to make a shape through the
     // user interface:
     if (through_ui && !m_editable) {
@@ -188,19 +188,19 @@ int ShapeMapDX::makeLineShapeWithRef(const Line &line, int shape_ref, bool throu
     if (through_ui) {
         // update displayed attribute if through ui:
         invalidateDisplayedAttribute();
-        setDisplayedAttribute(m_displayed_attribute);
+        setDisplayedAttribute(m_displayedAttribute);
     }
     return shapeRef;
 }
 
 int ShapeMapDX::makePolyShape(const std::vector<Point2f> &points, bool open, bool tempshape,
-                               const std::map<int, float> &extraAttributes) {
+                              const std::map<int, float> &extraAttributes) {
     return makePolyShapeWithRef(points, getInternalMap().getNextShapeKey(), open, tempshape,
                                 extraAttributes);
 }
 
 int ShapeMapDX::makePolyShapeWithRef(const std::vector<Point2f> &points, bool open, int shape_ref,
-                                      bool tempshape, const std::map<int, float> &extraAttributes) {
+                                     bool tempshape, const std::map<int, float> &extraAttributes) {
     int shapeRef =
         getInternalMap().makePolyShapeWithRef(points, open, shape_ref, tempshape, extraAttributes);
     if (!tempshape) {
@@ -210,7 +210,7 @@ int ShapeMapDX::makePolyShapeWithRef(const std::vector<Point2f> &points, bool op
 }
 
 int ShapeMapDX::makeShape(const SalaShape &poly, int override_shape_ref,
-                           const std::map<int, float> &extraAttributes) {
+                          const std::map<int, float> &extraAttributes) {
     int shapeRef = getInternalMap().makeShape(poly, override_shape_ref, extraAttributes);
     m_newshape = true;
     return shapeRef;
@@ -231,7 +231,7 @@ bool ShapeMapDX::moveShape(int shaperef, const Line &line, bool undoing) {
     if (getInternalMap().hasGraph()) {
         // update displayed attribute for any changes:
         invalidateDisplayedAttribute();
-        setDisplayedAttribute(m_displayed_attribute);
+        setDisplayedAttribute(m_displayedAttribute);
     }
     return moved;
 }
@@ -241,7 +241,7 @@ int ShapeMapDX::polyBegin(const Line &line) {
 
     // update displayed attribute
     invalidateDisplayedAttribute();
-    setDisplayedAttribute(m_displayed_attribute);
+    setDisplayedAttribute(m_displayedAttribute);
 
     // flag new shape
     m_newshape = true;
@@ -259,7 +259,7 @@ bool ShapeMapDX::polyCancel(int shape_ref) {
 
     // update displayed attribute
     invalidateDisplayedAttribute();
-    setDisplayedAttribute(m_displayed_attribute);
+    setDisplayedAttribute(m_displayedAttribute);
     return polyCancelled;
 }
 
@@ -275,7 +275,7 @@ bool ShapeMapDX::removeSelected() {
         m_selectionSet.clear();
 
         invalidateDisplayedAttribute();
-        setDisplayedAttribute(m_displayed_attribute);
+        setDisplayedAttribute(m_displayedAttribute);
 
         return true;
     }
@@ -292,25 +292,25 @@ void ShapeMapDX::removeShape(int shaperef, bool undoing) {
 void ShapeMapDX::undo() {
     getInternalMap().undo();
     invalidateDisplayedAttribute();
-    setDisplayedAttribute(m_displayed_attribute);
+    setDisplayedAttribute(m_displayedAttribute);
     m_newshape = true;
 }
 
 void ShapeMapDX::makeShapeConnections() {
     getInternalMap().makeShapeConnections();
 
-    m_displayed_attribute = -1; // <- override if it's already showing
+    m_displayedAttribute = -1; // <- override if it's already showing
     auto conn_col = getInternalMap().getAttributeTable().getColumnIndex("Connectivity");
 
     setDisplayedAttribute(static_cast<int>(conn_col));
 }
 
 double ShapeMapDX::getLocationValue(const Point2f &point) const {
-    return getInternalMap().getLocationValue(point, m_displayed_attribute);
+    return getInternalMap().getLocationValue(point, m_displayedAttribute);
 }
 
 const PafColor ShapeMapDX::getShapeColor() const {
-    AttributeKey key(static_cast<int>(m_display_shapes[static_cast<size_t>(m_current_shape)]));
+    AttributeKey key(static_cast<int>(m_displayShapes[static_cast<size_t>(m_currentShape)]));
     const AttributeRow &row = getInternalMap().getAttributeTable().getRow(key);
     return dXreimpl::getDisplayColor(key, row, getInternalMap().getAttributeTableHandle(),
                                      m_selectionSet, true);
@@ -319,7 +319,7 @@ const PafColor ShapeMapDX::getShapeColor() const {
 
 bool ShapeMapDX::getShapeSelected() const {
     return m_selectionSet.find(static_cast<int>(
-               m_display_shapes[static_cast<size_t>(m_current_shape)])) != m_selectionSet.end();
+               m_displayShapes[static_cast<size_t>(m_currentShape)])) != m_selectionSet.end();
 }
 
 bool ShapeMapDX::linkShapes(const Point2f &p) {

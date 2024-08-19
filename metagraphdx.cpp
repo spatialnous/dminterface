@@ -310,7 +310,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
 {
     bool analysisCompleted = false;
 
-    if (options.point_depth_selection) {
+    if (options.pointDepthSelection) {
         if (m_viewClass & VIEWVGA && !getDisplayedPointMap().isSelected()) {
             return false;
         } else if (m_viewClass & VIEWAXIAL && !getDisplayedShapeGraph().hasSelectedElements()) {
@@ -320,7 +320,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
 
     try {
         analysisCompleted = true;
-        if (options.point_depth_selection == 1) {
+        if (options.pointDepthSelection == 1) {
             if (m_viewClass & VIEWVGA) {
                 auto &map = getDisplayedPointMap();
                 std::set<PixelRef> origins;
@@ -356,7 +356,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             }
             // REPLACES:
             // Graph::calculate_point_depth_matrix( communicator );
-        } else if (options.point_depth_selection == 2) {
+        } else if (options.pointDepthSelection == 2) {
             if (m_viewClass & VIEWVGA) {
                 auto &map = getDisplayedPointMap();
                 std::set<PixelRef> origins;
@@ -385,7 +385,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                                         .completed;
                 map.setDisplayedAttribute(SegmentMetricPD::Column::METRIC_STEP_DEPTH);
             }
-        } else if (options.point_depth_selection == 3) {
+        } else if (options.pointDepthSelection == 3) {
             auto &map = getDisplayedPointMap();
             std::set<PixelRef> origins;
             for (auto &sel : map.getSelSet()) {
@@ -399,7 +399,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             analysisCompleted = analysisResult.completed;
             map.setDisplayedAttribute(-2);
             map.setDisplayedAttribute(VGAAngularDepth::Column::ANGULAR_STEP_DEPTH);
-        } else if (options.point_depth_selection == 4) {
+        } else if (options.pointDepthSelection == 4) {
             if (m_viewClass & VIEWVGA) {
                 auto &map = getDisplayedPointMap();
                 map.getInternalMap().binDisplay(communicator, map.getSelSet());
@@ -413,7 +413,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                 map.setDisplayedAttribute(-2);
                 map.setDisplayedAttribute(SegmentTopologicalPD::Column::TOPOLOGICAL_STEP_DEPTH);
             }
-        } else if (options.output_type == AnalysisType::ISOVIST) {
+        } else if (options.outputType == AnalysisType::ISOVIST) {
             auto shapes = getShownDrawingFilesAsShapes();
             auto &map = getDisplayedPointMap();
             auto analysis = VGAIsovist(map.getInternalMap(), shapes);
@@ -425,12 +425,12 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             analysisCompleted = analysisResult.completed;
             map.setDisplayedAttribute(-2);
             map.setDisplayedAttribute(VGAIsovist::Column::ISOVIST_AREA);
-        } else if (options.output_type == AnalysisType::VISUAL) {
+        } else if (options.outputType == AnalysisType::VISUAL) {
             bool localResult = true;
             bool globalResult = true;
             if (options.local) {
                 auto &map = getDisplayedPointMap();
-                auto analysis = VGAVisualLocal(map.getInternalMap(), options.gates_only);
+                auto analysis = VGAVisualLocal(map.getInternalMap(), options.gatesOnly);
                 auto analysisResult = analysis.run(communicator);
                 analysis.copyResultToMap(analysisResult.getAttributes(),
                                          analysisResult.getAttributeData(), map.getInternalMap(),
@@ -442,7 +442,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             if (options.global) {
                 auto &map = getDisplayedPointMap();
                 auto analysis =
-                    VGAVisualGlobal(map.getInternalMap(), options.radius, options.gates_only);
+                    VGAVisualGlobal(map.getInternalMap(), options.radius, options.gatesOnly);
                 analysis.setSimpleVersion(simple_version);
                 analysis.setLegacyWriteMiscs(true);
                 auto analysisResult = analysis.run(communicator);
@@ -455,9 +455,9 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                     VGAVisualGlobal::Column::VISUAL_INTEGRATION_HH, options.radius));
             }
             analysisCompleted = globalResult & localResult;
-        } else if (options.output_type == AnalysisType::METRIC) {
+        } else if (options.outputType == AnalysisType::METRIC) {
             auto &map = getDisplayedPointMap();
-            auto analysis = VGAMetric(map.getInternalMap(), options.radius, options.gates_only);
+            auto analysis = VGAMetric(map.getInternalMap(), options.radius, options.gatesOnly);
             auto analysisResult = analysis.run(communicator);
             analysis.copyResultToMap(analysisResult.getAttributes(),
                                      analysisResult.getAttributeData(), map.getInternalMap(),
@@ -467,9 +467,9 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             map.setDisplayedAttribute(VGAMetric::getColumnWithRadius(
                 VGAMetric::Column::METRIC_MEAN_SHORTEST_PATH_DISTANCE, options.radius,
                 map.getInternalMap().getRegion()));
-        } else if (options.output_type == AnalysisType::ANGULAR) {
+        } else if (options.outputType == AnalysisType::ANGULAR) {
             auto &map = getDisplayedPointMap();
-            auto analysis = VGAAngular(map.getInternalMap(), options.radius, options.gates_only);
+            auto analysis = VGAAngular(map.getInternalMap(), options.radius, options.gatesOnly);
             auto analysisResult = analysis.run(communicator);
             analysis.copyResultToMap(analysisResult.getAttributes(),
                                      analysisResult.getAttributeData(), map.getInternalMap(),
@@ -479,7 +479,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             map.setDisplayedAttribute(
                 VGAAngular::getColumnWithRadius(VGAAngular::Column::ANGULAR_MEAN_DEPTH,
                                                 options.radius, map.getInternalMap().getRegion()));
-        } else if (options.output_type == AnalysisType::THRU_VISION) {
+        } else if (options.outputType == AnalysisType::THRU_VISION) {
             auto &map = getDisplayedPointMap();
             auto analysis = VGAThroughVision(map.getInternalMap());
             auto analysisResult = analysis.run(communicator);
@@ -1421,7 +1421,7 @@ bool MetaGraphDX::analyseAxial(Communicator *communicator, Options options,
 
     try {
         auto &map = getDisplayedShapeGraph();
-        AxialIntegration analysis(options.radius_set, options.weighted_measure_col, options.choice,
+        AxialIntegration analysis(options.radiusSet, options.weightedMeasureCol, options.choice,
                                   options.fulloutput);
         analysis.setForceLegacyColumnOrder(forceLegacyColumnOrder);
         analysisCompleted = analysis.run(communicator, map.getInternalMap(), false).completed;
@@ -1430,7 +1430,7 @@ bool MetaGraphDX::analyseAxial(Communicator *communicator, Options options,
 
         map.setDisplayedAttribute(static_cast<int>(AxialIntegration::getFormattedColumnIdx(
             map.getInternalMap().getAttributeTable(), AxialIntegration::Column::INTEGRATION,
-            static_cast<int>(*options.radius_set.rbegin()), std::nullopt,
+            static_cast<int>(*options.radiusSet.rbegin()), std::nullopt,
             AxialIntegration::Normalisation::HH)));
 
         if (options.local)
@@ -1458,23 +1458,22 @@ bool MetaGraphDX::analyseSegmentsTulip(
 
     try {
         auto &map = getDisplayedShapeGraph();
-        SegmentTulip analysis(options.radius_set,
-                              options.sel_only ? std::make_optional(map.getSelSet()) : std::nullopt,
-                              options.tulip_bins, options.weighted_measure_col, options.radius_type,
-                              options.choice);
+        SegmentTulip analysis(
+            options.radiusSet, options.selOnly ? std::make_optional(map.getSelSet()) : std::nullopt,
+            options.tulipBins, options.weightedMeasureCol, options.radiusType, options.choice);
         analysis.setForceLegacyColumnOrder(forceLegacyColumnOrder);
         analysisCompleted = analysis.run(communicator, map.getInternalMap(), false).completed;
         map.setDisplayedAttribute(-2); // <- override if it's already showing
         if (options.choice) {
             map.setDisplayedAttribute(static_cast<int>(SegmentTulip::getFormattedColumnIdx(
                 map.getInternalMap().getAttributeTable(), SegmentTulip::Column::CHOICE,
-                options.tulip_bins, options.radius_type,
-                static_cast<int>(*options.radius_set.begin()))));
+                options.tulipBins, options.radiusType,
+                static_cast<int>(*options.radiusSet.begin()))));
         } else {
             map.setDisplayedAttribute(static_cast<int>(SegmentTulip::getFormattedColumnIdx(
                 map.getInternalMap().getAttributeTable(), SegmentTulip::Column::TOTAL_DEPTH,
-                options.tulip_bins, options.radius_type,
-                static_cast<int>(*options.radius_set.begin()))));
+                options.tulipBins, options.radiusType,
+                static_cast<int>(*options.radiusSet.begin()))));
         }
     } catch (Communicator::CancelledException) {
         analysisCompleted = false;
@@ -1495,14 +1494,14 @@ bool MetaGraphDX::analyseSegmentsAngular(Communicator *communicator,
 
     try {
         auto &map = getDisplayedShapeGraph();
-        analysisCompleted = SegmentAngular(options.radius_set)
+        analysisCompleted = SegmentAngular(options.radiusSet)
                                 .run(communicator, map.getInternalMap(), false)
                                 .completed;
 
         map.setDisplayedAttribute(-2); // <- override if it's already showing
         std::string depth_col_text =
             SegmentAngular::getFormattedColumn(SegmentAngular::Column::ANGULAR_MEAN_DEPTH,
-                                               static_cast<int>(*options.radius_set.begin()));
+                                               static_cast<int>(*options.radiusSet.begin()));
         map.setDisplayedAttribute(depth_col_text);
 
     } catch (Communicator::CancelledException) {
@@ -1524,18 +1523,18 @@ bool MetaGraphDX::analyseTopoMetMultipleRadii(
     bool analysisCompleted = true;
 
     try {
-        // note: "output_type" reused for analysis type (either 0 = topological or 1
+        // note: "outputType" reused for analysis type (either 0 = topological or 1
         // = metric)
         auto &map = getDisplayedShapeGraph();
-        for (size_t r = 0; r < options.radius_set.size(); r++) {
-            if (options.output_type == AnalysisType::ISOVIST) {
-                if (!SegmentTopological(options.radius, options.sel_only
+        for (size_t r = 0; r < options.radiusSet.size(); r++) {
+            if (options.outputType == AnalysisType::ISOVIST) {
+                if (!SegmentTopological(options.radius, options.selOnly
                                                             ? std::make_optional(map.getSelSet())
                                                             : std::nullopt)
                          .run(communicator, map.getInternalMap(), false)
                          .completed)
                     analysisCompleted = false;
-                if (!options.sel_only) {
+                if (!options.selOnly) {
                     map.setDisplayedAttribute(SegmentTopological::getFormattedColumn(
                         SegmentTopological::Column::TOPOLOGICAL_CHOICE, options.radius));
                 } else {
@@ -1544,13 +1543,13 @@ bool MetaGraphDX::analyseTopoMetMultipleRadii(
                 }
 
             } else {
-                if (!SegmentMetric(options.radius, options.sel_only
+                if (!SegmentMetric(options.radius, options.selOnly
                                                        ? std::make_optional(map.getSelSet())
                                                        : std::nullopt)
                          .run(communicator, map.getInternalMap(), false)
                          .completed)
                     analysisCompleted = false;
-                if (!options.sel_only) {
+                if (!options.selOnly) {
                     map.setDisplayedAttribute(SegmentMetric::getFormattedColumn(
                         SegmentMetric::Column::METRIC_CHOICE, options.radius));
                 } else {
@@ -1579,16 +1578,16 @@ bool MetaGraphDX::analyseTopoMet(Communicator *communicator,
     auto &map = getDisplayedShapeGraph();
 
     try {
-        // note: "output_type" reused for analysis type (either 0 = topological or 1
+        // note: "outputType" reused for analysis type (either 0 = topological or 1
         // = metric)
-        if (options.output_type == AnalysisType::ISOVIST) {
+        if (options.outputType == AnalysisType::ISOVIST) {
             analysisCompleted =
-                SegmentTopological(options.radius, options.sel_only
+                SegmentTopological(options.radius, options.selOnly
                                                        ? std::make_optional(map.getSelSet())
                                                        : std::nullopt)
                     .run(communicator, map.getInternalMap(), false)
                     .completed;
-            if (!options.sel_only) {
+            if (!options.selOnly) {
                 map.setDisplayedAttribute(SegmentTopological::getFormattedColumn(
                     SegmentTopological::Column::TOPOLOGICAL_CHOICE, options.radius));
             } else {
@@ -1598,10 +1597,10 @@ bool MetaGraphDX::analyseTopoMet(Communicator *communicator,
         } else {
             analysisCompleted =
                 SegmentMetric(options.radius,
-                              options.sel_only ? std::make_optional(map.getSelSet()) : std::nullopt)
+                              options.selOnly ? std::make_optional(map.getSelSet()) : std::nullopt)
                     .run(communicator, map.getInternalMap(), false)
                     .completed;
-            if (!options.sel_only) {
+            if (!options.selOnly) {
                 map.setDisplayedAttribute(SegmentMetric::getFormattedColumn(
                     SegmentMetric::Column::METRIC_CHOICE, options.radius));
             } else {
@@ -2434,11 +2433,11 @@ size_t MetaGraphDX::addNewPointMap(const std::string &name) {
 }
 
 void MetaGraphDX::makeViewportShapes(const QtRegion &viewport) const {
-    m_current_layer = -1;
+    currentLayer = -1;
     size_t i = m_drawingFiles.size() - 1;
     for (auto iter = m_drawingFiles.rbegin(); iter != m_drawingFiles.rend(); iter++) {
         if (isShown(*iter)) {
-            m_current_layer = (int)i;
+            currentLayer = (int)i;
 
             iter->groupData.invalidateCurrentLayer();
             for (size_t i = iter->maps.size() - 1; static_cast<int>(i) != -1; i--) {
@@ -2476,14 +2475,14 @@ bool MetaGraphDX::findNextShape(const ShapeMapGroup &spf, bool &nextlayer) const
 }
 
 bool MetaGraphDX::findNextShape(bool &nextlayer) const {
-    if (m_current_layer == -1)
+    if (currentLayer == -1)
         return false;
-    while (!findNextShape(m_drawingFiles[static_cast<size_t>(m_current_layer)], nextlayer)) {
-        while (++m_current_layer < (int)m_drawingFiles.size() &&
-               !isShown(m_drawingFiles[static_cast<size_t>(m_current_layer)]))
+    while (!findNextShape(m_drawingFiles[static_cast<size_t>(currentLayer)], nextlayer)) {
+        while (++currentLayer < (int)m_drawingFiles.size() &&
+               !isShown(m_drawingFiles[static_cast<size_t>(currentLayer)]))
             ;
-        if (m_current_layer == static_cast<int>(m_drawingFiles.size())) {
-            m_current_layer = -1;
+        if (currentLayer == static_cast<int>(m_drawingFiles.size())) {
+            currentLayer = -1;
             return false;
         }
     }
