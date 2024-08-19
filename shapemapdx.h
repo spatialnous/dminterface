@@ -46,27 +46,24 @@ class ShapeMapDX : public AttributeMapDX {
     mutable bool m_invalidate;
 
   public: // ctor
-    ShapeMapDX(std::unique_ptr<ShapeMap> &&map) : AttributeMapDX(std::move(map)) {
-        // -1 is the shape ref column (which will be shown by default)
-        m_displayedAttribute = -1;
-        m_invalidate = false;
+    ShapeMapDX(std::unique_ptr<ShapeMap> &&map)
+        : AttributeMapDX(std::move(map)), m_show(true), m_editable(false), m_showLines(true),
+          m_showFill(true), m_showCentroids(false), m_displayedAttribute(-1),
+          m_invalidate(false){
+              // -1 is the shape ref column (which will be shown by default)
 
-        // for polygons:
-        m_showLines = true;
-        m_showFill = true;
-        m_showCentroids = false;
+              // for polygons:
 
-        // note show is
-        m_show = true;
-        m_editable = false;
-    };
+              // note show is
+
+          };
     ShapeMapDX(const std::string &name, int type)
         : ShapeMapDX(std::make_unique<ShapeMap>(name, type)) {}
 
     void copy(const ShapeMapDX &other, int copyflags = 0, bool copyMapType = false) {
         getInternalMap().copy(other.getInternalMap(), copyflags, copyMapType);
     }
-    virtual ~ShapeMapDX() {}
+    ~ShapeMapDX() override {}
     ShapeMapDX() = delete;
     ShapeMapDX(const ShapeMapDX &other) = delete;
     ShapeMapDX(ShapeMapDX &&other) = default;
@@ -75,8 +72,10 @@ class ShapeMapDX : public AttributeMapDX {
   public: // methods
     bool valid() const { return !m_invalidate; }
 
-    ShapeMap &getInternalMap() { return *static_cast<ShapeMap *>(m_map.get()); }
-    const ShapeMap &getInternalMap() const { return *static_cast<ShapeMap *>(m_map.get()); }
+    ShapeMap &getInternalMap() override { return *static_cast<ShapeMap *>(m_map.get()); }
+    const ShapeMap &getInternalMap() const override {
+        return *static_cast<ShapeMap *>(m_map.get());
+    }
 
     void init(size_t size, const QtRegion &r);
 

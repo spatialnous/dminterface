@@ -31,11 +31,11 @@ bool PointMapDX::read(std::istream &stream) {
     // NOTE: You MUST set m_spacepix manually!
     m_displayedAttribute = -1;
 
-    int displayed_attribute; // n.b., temp variable necessary to force recalc
-                             // below
+    int displayedAttribute; // n.b., temp variable necessary to force recalc
+                            // below
 
     // our data read
-    stream.read((char *)&displayed_attribute, sizeof(displayed_attribute));
+    stream.read(reinterpret_cast<char *>(&displayedAttribute), sizeof(displayedAttribute));
 
     read = read && getInternalMap().readPointsAndAttributes(stream);
 
@@ -45,7 +45,7 @@ bool PointMapDX::read(std::istream &stream) {
     // now, as soon as loaded, must recalculate our screen display:
     // note m_displayedAttribute should be -2 in order to force recalc...
     m_displayedAttribute = -2;
-    setDisplayedAttribute(displayed_attribute);
+    setDisplayedAttribute(displayedAttribute);
     return read;
 }
 
@@ -57,7 +57,8 @@ bool PointMapDX::write(std::ostream &stream) {
     auto sortedDisplayedAttribute =
         static_cast<int>(getInternalMap().getAttributeTable().getColumnSortedIndex(
             static_cast<size_t>(m_displayedAttribute)));
-    stream.write((char *)&sortedDisplayedAttribute, sizeof(sortedDisplayedAttribute));
+    stream.write(reinterpret_cast<const char *>(&sortedDisplayedAttribute),
+                 sizeof(sortedDisplayedAttribute));
 
     written = written && getInternalMap().writePointsAndAttributes(stream);
     return written;

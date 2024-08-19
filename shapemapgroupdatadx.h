@@ -18,12 +18,10 @@ class ShapeMapGroupDataDX {
     mutable std::optional<size_t> m_currentLayer;
 
   public:
-    ShapeMapGroupDataDX(ShapeMapGroupData &&mapGroupData) : m_mapGroupData(mapGroupData) {
-        m_currentLayer = std::nullopt;
-    }
-    ShapeMapGroupDataDX(const std::string &name = std::string()) : m_mapGroupData(name) {
-        m_currentLayer = std::nullopt;
-    }
+    ShapeMapGroupDataDX(ShapeMapGroupData &&mapGroupData)
+        : m_mapGroupData(mapGroupData), m_currentLayer(std::nullopt) {}
+    ShapeMapGroupDataDX(const std::string &name = std::string())
+        : m_mapGroupData(name), m_currentLayer(std::nullopt) {}
     ShapeMapGroupDataDX(ShapeMapGroupDataDX &&other)
         : m_mapGroupData(other.m_mapGroupData), m_currentLayer(other.m_currentLayer) {}
     ShapeMapGroupDataDX &operator=(ShapeMapGroupDataDX &&other) {

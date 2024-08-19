@@ -9,22 +9,22 @@
 void ShapeGraphDX::makeConnections(const KeyVertices &keyvertices) {
     getInternalMap().makeConnections(keyvertices);
     m_displayedAttribute = -1; // <- override if it's already showing
-    auto conn_col =
+    auto connCol =
         getInternalMap().getAttributeTable().getColumnIndex(ShapeGraph::Column::CONNECTIVITY);
 
-    setDisplayedAttribute(static_cast<int>(conn_col));
+    setDisplayedAttribute(static_cast<int>(connCol));
 }
 
 void ShapeGraphDX::unlinkFromShapeMap(const ShapeMap &shapemap) {
     getInternalMap().unlinkFromShapeMap(shapemap);
 
     // reset displayed attribute if it happens to be "Connectivity":
-    auto conn_col =
+    auto connCol =
         getInternalMap().getAttributeTable().getColumnIndex(ShapeGraph::Column::CONNECTIVITY);
-    if (getDisplayedAttribute() == static_cast<int>(conn_col)) {
+    if (getDisplayedAttribute() == static_cast<int>(connCol)) {
         invalidateDisplayedAttribute();
         setDisplayedAttribute(
-            static_cast<int>(conn_col)); // <- reflect changes to connectivity counts
+            static_cast<int>(connCol)); // <- reflect changes to connectivity counts
     }
 }
 
@@ -33,9 +33,9 @@ void ShapeGraphDX::makeSegmentConnections(std::vector<Connector> &connectionset)
 
     m_displayedAttribute = -2; // <- override if it's already showing
 
-    auto uw_conn_col =
+    auto uwConnCol =
         getInternalMap().getAttributeTable().getColumnIndex(ShapeGraph::Column::CONNECTIVITY);
-    setDisplayedAttribute(static_cast<int>(uw_conn_col));
+    setDisplayedAttribute(static_cast<int>(uwConnCol));
 }
 
 bool ShapeGraphDX::read(std::istream &stream) {

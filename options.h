@@ -41,21 +41,9 @@ struct Options {
     int routeweightCol;      // EFEF
     std::string outputFile;  // To save an output graph (for example)
     // default values
-    Options() {
-        local = 0;
-        global = 1;
-        cliques = 0;
-        choice = false;
-        fulloutput = false;
-        pointDepthSelection = 0;
-        tulipBins = 1024;
-        radius = -1;
-        radiusType = RadiusType::TOPOLOGICAL;
-        outputType = AnalysisType::ISOVIST;
-        processInMemory = false;
-        gatesOnly = false;
-        selOnly = false;
-        gatelayer = -1;
-        weightedMeasureCol = -1;
-    }
+    Options()
+        : outputType(AnalysisType::ISOVIST), local(0), global(1), cliques(0), choice(false),
+          fulloutput(false), radiusType(RadiusType::TOPOLOGICAL), radius(-1),
+          pointDepthSelection(0), tulipBins(1024), processInMemory(false), selOnly(false),
+          gatesOnly(false), gatelayer(-1), weightedMeasureCol(-1) {}
 };

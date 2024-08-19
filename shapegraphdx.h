@@ -17,8 +17,10 @@ class ShapeGraphDX : public ShapeMapDX {
   public:
     ShapeGraphDX(std::unique_ptr<ShapeGraph> &&map) : ShapeMapDX(std::move(map)){};
 
-    ShapeGraph &getInternalMap() { return *static_cast<ShapeGraph *>(m_map.get()); }
-    const ShapeGraph &getInternalMap() const { return *static_cast<ShapeGraph *>(m_map.get()); }
+    ShapeGraph &getInternalMap() override { return *static_cast<ShapeGraph *>(m_map.get()); }
+    const ShapeGraph &getInternalMap() const override {
+        return *static_cast<ShapeGraph *>(m_map.get());
+    }
 
     void makeConnections(const KeyVertices &keyvertices);
 

@@ -95,8 +95,8 @@ bool ShapeMapDX::read(std::istream &stream) {
 bool ShapeMapDX::write(std::ostream &stream) {
     bool written = getInternalMap().writeNameType(stream);
 
-    stream.write((char *)&m_show, sizeof(m_show));
-    stream.write((char *)&m_editable, sizeof(m_editable));
+    stream.write(reinterpret_cast<const char *>(&m_show), sizeof(m_show));
+    stream.write(reinterpret_cast<const char *>(&m_editable), sizeof(m_editable));
 
     written = written && getInternalMap().writePart2(stream);
 
@@ -104,7 +104,8 @@ bool ShapeMapDX::write(std::ostream &stream) {
     // alphabetically so the displayed attribute needs to match that
     auto sortedDisplayedAttribute = getInternalMap().getAttributeTable().getColumnSortedIndex(
         static_cast<size_t>(m_displayedAttribute));
-    stream.write((char *)&sortedDisplayedAttribute, sizeof(sortedDisplayedAttribute));
+    stream.write(reinterpret_cast<const char *>(&sortedDisplayedAttribute),
+                 sizeof(sortedDisplayedAttribute));
     written = written && getInternalMap().writePart3(stream);
     return written;
 }
@@ -300,9 +301,9 @@ void ShapeMapDX::makeShapeConnections() {
     getInternalMap().makeShapeConnections();
 
     m_displayedAttribute = -1; // <- override if it's already showing
-    auto conn_col = getInternalMap().getAttributeTable().getColumnIndex("Connectivity");
+    auto connCol = getInternalMap().getAttributeTable().getColumnIndex("Connectivity");
 
-    setDisplayedAttribute(static_cast<int>(conn_col));
+    setDisplayedAttribute(static_cast<int>(connCol));
 }
 
 double ShapeMapDX::getLocationValue(const Point2f &point) const {

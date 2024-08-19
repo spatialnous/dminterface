@@ -42,16 +42,12 @@
 #include <sstream>
 #include <tuple>
 
-MetaGraphDX::MetaGraphDX(std::string name) {
+MetaGraphDX::MetaGraphDX(std::string name)
+    : m_state(0), m_viewClass(VIEWNONE), m_showGrid(false), m_showText(false) {
     m_metaGraph.name = name;
     m_metaGraph.version = -1; // <- if unsaved, file version is -1
 
-    m_state = 0;
-    m_viewClass = VIEWNONE;
-
     // whether or not showing text / grid saved with file:
-    m_showText = false;
-    m_showGrid = false;
 
     // bsp tree for making isovists:
     m_bspNodeTree = BSPNodeTree();
@@ -199,8 +195,8 @@ bool MetaGraphDX::makePoints(const Point2f &p, int fill_type, Communicator *comm
 }
 
 bool MetaGraphDX::clearPoints() {
-    bool b_return = getDisplayedPointMap().clearPoints();
-    return b_return;
+    bool bReturn = getDisplayedPointMap().clearPoints();
+    return bReturn;
 }
 
 bool MetaGraphDX::hasVisibleDrawingShapes() {
@@ -1499,10 +1495,10 @@ bool MetaGraphDX::analyseSegmentsAngular(Communicator *communicator,
                                 .completed;
 
         map.setDisplayedAttribute(-2); // <- override if it's already showing
-        std::string depth_col_text =
+        std::string depthColText =
             SegmentAngular::getFormattedColumn(SegmentAngular::Column::ANGULAR_MEAN_DEPTH,
                                                static_cast<int>(*options.radiusSet.begin()));
-        map.setDisplayedAttribute(depth_col_text);
+        map.setDisplayedAttribute(depthColText);
 
     } catch (Communicator::CancelledException) {
         analysisCompleted = false;
@@ -1753,24 +1749,24 @@ bool MetaGraphDX::pushValuesToLayer(int desttype, size_t destlayer, PushValues::
                                     bool count_col) {
     auto sourcetype = m_viewClass;
     auto sourcelayer = getDisplayedMapRef().value();
-    size_t col_in = static_cast<size_t>(getDisplayedAttribute());
+    size_t colIn = static_cast<size_t>(getDisplayedAttribute());
 
     // temporarily turn off everything to prevent redraw during sensitive time:
     int oldstate = m_state;
     m_state &= ~(DATAMAPS | AXIALLINES | POINTMAPS);
 
-    AttributeTable &table_in = getAttributeTable(sourcetype, sourcelayer);
-    AttributeTable &table_out = getAttributeTable(desttype, destlayer);
-    std::string name = table_in.getColumnName(col_in);
-    if ((table_out.hasColumn(name) &&
-         table_out.getColumn(table_out.getColumnIndex(name)).isLocked()) ||
+    AttributeTable &tableIn = getAttributeTable(sourcetype, sourcelayer);
+    AttributeTable &tableOut = getAttributeTable(desttype, destlayer);
+    std::string name = tableIn.getColumnName(colIn);
+    if ((tableOut.hasColumn(name) &&
+         tableOut.getColumn(tableOut.getColumnIndex(name)).isLocked()) ||
         name == "Object Count") {
         name = std::string("Copied ") + name;
     }
-    size_t col_out = table_out.insertOrResetColumn(name);
+    size_t colOut = tableOut.insertOrResetColumn(name);
 
-    bool valuesPushed = pushValuesToLayer(sourcetype, sourcelayer, desttype, destlayer, col_in,
-                                          col_out, push_func, count_col);
+    bool valuesPushed = pushValuesToLayer(sourcetype, sourcelayer, desttype, destlayer, colIn,
+                                          colOut, push_func, count_col);
 
     m_state = oldstate;
 
@@ -1784,12 +1780,12 @@ bool MetaGraphDX::pushValuesToLayer(int desttype, size_t destlayer, PushValues::
 bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int desttype,
                                     size_t destlayer, std::optional<size_t> colIn, size_t colOut,
                                     PushValues::Func pushFunc, bool createCountCol) {
-    AttributeTable &table_out = getAttributeTable(desttype, destlayer);
+    AttributeTable &tableOut = getAttributeTable(desttype, destlayer);
 
     std::optional<std::string> countColName = std::nullopt;
     if (createCountCol) {
         countColName = "Object Count";
-        table_out.insertOrResetColumn(countColName.value());
+        tableOut.insertOrResetColumn(countColName.value());
     }
 
     if (colIn.has_value() && desttype == VIEWVGA &&
@@ -2387,13 +2383,13 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::write(const std::string &filename, i
 std::streampos MetaGraphDX::skipVirtualMem(std::istream &stream) {
     // it's graph virtual memory: skip it
     int nodes = -1;
-    stream.read((char *)&nodes, sizeof(nodes));
+    stream.read(reinterpret_cast<char *>(&nodes), sizeof(nodes));
 
     nodes *= 2;
 
     for (int i = 0; i < nodes; i++) {
         int connections;
-        stream.read((char *)&connections, sizeof(connections));
+        stream.read(reinterpret_cast<char *>(&connections), sizeof(connections));
         stream.seekg(stream.tellg() +
                      std::streamoff(static_cast<size_t>(connections) * sizeof(connections)));
     }

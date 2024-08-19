@@ -48,30 +48,25 @@ class PointMapDX : public AttributeMapDX {
     mutable int m_displayedAttribute;
 
   public: // ctor
-    PointMapDX(std::unique_ptr<PointMap> &&map) : AttributeMapDX(std::move(map)) {
-        // -2 follows axial map convention, where -1 is the reference number
-        m_displayedAttribute = -2;
-        m_selection = NO_SELECTION;
-        m_pinnedSelection = false;
+    PointMapDX(std::unique_ptr<PointMap> &&map)
+        : AttributeMapDX(std::move(map)), m_selection(NO_SELECTION), m_pinnedSelection(false),
+          m_sBl(NoPixel), m_sTr(NoPixel), m_curmergeline(-1), m_viewingDeprecated(-1),
+          m_drawStep(1), m_displayedAttribute(-2){
+                             // -2 follows axial map convention, where -1 is the reference number
+                             // screen
 
-        // screen
-        m_viewingDeprecated = -1;
-        m_drawStep = 1;
-
-        m_curmergeline = -1;
-
-        m_sBl = NoPixel;
-        m_sTr = NoPixel;
-    };
-    virtual ~PointMapDX() {}
+                         };
+    ~PointMapDX() override {}
     PointMapDX() = delete;
     PointMapDX(const PointMapDX &other) = delete;
     PointMapDX(PointMapDX &&other) = default;
     PointMapDX &operator=(PointMapDX &&other) = default;
 
   public: // methods
-    PointMap &getInternalMap() { return *static_cast<PointMap *>(m_map.get()); }
-    const PointMap &getInternalMap() const { return *static_cast<PointMap *>(m_map.get()); }
+    PointMap &getInternalMap() override { return *static_cast<PointMap *>(m_map.get()); }
+    const PointMap &getInternalMap() const override {
+        return *static_cast<PointMap *>(m_map.get());
+    }
 
     double getDisplayMinValue() const {
         return (m_displayedAttribute != -1)
