@@ -23,7 +23,7 @@
 #include "salalib/pushvalues.h"
 #include "salalib/spacepix.h"
 
-#include "genlib/p2dpoly.h"
+#include "salalib/genlib/p2dpoly.h"
 
 #include <memory>
 #include <mutex>

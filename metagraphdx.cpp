@@ -36,8 +36,8 @@
 #include "salalib/vgamodules/vgavisualglobaldepth.h"
 #include "salalib/vgamodules/vgavisuallocal.h"
 
-#include "genlib/comm.h"
-#include "genlib/p2dpoly.h"
+#include "salalib/genlib/comm.h"
+#include "salalib/genlib/p2dpoly.h"
 
 #include <sstream>
 #include <tuple>

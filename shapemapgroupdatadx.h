@@ -7,7 +7,7 @@
 
 #include "salalib/shapemapgroupdata.h"
 
-#include "genlib/p2dpoly.h"
+#include "salalib/genlib/p2dpoly.h"
 
 #include <deque>
 #include <string>
