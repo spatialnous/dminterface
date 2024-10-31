@@ -2362,7 +2362,7 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::write(const std::string &filename, i
             tempViewClass = m_viewClass;
         }
 
-        MetaGraphReadWrite::write(
+        MetaGraphReadWrite::writeToFile(
             filename, // MetaGraph Data
             version, m_metaGraph.name, m_metaGraph.region, m_metaGraph.fileProperties, drawingFiles,
             pointMaps, dataMaps, shapeGraphs, m_allLineMapData,
@@ -2370,10 +2370,10 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::write(const std::string &filename, i
             tempState, tempViewClass, m_showGrid, m_showText, perDrawingMap, m_displayedPointmap,
             perPointMap, m_displayedDatamap, perDataMap, m_displayedShapegraph, perShapeGraph);
     } else {
-        MetaGraphReadWrite::write(filename, // MetaGraph Data
-                                  version, m_metaGraph.name, m_metaGraph.region,
-                                  m_metaGraph.fileProperties, drawingFiles, pointMaps, dataMaps,
-                                  shapeGraphs, m_allLineMapData);
+        MetaGraphReadWrite::writeToFile(filename, // MetaGraph Data
+                                        version, m_metaGraph.name, m_metaGraph.region,
+                                        m_metaGraph.fileProperties, drawingFiles, pointMaps,
+                                        dataMaps, shapeGraphs, m_allLineMapData);
     }
     m_state = oldstate;
     return MetaGraphReadWrite::ReadStatus::OK;
