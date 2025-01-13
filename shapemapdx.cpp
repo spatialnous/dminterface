@@ -307,6 +307,9 @@ void ShapeMapDX::makeShapeConnections() {
 }
 
 double ShapeMapDX::getLocationValue(const Point2f &point) const {
+    if (m_displayedAttribute == -1) {
+        return getInternalMap().getLocationValue(point, std::nullopt);
+    }
     return getInternalMap().getLocationValue(point, m_displayedAttribute);
 }
 
