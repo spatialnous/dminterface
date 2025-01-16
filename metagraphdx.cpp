@@ -597,7 +597,7 @@ bool MetaGraphDX::moveSelShape(const Line &line) {
 // returns 0: fail, 1: made isovist, 2: made isovist and added new shapemap
 // layer
 int MetaGraphDX::makeIsovist(Communicator *communicator, const Point2f &p, double startangle,
-                             double endangle, bool) {
+                             double endangle, bool, bool closeIsovistPoly) {
     int isovistMade = 0;
     // first make isovist
     Isovist iso;
@@ -618,8 +618,17 @@ int MetaGraphDX::makeIsovist(Communicator *communicator, const Point2f &p, doubl
             shapelayer = mapRef.value();
         }
         auto &map = m_dataMaps[shapelayer];
+
+        std::vector<Point2f> polygon = iso.getPolygon();
+
+        if (closeIsovistPoly) {
+            // if the polygon is not closed force it to close
+            if (polygon.front().x != polygon.back().x || polygon.front().y != polygon.back().y) {
+                polygon.push_back(polygon.front());
+            }
+        }
         // false: closed polygon, true: isovist
-        int polyref = map.getInternalMap().makePolyShape(iso.getPolygon(), false);
+        int polyref = map.getInternalMap().makePolyShape(polygon, false);
         map.getInternalMap().getAllShapes()[polyref].setCentroid(p);
         map.overrideDisplayedAttribute(-2);
         map.setDisplayedAttribute(-1);

@@ -523,7 +523,7 @@ class MetaGraphDX {
     void resetBSPtree() { m_bspNodeTree.resetBSPtree(); }
     // returns 0: fail, 1: made isovist, 2: made isovist and added new shapemap layer
     int makeIsovist(Communicator *communicator, const Point2f &p, double startangle = 0,
-                    double endangle = 0, bool = true);
+                    double endangle = 0, bool = true, bool closeIsovistPoly = false);
     // returns 0: fail, 1: made isovist, 2: made isovist and added new shapemap layer
     int makeIsovistPath(Communicator *communicator, double fovAngle = 2.0 * M_PI, bool = true);
     bool makeIsovist(const Point2f &p, Isovist &iso);
