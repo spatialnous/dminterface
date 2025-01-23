@@ -2295,9 +2295,37 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromStream(std::istream &stream,
         m_viewClass = dd.viewClass;
         m_showGrid = dd.showGrid;
         m_showText = dd.showText;
-        m_displayedPointmap = dd.displayedPointMap;
-        m_displayedDatamap = dd.displayedDataMap;
-        m_displayedShapegraph = dd.displayedShapeGraph;
+        if (!dd.displayedPointMap.has_value() || dd.displayedPointMap == -1) {
+            if (!mgd.dataMaps.empty()) {
+                setViewClass(SHOWVGATOP);
+                m_displayedPointmap = 0;
+            } else {
+                m_displayedPointmap = std::nullopt;
+            }
+        } else {
+            m_displayedPointmap = dd.displayedPointMap;
+        }
+        if (!dd.displayedDataMap.has_value() || dd.displayedDataMap == -1) {
+            if (!mgd.dataMaps.empty()) {
+                setViewClass(SHOWSHAPETOP);
+                m_displayedDatamap = 0;
+            } else {
+                m_displayedDatamap = std::nullopt;
+            }
+        } else {
+            m_displayedDatamap = dd.displayedDataMap;
+        }
+
+        if (!dd.displayedShapeGraph.has_value() || dd.displayedShapeGraph == -1) {
+            if (!mgd.dataMaps.empty()) {
+                setViewClass(SHOWAXIALTOP);
+                m_displayedShapegraph = 0;
+            } else {
+                m_displayedShapegraph = std::nullopt;
+            }
+        } else {
+            m_displayedShapegraph = dd.displayedShapeGraph;
+        }
     } catch (MetaGraphReadWrite::MetaGraphReadError &e) {
         std::cerr << "MetaGraph reading failed: " << e.what() << std::endl;
     }
