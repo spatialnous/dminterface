@@ -8,7 +8,7 @@
 #include "salalib/tolerances.h"
 #include <numeric>
 
-void ShapeMapDX::init(size_t size, const QtRegion &r) {
+void ShapeMapDX::init(size_t size, const Region4f &r) {
     m_displayShapes.clear();
     getInternalMap().init(size, r);
 }
@@ -140,7 +140,7 @@ const SalaShape &ShapeMapDX::getNextShape() const {
 
 // this is all very similar to spacepixel, apart from a few minor details
 
-void ShapeMapDX::makeViewportShapes(const QtRegion &viewport) const {
+void ShapeMapDX::makeViewportShapes(const Region4f &viewport) const {
 
     auto &shapes = getInternalMap().getAllShapes();
     if (m_displayShapes.empty() || m_newshape) {
@@ -166,14 +166,14 @@ int ShapeMapDX::makePointShapeWithRef(const Point2f &point, int shapeRef, bool t
     return newShapeRef;
 }
 
-int ShapeMapDX::makeLineShape(const Line &line, bool throughUi, bool tempshape,
+int ShapeMapDX::makeLineShape(const Line4f &line, bool throughUi, bool tempshape,
                               const std::map<int, float> &extraAttributes) {
     return makeLineShapeWithRef(line, getInternalMap().getNextShapeKey(), throughUi, tempshape,
                                 extraAttributes);
 }
 
-int ShapeMapDX::makeLineShapeWithRef(const Line &line, int shapeRef, bool throughUi, bool tempshape,
-                                     const std::map<int, float> &extraAttributes) {
+int ShapeMapDX::makeLineShapeWithRef(const Line4f &line, int shapeRef, bool throughUi,
+                                     bool tempshape, const std::map<int, float> &extraAttributes) {
     // note, map must have editable flag on if we are to make a shape through the
     // user interface:
     if (throughUi && !m_editable) {
@@ -226,7 +226,7 @@ int ShapeMapDX::makeShapeFromPointSet(const PointMapDX &pointmap) {
     return shapeRef;
 }
 
-bool ShapeMapDX::moveShape(int shaperef, const Line &line, bool undoing) {
+bool ShapeMapDX::moveShape(int shaperef, const Line4f &line, bool undoing) {
     bool moved = getInternalMap().moveShape(shaperef, line, undoing);
 
     if (getInternalMap().hasGraph()) {
@@ -237,7 +237,7 @@ bool ShapeMapDX::moveShape(int shaperef, const Line &line, bool undoing) {
     return moved;
 }
 
-int ShapeMapDX::polyBegin(const Line &line) {
+int ShapeMapDX::polyBegin(const Line4f &line) {
     auto newShapeRef = getInternalMap().polyBegin(line);
 
     // update displayed attribute
@@ -348,19 +348,19 @@ bool ShapeMapDX::findNextLinkLine() const {
     return (m_curlinkline < (int)getInternalMap().getLinks().size());
 }
 
-Line ShapeMapDX::getNextLinkLine() const {
+Line4f ShapeMapDX::getNextLinkLine() const {
     // note, links are stored directly by rowid, not by key:
     if (m_curlinkline < (int)getInternalMap().getLinks().size()) {
-        return Line(depthmapX::getMapAtIndex(
-                        getInternalMap().getAllShapes(),
-                        getInternalMap().getLinks()[static_cast<size_t>(m_curlinkline)].a)
-                        ->second.getCentroid(),
-                    depthmapX::getMapAtIndex(
-                        getInternalMap().getAllShapes(),
-                        getInternalMap().getLinks()[static_cast<size_t>(m_curlinkline)].b)
-                        ->second.getCentroid());
+        return Line4f(depthmapX::getMapAtIndex(
+                          getInternalMap().getAllShapes(),
+                          getInternalMap().getLinks()[static_cast<size_t>(m_curlinkline)].a)
+                          ->second.getCentroid(),
+                      depthmapX::getMapAtIndex(
+                          getInternalMap().getAllShapes(),
+                          getInternalMap().getLinks()[static_cast<size_t>(m_curlinkline)].b)
+                          ->second.getCentroid());
     }
-    return Line();
+    return Line4f();
 }
 bool ShapeMapDX::findNextUnlinkPoint() const {
     if (m_curunlinkpoint < (int)getInternalMap().getUnlinks().size()) {
@@ -372,16 +372,16 @@ bool ShapeMapDX::findNextUnlinkPoint() const {
 Point2f ShapeMapDX::getNextUnlinkPoint() const {
     // note, links are stored directly by rowid, not by key:
     if (m_curunlinkpoint < (int)getInternalMap().getUnlinks().size()) {
-        return intersection_point(
-            depthmapX::getMapAtIndex(
-                getInternalMap().getAllShapes(),
-                getInternalMap().getUnlinks()[static_cast<size_t>(m_curunlinkpoint)].a)
-                ->second.getLine(),
-            depthmapX::getMapAtIndex(
-                getInternalMap().getAllShapes(),
-                getInternalMap().getUnlinks()[static_cast<size_t>(m_curunlinkpoint)].b)
-                ->second.getLine(),
-            TOLERANCE_A);
+        return depthmapX::getMapAtIndex(
+                   getInternalMap().getAllShapes(),
+                   getInternalMap().getUnlinks()[static_cast<size_t>(m_curunlinkpoint)].a)
+            ->second.getLine()
+            .intersection_point(
+                depthmapX::getMapAtIndex(
+                    getInternalMap().getAllShapes(),
+                    getInternalMap().getUnlinks()[static_cast<size_t>(m_curunlinkpoint)].b)
+                    ->second.getLine(),
+                TOLERANCE_A);
     }
     return Point2f();
 }
@@ -429,7 +429,7 @@ bool ShapeMapDX::setCurSel(const std::vector<int> &selset, bool add) {
     return !m_selectionSet.empty();
 }
 
-bool ShapeMapDX::setCurSel(QtRegion &r, bool add) {
+bool ShapeMapDX::setCurSel(Region4f &r, bool add) {
     if (add == false) {
         clearSel();
     }
@@ -454,11 +454,11 @@ bool ShapeMapDX::clearSel() {
     return true;
 }
 
-QtRegion ShapeMapDX::getSelBounds() {
-    QtRegion r;
+Region4f ShapeMapDX::getSelBounds() {
+    Region4f r;
     if (!m_selectionSet.empty()) {
         for (auto &shapeRef : m_selectionSet) {
-            r = runion(r, getInternalMap().getAllShapes().at(shapeRef).getBoundingBox());
+            r = r.runion(getInternalMap().getAllShapes().at(shapeRef).getBoundingBox());
         }
     }
     return r;

@@ -37,5 +37,5 @@ class AttributeMapDX {
     }
     LayerManagerImpl &getLayers() { return getInternalMap().getLayers(); }
 
-    const QtRegion &getRegion() const { return m_map->getRegion(); }
+    const Region4f &getRegion() const { return m_map->getRegion(); }
 };

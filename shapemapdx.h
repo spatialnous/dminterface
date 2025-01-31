@@ -77,7 +77,7 @@ class ShapeMapDX : public AttributeMapDX {
         return *static_cast<ShapeMap *>(m_map.get());
     }
 
-    void init(size_t size, const QtRegion &r);
+    void init(size_t size, const Region4f &r);
 
     double getDisplayMinValue() const;
 
@@ -108,10 +108,10 @@ class ShapeMapDX : public AttributeMapDX {
                               const std::map<int, float> &extraAttributes = std::map<int, float>());
     int makePointShape(const Point2f &point, bool tempshape = false,
                        const std::map<int, float> &extraAttributes = std::map<int, float>());
-    int makeLineShapeWithRef(const Line &line, int shapeRef, bool throughUi = false,
+    int makeLineShapeWithRef(const Line4f &line, int shapeRef, bool throughUi = false,
                              bool tempshape = false,
                              const std::map<int, float> &extraAttributes = std::map<int, float>());
-    int makeLineShape(const Line &line, bool throughUi = false, bool tempshape = false,
+    int makeLineShape(const Line4f &line, bool throughUi = false, bool tempshape = false,
                       const std::map<int, float> &extraAttributes = std::map<int, float>());
     int makePolyShapeWithRef(const std::vector<Point2f> &points, bool open, int shapeRef,
                              bool tempshape = false,
@@ -122,9 +122,9 @@ class ShapeMapDX : public AttributeMapDX {
                   const std::map<int, float> &extraAttributes = std::map<int, float>());
     int makeShapeFromPointSet(const PointMapDX &pointmap);
 
-    bool moveShape(int shaperef, const Line &line, bool undoing = false);
+    bool moveShape(int shaperef, const Line4f &line, bool undoing = false);
 
-    int polyBegin(const Line &line);
+    int polyBegin(const Line4f &line);
     bool polyAppend(int shapeRef, const Point2f &point);
     bool polyClose(int shapeRef);
     bool polyCancel(int shapeRef);
@@ -145,7 +145,7 @@ class ShapeMapDX : public AttributeMapDX {
     bool unlinkShapes(const Point2f &p);
 
     bool findNextLinkLine() const;
-    Line getNextLinkLine() const;
+    Line4f getNextLinkLine() const;
     // specific to axial line graphs
     bool findNextUnlinkPoint() const;
     Point2f getNextUnlinkPoint() const;
@@ -175,7 +175,7 @@ class ShapeMapDX : public AttributeMapDX {
 
     std::vector<Point2f> getAllUnlinkPoints();
 
-    void makeViewportShapes(const QtRegion &viewport) const;
+    void makeViewportShapes(const Region4f &viewport) const;
 
     auto getShapeCount() { return getInternalMap().getShapeCount(); }
     auto getSpacing() const { return getInternalMap().getSpacing(); }
@@ -184,13 +184,13 @@ class ShapeMapDX : public AttributeMapDX {
     // Selection
     bool hasSelectedElements() const { return !m_selectionSet.empty(); }
     bool setCurSel(const std::vector<int> &selset, bool add = false);
-    bool setCurSel(QtRegion &r, bool add = false);
+    bool setCurSel(Region4f &r, bool add = false);
     float getSelectedAvg(size_t attributeIdx);
     bool clearSel();
     std::set<int> &getSelSet() { return m_selectionSet; }
     const std::set<int> &getSelSet() const { return m_selectionSet; }
     size_t getSelCount() { return m_selectionSet.size(); }
-    QtRegion getSelBounds();
+    Region4f getSelBounds();
 
     bool selectionToLayer(const std::string &name = std::string("Unnamed"));
 
@@ -217,7 +217,7 @@ class ShapeMapDX : public AttributeMapDX {
     auto unlinkShapesFromRefs(int ref1, int ref2) {
         return getInternalMap().unlinkShapesFromRefs(ref1, ref2);
     };
-    auto getShapesInRegion(const QtRegion &r) const {
+    auto getShapesInRegion(const Region4f &r) const {
         return getInternalMap().getShapesInRegion(r);
     }
 };

@@ -7,8 +7,6 @@
 
 #include "salalib/shapemapgroupdata.h"
 
-#include "salalib/genlib/p2dpoly.h"
-
 #include <deque>
 #include <string>
 
@@ -35,8 +33,8 @@ class ShapeMapGroupDataDX {
     void setName(const std::string &name) { m_mapGroupData.name = name; }
     const std::string &getName() const { return m_mapGroupData.name; }
 
-    const QtRegion &getRegion() const { return m_mapGroupData.region; }
-    void setRegion(QtRegion region) { m_mapGroupData.region = region; }
+    const Region4f &getRegion() const { return m_mapGroupData.region; }
+    void setRegion(Region4f region) { m_mapGroupData.region = region; }
 
     const ShapeMapGroupData &getInternalData() const { return m_mapGroupData; }
 

@@ -37,7 +37,6 @@
 #include "salalib/vgamodules/vgavisuallocal.h"
 
 #include "salalib/genlib/comm.h"
-#include "salalib/genlib/p2dpoly.h"
 
 #include <sstream>
 #include <tuple>
@@ -176,7 +175,7 @@ bool MetaGraphDX::makePoints(const Point2f &p, int fillType, Communicator *commu
     //   m_state &= ~POINTS;
 
     try {
-        std::vector<Line> lines = getShownDrawingFilesAsLines();
+        std::vector<Line4f> lines = getShownDrawingFilesAsLines();
         getDisplayedPointMap().getInternalMap().blockLines(lines);
         getDisplayedPointMap().getInternalMap().makePoints(p, fillType, communicator);
         getDisplayedPointMap().setDisplayedAttribute(-2);
@@ -239,8 +238,8 @@ std::vector<std::pair<std::reference_wrapper<const ShapeMap>, int>> MetaGraphDX:
     return internalMaps;
 }
 
-std::vector<Line> MetaGraphDX::getShownDrawingFilesAsLines() {
-    std::vector<Line> lines;
+std::vector<Line4f> MetaGraphDX::getShownDrawingFilesAsLines() {
+    std::vector<Line4f> lines;
     auto shownMaps = getShownDrawingMaps();
     for (const auto &map : shownMaps) {
         std::vector<SimpleLine> newLines =
@@ -272,7 +271,7 @@ bool MetaGraphDX::makeGraph(Communicator *communicator, int algorithm, double ma
     bool graphMade = false;
 
     try {
-        std::vector<Line> lines = getShownDrawingFilesAsLines();
+        std::vector<Line4f> lines = getShownDrawingFilesAsLines();
         getDisplayedPointMap().getInternalMap().blockLines(lines);
         // algorithm is now used for boundary graph option (as a simple boolean)
         graphMade = getDisplayedPointMap().getInternalMap().sparkGraph2(communicator,
@@ -520,7 +519,7 @@ ShapeMapDX &MetaGraphDX::getEditableMap() {
     return *map;
 }
 
-bool MetaGraphDX::makeShape(const Line &line) {
+bool MetaGraphDX::makeShape(const Line4f &line) {
     if (!isEditableMap()) {
         return false;
     }
@@ -528,7 +527,7 @@ bool MetaGraphDX::makeShape(const Line &line) {
     return (map.makeLineShape(line, true) != -1);
 }
 
-int MetaGraphDX::polyBegin(const Line &line) {
+int MetaGraphDX::polyBegin(const Line4f &line) {
     if (!isEditableMap()) {
         return -1;
     }
@@ -560,7 +559,7 @@ bool MetaGraphDX::polyCancel(int shapeRef) {
     return map.polyCancel(shapeRef);
 }
 
-bool MetaGraphDX::moveSelShape(const Line &line) {
+bool MetaGraphDX::moveSelShape(const Line4f &line) {
     bool shapeMoved = false;
     if (m_viewClass & VIEWAXIAL) {
         auto &map = getDisplayedShapeGraph();
@@ -723,7 +722,7 @@ int MetaGraphDX::makeIsovistPath(Communicator *communicator, double fov, bool) {
                     IsovistUtils::setIsovistData(iso, table, row);
                 } else {
                     for (size_t i = 0; i < path.points.size() - 1; i++) {
-                        Line li = Line(path.points[i], path.points[i + 1]);
+                        Line4f li = Line4f(path.points[i], path.points[i + 1]);
                         Point2f start = li.t_start();
                         Point2f vec = li.vector();
                         if (fov < 2.0 * M_PI) {
@@ -766,14 +765,14 @@ bool MetaGraphDX::makeBSPtree(BSPNodeTree &bspNodeTree, Communicator *communicat
         return true;
     }
 
-    std::vector<Line> partitionlines;
+    std::vector<Line4f> partitionlines;
     auto shownMaps = getShownDrawingMaps();
     for (const auto &mapLayer : shownMaps) {
         auto refShapes = mapLayer.first.get().getInternalMap().getAllShapes();
         for (const auto &refShape : refShapes) {
-            std::vector<Line> newLines = refShape.second.getAsLines();
+            std::vector<Line4f> newLines = refShape.second.getAsLines();
             // must check it is not a zero length line:
-            for (const Line &line : newLines) {
+            for (const Line4f &line : newLines) {
                 if (line.length() > 0.0) {
                     partitionlines.push_back(line);
                 }
@@ -1203,12 +1202,12 @@ bool MetaGraphDX::convertToDrawing(Communicator *, std::string layerName,
                 group->groupData.setRegion(group->maps.back().getRegion());
             } else {
                 group->groupData.setRegion(
-                    runion(group->groupData.getRegion(), group->maps.back().getRegion()));
+                    group->groupData.getRegion().runion(group->maps.back().getRegion()));
             }
             if (m_drawingFiles.size() == 1) {
                 m_metaGraph.region = group->groupData.getRegion();
             } else {
-                m_metaGraph.region = runion(m_metaGraph.region, group->groupData.getRegion());
+                m_metaGraph.region = m_metaGraph.region.runion(group->groupData.getRegion());
             }
             //
             converted = true;
@@ -1679,8 +1678,7 @@ size_t MetaGraphDX::addDrawingFile(std::string name, std::vector<ShapeMap> &&map
     if (m_drawingFiles.size() == 1) {
         m_metaGraph.region = m_drawingFiles.back().groupData.getRegion();
     } else {
-        m_metaGraph.region =
-            runion(m_metaGraph.region, m_drawingFiles.back().groupData.getRegion());
+        m_metaGraph.region = m_metaGraph.region.runion(m_drawingFiles.back().groupData.getRegion());
     }
     return m_drawingFiles.size() - 1;
 }
@@ -1740,13 +1738,12 @@ void MetaGraphDX::updateParentRegions(ShapeMap &shapeMap) {
         m_drawingFiles.back().groupData.setRegion(shapeMap.getRegion());
     } else {
         m_drawingFiles.back().groupData.setRegion(
-            runion(m_drawingFiles.back().groupData.getRegion(), shapeMap.getRegion()));
+            m_drawingFiles.back().groupData.getRegion().runion(shapeMap.getRegion()));
     }
     if (m_metaGraph.region.atZero()) {
         m_metaGraph.region = m_drawingFiles.back().groupData.getRegion();
     } else {
-        m_metaGraph.region =
-            runion(m_metaGraph.region, m_drawingFiles.back().groupData.getRegion());
+        m_metaGraph.region = m_metaGraph.region.runion(m_drawingFiles.back().groupData.getRegion());
     }
 }
 
@@ -2024,8 +2021,8 @@ bool MetaGraphDX::hasVisibleDrawingLayers() {
     return false;
 }
 
-QtRegion MetaGraphDX::getBoundingBox() const {
-    QtRegion bounds = m_metaGraph.region;
+Region4f MetaGraphDX::getBoundingBox() const {
+    Region4f bounds = m_metaGraph.region;
     if (bounds.atZero() && ((getState() & MetaGraphDX::SHAPEGRAPHS) == MetaGraphDX::SHAPEGRAPHS)) {
         bounds = getDisplayedShapeGraph().getRegion();
     }
@@ -2464,7 +2461,7 @@ size_t MetaGraphDX::addNewPointMap(const std::string &name) {
     return m_pointMaps.size() - 1;
 }
 
-void MetaGraphDX::makeViewportShapes(const QtRegion &viewport) const {
+void MetaGraphDX::makeViewportShapes(const Region4f &viewport) const {
     currentLayer = -1;
     size_t i = m_drawingFiles.size() - 1;
     for (auto iter = m_drawingFiles.rbegin(); iter != m_drawingFiles.rend(); iter++) {

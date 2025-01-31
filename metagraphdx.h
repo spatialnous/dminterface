@@ -23,8 +23,6 @@
 #include "salalib/pushvalues.h"
 #include "salalib/spacepix.h"
 
-#include "salalib/genlib/p2dpoly.h"
-
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -57,7 +55,7 @@ class MetaGraphDX {
             if (maps.size() == 1) {
                 groupData.setRegion(maps.back().getRegion());
             } else {
-                groupData.setRegion(runion(groupData.getRegion(), maps.back().getRegion()));
+                groupData.setRegion(groupData.getRegion().runion(maps.back().getRegion()));
             }
             return maps.size() - 1;
         }
@@ -122,7 +120,7 @@ class MetaGraphDX {
     enum { NOT_EDITABLE = 0, EDITABLE_OFF = 1, EDITABLE_ON = 2 };
 
     std::string &getName() { return m_metaGraph.name; }
-    const QtRegion &getRegion() { return m_metaGraph.region; }
+    const Region4f &getRegion() { return m_metaGraph.region; }
     void setRegion(Point2f &bottomLeft, Point2f &topRight) {
         m_metaGraph.region.bottomLeft = bottomLeft;
         m_metaGraph.region.topRight = topRight;
@@ -150,7 +148,7 @@ class MetaGraphDX {
     }
 
     // TODO: drawing state functions/fields that should be eventually removed
-    void makeViewportShapes(const QtRegion &viewport) const;
+    void makeViewportShapes(const Region4f &viewport) const;
     bool findNextShape(const ShapeMapGroup &spf, bool &nextlayer) const;
     bool findNextShape(bool &nextlayer) const;
     const SalaShape &getNextShape() const {
@@ -225,7 +223,7 @@ class MetaGraphDX {
     std::vector<std::pair<std::reference_wrapper<const ShapeMapDX>, int>> getShownDrawingMaps();
     std::vector<std::pair<std::reference_wrapper<const ShapeMap>, int>>
     getAsInternalMaps(std::vector<std::pair<std::reference_wrapper<const ShapeMapDX>, int>> maps);
-    std::vector<Line> getShownDrawingFilesAsLines();
+    std::vector<Line4f> getShownDrawingFilesAsLines();
     std::vector<SalaShape> getShownDrawingFilesAsShapes();
     bool makeGraph(Communicator *communicator, int algorithm, double maxdist);
     bool unmakeGraph(bool removeLinks);
@@ -237,10 +235,10 @@ class MetaGraphDX {
     ShapeMapDX &getEditableMap();
     // currently only making / moving lines, but should be able to extend this to polys fairly
     // easily:
-    bool makeShape(const Line &line);
-    bool moveSelShape(const Line &line);
+    bool makeShape(const Line4f &line);
+    bool moveSelShape(const Line4f &line);
     // onto polys as well:
-    int polyBegin(const Line &line);
+    int polyBegin(const Line4f &line);
     bool polyAppend(int shapeRef, const Point2f &point);
     bool polyClose(int shapeRef);
     bool polyCancel(int shapeRef);
@@ -367,7 +365,7 @@ class MetaGraphDX {
     int getDisplayedMapType();
     AttributeTable &getDisplayedMapAttributes();
     bool hasVisibleDrawingLayers();
-    QtRegion getBoundingBox() const;
+    Region4f getBoundingBox() const;
     //
     int getDisplayedAttribute() const;
     void setDisplayedAttribute(int col);
@@ -426,7 +424,7 @@ class MetaGraphDX {
         else
             return false;
     }
-    bool setCurSel(QtRegion &r, bool add = false) // set current selection
+    bool setCurSel(Region4f &r, bool add = false) // set current selection
     {
         if (m_viewClass & VIEWAXIAL)
             return getDisplayedShapeGraph().setCurSel(r, add);
@@ -476,7 +474,7 @@ class MetaGraphDX {
         else
             return -1.0f;
     }
-    QtRegion getSelBounds() {
+    Region4f getSelBounds() {
         if (m_viewClass & VIEWVGA)
             return getDisplayedPointMap().getSelBounds();
         else if (m_viewClass & VIEWAXIAL)
@@ -484,7 +482,7 @@ class MetaGraphDX {
         else if (m_viewClass & VIEWDATA)
             return getDisplayedDataMap().getSelBounds();
         else
-            return QtRegion();
+            return Region4f();
     }
     // setSelSet expects a set of ref ids:
     void setSelSet(const std::vector<int> &selset, bool add = false) {

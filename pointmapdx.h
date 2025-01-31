@@ -31,7 +31,7 @@ class PointMapDX : public AttributeMapDX {
     mutable PixelRef m_sTr;
 
     mutable int m_curmergeline;
-    mutable QtRegion m_selBounds;
+    mutable Region4f m_selBounds;
 
     int m_viewingDeprecated;
     int m_drawStep;
@@ -121,14 +121,14 @@ class PointMapDX : public AttributeMapDX {
         return m_selection != NO_SELECTION;
     }
     bool clearSel();                               // clear the current selection
-    bool setCurSel(QtRegion &r, bool add = false); // set current selection
+    bool setCurSel(Region4f &r, bool add = false); // set current selection
     bool setCurSel(const std::vector<int> &selset, bool add = false);
     // Note: passed by ref, use with care in multi-threaded app
     std::set<int> &getSelSet() { return m_selectionSet; }
     const std::set<int> &getSelSet() const { return m_selectionSet; }
 
     int getSelCount() { return (int)m_selectionSet.size(); }
-    const QtRegion &getSelBounds() const { return m_selBounds; }
+    const Region4f &getSelBounds() const { return m_selBounds; }
 
     bool clearPoints() {
         bool result = false;
@@ -151,19 +151,19 @@ class PointMapDX : public AttributeMapDX {
     bool refInSelectedSet(const PixelRef &ref) const;
 
     void setScreenPixel(double mUnit);
-    void makeViewportPoints(const QtRegion &viewport) const;
+    void makeViewportPoints(const Region4f &viewport) const;
     bool findNextPoint() const;
     Point2f getNextPointLocation() const { return getInternalMap().getPoint(m_cur).getLocation(); }
     bool findNextRow() const;
-    Line getNextRow() const;
+    Line4f getNextRow() const;
     bool findNextPointRow() const;
-    Line getNextPointRow() const;
+    Line4f getNextPointRow() const;
     bool findNextCol() const;
-    Line getNextCol() const;
+    Line4f getNextCol() const;
     bool findNextPointCol() const;
-    Line getNextPointCol() const;
+    Line4f getNextPointCol() const;
     bool findNextMergeLine() const;
-    Line getNextMergeLine() const;
+    Line4f getNextMergeLine() const;
     bool getPointSelected() const;
     PafColor getPointColor(PixelRef pixelRef) const;
     PafColor getCurrentPointColor() const;

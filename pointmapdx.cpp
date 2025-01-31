@@ -104,7 +104,7 @@ bool PointMapDX::clearSel() {
     return true;
 }
 
-bool PointMapDX::setCurSel(QtRegion &r, bool add) {
+bool PointMapDX::setCurSel(Region4f &r, bool add) {
     if (m_selection == NO_SELECTION) {
         add = false;
     } else if (!add) {
@@ -121,7 +121,7 @@ bool PointMapDX::setCurSel(QtRegion &r, bool add) {
     if (!add) {
         m_selBounds = r;
     } else {
-        m_selBounds = runion(m_selBounds, r);
+        m_selBounds = m_selBounds.runion(r);
     }
 
     int mask = 0;
@@ -142,7 +142,7 @@ bool PointMapDX::setCurSel(QtRegion &r, bool add) {
     }
 
     // Set the region to our actual region:
-    r = QtRegion(depixelate(m_sBl), depixelate(m_sTr));
+    r = Region4f(depixelate(m_sBl), depixelate(m_sTr));
 
     return true;
 }
@@ -171,7 +171,7 @@ void PointMapDX::setScreenPixel(double unit) {
     }
 }
 
-void PointMapDX::makeViewportPoints(const QtRegion &viewport) const {
+void PointMapDX::makeViewportPoints(const Region4f &viewport) const {
     // n.b., relies on "constrain" being set to true
     m_bl = pixelate(viewport.bottomLeft, true);
     m_cur = m_bl; // cursor for points
@@ -212,10 +212,10 @@ bool PointMapDX::findNextRow() const {
         return false;
     return true;
 }
-Line PointMapDX::getNextRow() const {
+Line4f PointMapDX::getNextRow() const {
     Point2f offset(getSpacing() / 2.0, getSpacing() / 2.0);
-    return Line(depixelate(PixelRef(m_bl.x, m_rc.y)) - offset,
-                depixelate(PixelRef(m_tr.x + 1, m_rc.y)) - offset);
+    return Line4f(depixelate(PixelRef(m_bl.x, m_rc.y)) - offset,
+                  depixelate(PixelRef(m_tr.x + 1, m_rc.y)) - offset);
 }
 bool PointMapDX::findNextPointRow() const {
     m_prc.y += 1;
@@ -223,10 +223,10 @@ bool PointMapDX::findNextPointRow() const {
         return false;
     return true;
 }
-Line PointMapDX::getNextPointRow() const {
+Line4f PointMapDX::getNextPointRow() const {
     Point2f offset(getSpacing() / 2.0, 0);
-    return Line(depixelate(PixelRef(m_bl.x, m_prc.y)) - offset,
-                depixelate(PixelRef(m_tr.x + 1, m_prc.y)) - offset);
+    return Line4f(depixelate(PixelRef(m_bl.x, m_prc.y)) - offset,
+                  depixelate(PixelRef(m_tr.x + 1, m_prc.y)) - offset);
 }
 bool PointMapDX::findNextCol() const {
     m_rc.x += 1;
@@ -234,10 +234,10 @@ bool PointMapDX::findNextCol() const {
         return false;
     return true;
 }
-Line PointMapDX::getNextCol() const {
+Line4f PointMapDX::getNextCol() const {
     Point2f offset(getSpacing() / 2.0, getSpacing() / 2.0);
-    return Line(depixelate(PixelRef(m_rc.x, m_bl.y)) - offset,
-                depixelate(PixelRef(m_rc.x, m_tr.y + 1)) - offset);
+    return Line4f(depixelate(PixelRef(m_rc.x, m_bl.y)) - offset,
+                  depixelate(PixelRef(m_rc.x, m_tr.y + 1)) - offset);
 }
 bool PointMapDX::findNextPointCol() const {
     m_prc.x += 1;
@@ -245,10 +245,10 @@ bool PointMapDX::findNextPointCol() const {
         return false;
     return true;
 }
-Line PointMapDX::getNextPointCol() const {
+Line4f PointMapDX::getNextPointCol() const {
     Point2f offset(0.0, getSpacing() / 2.0);
-    return Line(depixelate(PixelRef(m_prc.x, m_bl.y)) - offset,
-                depixelate(PixelRef(m_prc.x, m_tr.y + 1)) - offset);
+    return Line4f(depixelate(PixelRef(m_prc.x, m_bl.y)) - offset,
+                  depixelate(PixelRef(m_prc.x, m_tr.y + 1)) - offset);
 }
 
 bool PointMapDX::findNextMergeLine() const {
@@ -258,13 +258,13 @@ bool PointMapDX::findNextMergeLine() const {
     return (m_curmergeline < (int)getInternalMap().getMergeLines().size());
 }
 
-Line PointMapDX::getNextMergeLine() const {
+Line4f PointMapDX::getNextMergeLine() const {
     if (m_curmergeline < (int)getInternalMap().getMergeLines().size()) {
-        return Line(
+        return Line4f(
             depixelate(getInternalMap().getMergeLines()[static_cast<size_t>(m_curmergeline)].a),
             depixelate(getInternalMap().getMergeLines()[static_cast<size_t>(m_curmergeline)].b));
     }
-    return Line();
+    return Line4f();
 }
 
 bool PointMapDX::refInSelectedSet(const PixelRef &ref) const {
