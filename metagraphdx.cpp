@@ -42,7 +42,7 @@
 #include <tuple>
 
 MetaGraphDX::MetaGraphDX(std::string name)
-    : m_state(0), m_viewClass(VIEWNONE), m_showGrid(false), m_showText(false) {
+    : m_state(0), m_viewClass(DX_VIEWNONE), m_showGrid(false), m_showText(false) {
     m_metaGraph.name = name;
     m_metaGraph.version = -1; // <- if unsaved, file version is -1
 
@@ -56,83 +56,83 @@ bool MetaGraphDX::setViewClass(int command) {
     if (command < 0x10) {
         throw("Use with a show command, not a view class type");
     }
-    if ((command & (SHOWHIDEVGA | SHOWVGATOP)) && (~m_state & POINTMAPS))
+    if ((command & (DX_SHOWHIDEVGA | DX_SHOWVGATOP)) && (~m_state & DX_POINTMAPS))
         return false;
-    if ((command & (SHOWHIDEAXIAL | SHOWAXIALTOP)) && (~m_state & SHAPEGRAPHS))
+    if ((command & (DX_SHOWHIDEAXIAL | DX_SHOWAXIALTOP)) && (~m_state & DX_SHAPEGRAPHS))
         return false;
-    if ((command & (SHOWHIDESHAPE | SHOWSHAPETOP)) && (~m_state & DATAMAPS))
+    if ((command & (DX_SHOWHIDESHAPE | DX_SHOWSHAPETOP)) && (~m_state & DX_DATAMAPS))
         return false;
     switch (command) {
-    case SHOWHIDEVGA:
-        if (m_viewClass & (VIEWVGA | VIEWBACKVGA)) {
-            m_viewClass &= ~(VIEWVGA | VIEWBACKVGA);
-            if (m_viewClass & VIEWBACKAXIAL) {
-                m_viewClass ^= (VIEWAXIAL | VIEWBACKAXIAL);
-            } else if (m_viewClass & VIEWBACKDATA) {
-                m_viewClass ^= (VIEWDATA | VIEWBACKDATA);
+    case DX_SHOWHIDEVGA:
+        if (m_viewClass & (DX_VIEWVGA | DX_VIEWBACKVGA)) {
+            m_viewClass &= ~(DX_VIEWVGA | DX_VIEWBACKVGA);
+            if (m_viewClass & DX_VIEWBACKAXIAL) {
+                m_viewClass ^= (DX_VIEWAXIAL | DX_VIEWBACKAXIAL);
+            } else if (m_viewClass & DX_VIEWBACKDATA) {
+                m_viewClass ^= (DX_VIEWDATA | DX_VIEWBACKDATA);
             }
-        } else if (m_viewClass & (VIEWAXIAL | VIEWDATA)) {
-            m_viewClass &= ~(VIEWBACKAXIAL | VIEWBACKDATA);
-            m_viewClass |= VIEWBACKVGA;
+        } else if (m_viewClass & (DX_VIEWAXIAL | DX_VIEWDATA)) {
+            m_viewClass &= ~(DX_VIEWBACKAXIAL | DX_VIEWBACKDATA);
+            m_viewClass |= DX_VIEWBACKVGA;
         } else {
-            m_viewClass |= VIEWVGA;
+            m_viewClass |= DX_VIEWVGA;
         }
         break;
-    case SHOWHIDEAXIAL:
-        if (m_viewClass & (VIEWAXIAL | VIEWBACKAXIAL)) {
-            m_viewClass &= ~(VIEWAXIAL | VIEWBACKAXIAL);
-            if (m_viewClass & VIEWBACKVGA) {
-                m_viewClass ^= (VIEWVGA | VIEWBACKVGA);
-            } else if (m_viewClass & VIEWBACKDATA) {
-                m_viewClass ^= (VIEWDATA | VIEWBACKDATA);
+    case DX_SHOWHIDEAXIAL:
+        if (m_viewClass & (DX_VIEWAXIAL | DX_VIEWBACKAXIAL)) {
+            m_viewClass &= ~(DX_VIEWAXIAL | DX_VIEWBACKAXIAL);
+            if (m_viewClass & DX_VIEWBACKVGA) {
+                m_viewClass ^= (DX_VIEWVGA | DX_VIEWBACKVGA);
+            } else if (m_viewClass & DX_VIEWBACKDATA) {
+                m_viewClass ^= (DX_VIEWDATA | DX_VIEWBACKDATA);
             }
-        } else if (m_viewClass & (VIEWVGA | VIEWDATA)) {
-            m_viewClass &= ~(VIEWBACKVGA | VIEWBACKDATA);
-            m_viewClass |= VIEWBACKAXIAL;
+        } else if (m_viewClass & (DX_VIEWVGA | DX_VIEWDATA)) {
+            m_viewClass &= ~(DX_VIEWBACKVGA | DX_VIEWBACKDATA);
+            m_viewClass |= DX_VIEWBACKAXIAL;
         } else {
-            m_viewClass |= VIEWAXIAL;
+            m_viewClass |= DX_VIEWAXIAL;
         }
         break;
-    case SHOWHIDESHAPE:
-        if (m_viewClass & (VIEWDATA | VIEWBACKDATA)) {
-            m_viewClass &= ~(VIEWDATA | VIEWBACKDATA);
-            if (m_viewClass & VIEWBACKVGA) {
-                m_viewClass ^= (VIEWVGA | VIEWBACKVGA);
-            } else if (m_viewClass & VIEWBACKAXIAL) {
-                m_viewClass ^= (VIEWAXIAL | VIEWBACKAXIAL);
+    case DX_SHOWHIDESHAPE:
+        if (m_viewClass & (DX_VIEWDATA | DX_VIEWBACKDATA)) {
+            m_viewClass &= ~(DX_VIEWDATA | DX_VIEWBACKDATA);
+            if (m_viewClass & DX_VIEWBACKVGA) {
+                m_viewClass ^= (DX_VIEWVGA | DX_VIEWBACKVGA);
+            } else if (m_viewClass & DX_VIEWBACKAXIAL) {
+                m_viewClass ^= (DX_VIEWAXIAL | DX_VIEWBACKAXIAL);
             }
-        } else if (m_viewClass & (VIEWVGA | VIEWAXIAL)) {
-            m_viewClass &= ~(VIEWBACKVGA | VIEWBACKAXIAL);
-            m_viewClass |= VIEWBACKDATA;
+        } else if (m_viewClass & (DX_VIEWVGA | DX_VIEWAXIAL)) {
+            m_viewClass &= ~(DX_VIEWBACKVGA | DX_VIEWBACKAXIAL);
+            m_viewClass |= DX_VIEWBACKDATA;
         } else {
-            m_viewClass |= VIEWDATA;
+            m_viewClass |= DX_VIEWDATA;
         }
         break;
-    case SHOWVGATOP:
-        if (m_viewClass & VIEWAXIAL) {
-            m_viewClass = VIEWBACKAXIAL | VIEWVGA;
-        } else if (m_viewClass & VIEWDATA) {
-            m_viewClass = VIEWBACKDATA | VIEWVGA;
+    case DX_SHOWVGATOP:
+        if (m_viewClass & DX_VIEWAXIAL) {
+            m_viewClass = DX_VIEWBACKAXIAL | DX_VIEWVGA;
+        } else if (m_viewClass & DX_VIEWDATA) {
+            m_viewClass = DX_VIEWBACKDATA | DX_VIEWVGA;
         } else {
-            m_viewClass = VIEWVGA | (m_viewClass & (VIEWBACKAXIAL | VIEWBACKDATA));
+            m_viewClass = DX_VIEWVGA | (m_viewClass & (DX_VIEWBACKAXIAL | DX_VIEWBACKDATA));
         }
         break;
-    case SHOWAXIALTOP:
-        if (m_viewClass & VIEWVGA) {
-            m_viewClass = VIEWBACKVGA | VIEWAXIAL;
-        } else if (m_viewClass & VIEWDATA) {
-            m_viewClass = VIEWBACKDATA | VIEWAXIAL;
+    case DX_SHOWAXIALTOP:
+        if (m_viewClass & DX_VIEWVGA) {
+            m_viewClass = DX_VIEWBACKVGA | DX_VIEWAXIAL;
+        } else if (m_viewClass & DX_VIEWDATA) {
+            m_viewClass = DX_VIEWBACKDATA | DX_VIEWAXIAL;
         } else {
-            m_viewClass = VIEWAXIAL | (m_viewClass & (VIEWBACKVGA | VIEWBACKDATA));
+            m_viewClass = DX_VIEWAXIAL | (m_viewClass & (DX_VIEWBACKVGA | DX_VIEWBACKDATA));
         }
         break;
-    case SHOWSHAPETOP:
-        if (m_viewClass & VIEWVGA) {
-            m_viewClass = VIEWBACKVGA | VIEWDATA;
-        } else if (m_viewClass & VIEWAXIAL) {
-            m_viewClass = VIEWBACKAXIAL | VIEWDATA;
+    case DX_SHOWSHAPETOP:
+        if (m_viewClass & DX_VIEWVGA) {
+            m_viewClass = DX_VIEWBACKVGA | DX_VIEWDATA;
+        } else if (m_viewClass & DX_VIEWAXIAL) {
+            m_viewClass = DX_VIEWBACKAXIAL | DX_VIEWDATA;
         } else {
-            m_viewClass = VIEWDATA | (m_viewClass & (VIEWBACKVGA | VIEWBACKAXIAL));
+            m_viewClass = DX_VIEWDATA | (m_viewClass & (DX_VIEWBACKVGA | DX_VIEWBACKAXIAL));
         }
         break;
     }
@@ -156,16 +156,16 @@ double MetaGraphDX::getLocationValue(const Point2f &point) {
 }
 
 bool MetaGraphDX::setGrid(double spacing, const Point2f &offset) {
-    m_state &= ~POINTMAPS;
+    m_state &= ~DX_POINTMAPS;
 
     getDisplayedPointMap().getInternalMap().setGrid(spacing, offset);
     getDisplayedPointMap().setDisplayedAttribute(-2);
 
-    m_state |= POINTMAPS;
+    m_state |= DX_POINTMAPS;
 
     // just reassert that we should be viewing this (since set grid is essentially
     // a "new point map")
-    setViewClass(SHOWVGATOP);
+    setViewClass(DX_SHOWVGATOP);
 
     return true;
 }
@@ -183,7 +183,7 @@ bool MetaGraphDX::makePoints(const Point2f &p, int fillType, Communicator *commu
 
         // By this stage points almost certainly exist,
         // To avoid problems, just say points exist:
-        m_state |= POINTMAPS;
+        m_state |= DX_POINTMAPS;
 
         return false;
     }
@@ -266,7 +266,7 @@ std::vector<SalaShape> MetaGraphDX::getShownDrawingFilesAsShapes() {
 
 bool MetaGraphDX::makeGraph(Communicator *communicator, int algorithm, double maxdist) {
     // this is essentially a version tag, and remains for historical reasons:
-    m_state |= ANGULARGRAPH;
+    m_state |= DX_ANGULARGRAPH;
 
     bool graphMade = false;
 
@@ -282,7 +282,7 @@ bool MetaGraphDX::makeGraph(Communicator *communicator, int algorithm, double ma
     }
 
     if (graphMade) {
-        setViewClass(SHOWVGATOP);
+        setViewClass(DX_SHOWVGATOP);
     }
 
     return graphMade;
@@ -294,7 +294,7 @@ bool MetaGraphDX::unmakeGraph(bool removeLinks) {
     getDisplayedPointMap().setDisplayedAttribute(-2);
 
     if (graphUnmade) {
-        setViewClass(SHOWVGATOP);
+        setViewClass(DX_SHOWVGATOP);
     }
 
     return graphUnmade;
@@ -306,9 +306,9 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
     bool analysisCompleted = false;
 
     if (options.pointDepthSelection) {
-        if (m_viewClass & VIEWVGA && !getDisplayedPointMap().isSelected()) {
+        if (m_viewClass & DX_VIEWVGA && !getDisplayedPointMap().isSelected()) {
             return false;
-        } else if (m_viewClass & VIEWAXIAL && !getDisplayedShapeGraph().hasSelectedElements()) {
+        } else if (m_viewClass & DX_VIEWAXIAL && !getDisplayedShapeGraph().hasSelectedElements()) {
             return false;
         }
     }
@@ -316,7 +316,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
     try {
         analysisCompleted = true;
         if (options.pointDepthSelection == 1) {
-            if (m_viewClass & VIEWVGA) {
+            if (m_viewClass & DX_VIEWVGA) {
                 auto &map = getDisplayedPointMap();
                 std::set<PixelRef> origins;
                 for (auto &sel : map.getSelSet())
@@ -332,7 +332,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                 map.setDisplayedAttribute(-2);
                 map.setDisplayedAttribute(VGAVisualGlobalDepth::Column::VISUAL_STEP_DEPTH);
 
-            } else if (m_viewClass & VIEWAXIAL) {
+            } else if (m_viewClass & DX_VIEWAXIAL) {
                 if (!getDisplayedShapeGraph().getInternalMap().isSegmentMap()) {
                     auto &map = getDisplayedShapeGraph();
                     analysisCompleted = AxialStepDepth(map.getSelSet())
@@ -352,7 +352,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             // REPLACES:
             // Graph::calculate_point_depth_matrix( communicator );
         } else if (options.pointDepthSelection == 2) {
-            if (m_viewClass & VIEWVGA) {
+            if (m_viewClass & DX_VIEWVGA) {
                 auto &map = getDisplayedPointMap();
                 std::set<PixelRef> origins;
                 for (auto &sel : map.getSelSet())
@@ -371,7 +371,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                 analysisCompleted = analysisResult.completed;
                 map.setDisplayedAttribute(-2);
                 map.setDisplayedAttribute(VGAMetricDepth::Column::METRIC_STEP_SHORTEST_PATH_LENGTH);
-            } else if (m_viewClass & VIEWAXIAL &&
+            } else if (m_viewClass & DX_VIEWAXIAL &&
                        getDisplayedShapeGraph().getInternalMap().isSegmentMap()) {
 
                 auto &map = getDisplayedShapeGraph();
@@ -395,10 +395,10 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             map.setDisplayedAttribute(-2);
             map.setDisplayedAttribute(VGAAngularDepth::Column::ANGULAR_STEP_DEPTH);
         } else if (options.pointDepthSelection == 4) {
-            if (m_viewClass & VIEWVGA) {
+            if (m_viewClass & DX_VIEWVGA) {
                 auto &map = getDisplayedPointMap();
                 map.getInternalMap().binDisplay(communicator, map.getSelSet());
-            } else if (m_viewClass & VIEWAXIAL &&
+            } else if (m_viewClass & DX_VIEWAXIAL &&
                        getDisplayedShapeGraph().getInternalMap().isSegmentMap()) {
 
                 auto &map = getDisplayedShapeGraph();
@@ -495,9 +495,9 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
 //////////////////////////////////////////////////////////////////
 
 bool MetaGraphDX::isEditableMap() {
-    if (m_viewClass & VIEWAXIAL) {
+    if (m_viewClass & DX_VIEWAXIAL) {
         return getDisplayedShapeGraph().isEditable();
-    } else if (m_viewClass & VIEWDATA) {
+    } else if (m_viewClass & DX_VIEWDATA) {
         return getDisplayedDataMap().isEditable();
     }
     // still to do: allow editing of drawing layers
@@ -506,9 +506,9 @@ bool MetaGraphDX::isEditableMap() {
 
 ShapeMapDX &MetaGraphDX::getEditableMap() {
     ShapeMapDX *map = nullptr;
-    if (m_viewClass & VIEWAXIAL) {
+    if (m_viewClass & DX_VIEWAXIAL) {
         map = &(getDisplayedShapeGraph());
-    } else if (m_viewClass & VIEWDATA) {
+    } else if (m_viewClass & DX_VIEWDATA) {
         map = &(getDisplayedDataMap());
     } else {
         // still to do: allow editing of drawing layers
@@ -561,7 +561,7 @@ bool MetaGraphDX::polyCancel(int shapeRef) {
 
 bool MetaGraphDX::moveSelShape(const Line4f &line) {
     bool shapeMoved = false;
-    if (m_viewClass & VIEWAXIAL) {
+    if (m_viewClass & DX_VIEWAXIAL) {
         auto &map = getDisplayedShapeGraph();
         if (!map.isEditable()) {
             return false;
@@ -574,7 +574,7 @@ bool MetaGraphDX::moveSelShape(const Line4f &line) {
         if (shapeMoved) {
             map.clearSel();
         }
-    } else if (m_viewClass & VIEWDATA) {
+    } else if (m_viewClass & DX_VIEWDATA) {
         auto &map = getDisplayedDataMap();
         if (!map.isEditable()) {
             return false;
@@ -602,7 +602,7 @@ int MetaGraphDX::makeIsovist(Communicator *communicator, const Point2f &p, doubl
     Isovist iso;
 
     if (makeBSPtree(m_bspNodeTree, communicator)) {
-        m_viewClass &= ~VIEWDATA;
+        m_viewClass &= ~DX_VIEWDATA;
         isovistMade = 1;
         iso.makeit(m_bspNodeTree.getRoot(), p, m_metaGraph.region, startangle, endangle);
         size_t shapelayer = 0;
@@ -611,7 +611,7 @@ int MetaGraphDX::makeIsovist(Communicator *communicator, const Point2f &p, doubl
             m_dataMaps.emplace_back("Isovists", ShapeMap::DATAMAP);
             setDisplayedDataMapRef(m_dataMaps.size() - 1);
             shapelayer = m_dataMaps.size() - 1;
-            m_state |= DATAMAPS;
+            m_state |= DX_DATAMAPS;
             isovistMade = 2;
         } else {
             shapelayer = mapRef.value();
@@ -631,7 +631,7 @@ int MetaGraphDX::makeIsovist(Communicator *communicator, const Point2f &p, doubl
         map.getInternalMap().getAllShapes()[polyref].setCentroid(p);
         map.overrideDisplayedAttribute(-2);
         map.setDisplayedAttribute(-1);
-        setViewClass(SHOWSHAPETOP);
+        setViewClass(DX_SHOWSHAPETOP);
         AttributeTable &table = map.getInternalMap().getAttributeTable();
         AttributeRow &row = table.getRow(AttributeKey(polyref));
         IsovistUtils::setIsovistData(iso, table, row);
@@ -660,13 +660,13 @@ int MetaGraphDX::makeIsovistPath(Communicator *communicator, double fov, bool) {
     // must be showing a suitable map -- that is, one which may have polylines or
     // lines
 
-    int viewclass = getViewClass() & VIEWFRONT;
-    if (!(viewclass == VIEWAXIAL || viewclass == VIEWDATA)) {
+    int viewclass = getViewClass() & DX_VIEWFRONT;
+    if (!(viewclass == DX_VIEWAXIAL || viewclass == DX_VIEWDATA)) {
         return 0;
     }
 
     size_t isovistmapref = 0;
-    auto &map = (viewclass == VIEWAXIAL) //
+    auto &map = (viewclass == DX_VIEWAXIAL) //
                     ? getDisplayedShapeGraph()
                     : getDisplayedDataMap();
 
@@ -811,8 +811,8 @@ size_t MetaGraphDX::addShapeGraph(ShapeGraphDX &&shapeGraph) {
     m_shapeGraphs.emplace_back(std::move(shapeGraph));
     auto mapref = m_shapeGraphs.size() - 1;
     setDisplayedShapeGraphRef(mapref);
-    m_state |= SHAPEGRAPHS;
-    setViewClass(SHOWAXIALTOP);
+    m_state |= DX_SHAPEGRAPHS;
+    setViewClass(DX_SHOWAXIALTOP);
     return mapref;
 }
 
@@ -833,39 +833,39 @@ size_t MetaGraphDX::addShapeGraph(const std::string &name, int type) {
 }
 size_t MetaGraphDX::addShapeMap(const std::string &name) {
     m_dataMaps.emplace_back(name, ShapeMap::DATAMAP);
-    m_state |= DATAMAPS;
-    setViewClass(SHOWSHAPETOP);
+    m_state |= DX_DATAMAPS;
+    setViewClass(DX_SHOWSHAPETOP);
     return m_dataMaps.size() - 1;
 }
 void MetaGraphDX::removeDisplayedMap() {
-    switch (m_viewClass & VIEWFRONT) {
-    case VIEWVGA: {
+    switch (m_viewClass & DX_VIEWFRONT) {
+    case DX_VIEWVGA: {
         if (!hasDisplayedPointMap())
             return;
         removePointMap(getDisplayedPointMapRef());
         if (m_pointMaps.empty()) {
-            setViewClass(SHOWHIDEVGA);
-            m_state &= ~POINTMAPS;
+            setViewClass(DX_SHOWHIDEVGA);
+            m_state &= ~DX_POINTMAPS;
         }
         break;
     }
-    case VIEWAXIAL: {
+    case DX_VIEWAXIAL: {
         if (!hasDisplayedShapeGraph())
             return;
         removeShapeGraph(getDisplayedShapeGraphRef());
         if (m_shapeGraphs.empty()) {
-            setViewClass(SHOWHIDEAXIAL);
-            m_state &= ~SHAPEGRAPHS;
+            setViewClass(DX_SHOWHIDEAXIAL);
+            m_state &= ~DX_SHAPEGRAPHS;
         }
         break;
     }
-    case VIEWDATA:
+    case DX_VIEWDATA:
         if (!hasDisplayedDataMap())
             return;
         removeDataMap(getDisplayedDataMapRef());
         if (m_dataMaps.empty()) {
-            setViewClass(SHOWHIDESHAPE);
-            m_state &= ~DATAMAPS;
+            setViewClass(DX_SHOWHIDESHAPE);
+            m_state &= ~DX_DATAMAPS;
         }
         break;
     }
@@ -876,7 +876,7 @@ void MetaGraphDX::removeDisplayedMap() {
 bool MetaGraphDX::convertDrawingToAxial(Communicator *comm, std::string layerName) {
     int oldstate = m_state;
 
-    m_state &= ~SHAPEGRAPHS;
+    m_state &= ~DX_SHAPEGRAPHS;
 
     bool converted = true;
 
@@ -898,8 +898,8 @@ bool MetaGraphDX::convertDrawingToAxial(Communicator *comm, std::string layerNam
     m_state |= oldstate;
 
     if (converted) {
-        m_state |= SHAPEGRAPHS;
-        setViewClass(SHOWAXIALTOP);
+        m_state |= DX_SHAPEGRAPHS;
+        setViewClass(DX_SHOWAXIALTOP);
     }
 
     return converted;
@@ -909,7 +909,7 @@ bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layerName, 
                                      bool pushvalues) {
     int oldstate = m_state;
 
-    m_state &= ~SHAPEGRAPHS;
+    m_state &= ~DX_SHAPEGRAPHS;
 
     bool converted = true;
 
@@ -936,12 +936,12 @@ bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layerName, 
         if (!keeporiginal) {
             removeDataMap(getDisplayedDataMapRef());
             if (m_dataMaps.empty()) {
-                setViewClass(SHOWHIDESHAPE);
-                m_state &= ~DATAMAPS;
+                setViewClass(DX_SHOWHIDESHAPE);
+                m_state &= ~DX_DATAMAPS;
             }
         }
-        m_state |= SHAPEGRAPHS;
-        setViewClass(SHOWAXIALTOP);
+        m_state |= DX_SHAPEGRAPHS;
+        setViewClass(DX_SHOWAXIALTOP);
     }
 
     return converted;
@@ -953,7 +953,7 @@ bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layerName, boo
                                   int shapeMapType, bool copydata) {
     int oldstate = m_state;
 
-    m_state &= ~SHAPEGRAPHS; // and convex maps...
+    m_state &= ~DX_SHAPEGRAPHS; // and convex maps...
 
     bool converted = false;
 
@@ -990,12 +990,12 @@ bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layerName, boo
         if (shapeMapType != ShapeMap::DRAWINGMAP && !keeporiginal) {
             removeDataMap(getDisplayedDataMapRef());
             if (m_dataMaps.empty()) {
-                setViewClass(SHOWHIDESHAPE);
-                m_state &= ~DATAMAPS;
+                setViewClass(DX_SHOWHIDESHAPE);
+                m_state &= ~DX_DATAMAPS;
             }
         }
-        m_state |= SHAPEGRAPHS;
-        setViewClass(SHOWAXIALTOP);
+        m_state |= DX_SHAPEGRAPHS;
+        setViewClass(DX_SHOWAXIALTOP);
     }
 
     return converted;
@@ -1004,7 +1004,7 @@ bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layerName, boo
 bool MetaGraphDX::convertDrawingToSegment(Communicator *comm, std::string layerName) {
     int oldstate = m_state;
 
-    m_state &= ~SHAPEGRAPHS;
+    m_state &= ~DX_SHAPEGRAPHS;
 
     bool converted = true;
 
@@ -1032,8 +1032,8 @@ bool MetaGraphDX::convertDrawingToSegment(Communicator *comm, std::string layerN
     m_state |= oldstate;
 
     if (converted) {
-        m_state |= SHAPEGRAPHS;
-        setViewClass(SHOWAXIALTOP);
+        m_state |= DX_SHAPEGRAPHS;
+        setViewClass(DX_SHOWAXIALTOP);
     }
 
     return converted;
@@ -1043,7 +1043,7 @@ bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layerName
                                        bool pushvalues) {
     int oldstate = m_state;
 
-    m_state &= ~SHAPEGRAPHS;
+    m_state &= ~DX_SHAPEGRAPHS;
 
     bool converted = true;
 
@@ -1068,12 +1068,12 @@ bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layerName
         if (!keeporiginal) {
             removeDataMap(getDisplayedDataMapRef());
             if (m_dataMaps.empty()) {
-                setViewClass(SHOWHIDESHAPE);
-                m_state &= ~DATAMAPS;
+                setViewClass(DX_SHOWHIDESHAPE);
+                m_state &= ~DX_DATAMAPS;
             }
         }
-        m_state |= SHAPEGRAPHS;
-        setViewClass(SHOWAXIALTOP);
+        m_state |= DX_SHAPEGRAPHS;
+        setViewClass(DX_SHOWAXIALTOP);
     }
 
     return converted;
@@ -1085,7 +1085,7 @@ bool MetaGraphDX::convertToData(Communicator *, std::string layerName, bool keep
                                 int shapeMapType, bool copydata) {
     int oldstate = m_state;
 
-    m_state &= ~DATAMAPS;
+    m_state &= ~DX_DATAMAPS;
 
     bool converted = false;
 
@@ -1151,12 +1151,12 @@ bool MetaGraphDX::convertToData(Communicator *, std::string layerName, bool keep
         if (shapeMapType != ShapeMap::DRAWINGMAP && !keeporiginal) {
             removeShapeGraph(getDisplayedShapeGraphRef());
             if (m_shapeGraphs.empty()) {
-                setViewClass(SHOWHIDEAXIAL);
-                m_state &= ~SHAPEGRAPHS;
+                setViewClass(DX_SHOWHIDEAXIAL);
+                m_state &= ~DX_SHAPEGRAPHS;
             }
         }
-        m_state |= DATAMAPS;
-        setViewClass(SHOWSHAPETOP);
+        m_state |= DX_DATAMAPS;
+        setViewClass(DX_SHOWSHAPETOP);
     }
 
     return converted;
@@ -1168,7 +1168,7 @@ bool MetaGraphDX::convertToDrawing(Communicator *, std::string layerName,
 
     int oldstate = m_state;
 
-    m_state &= ~LINEDATA;
+    m_state &= ~DX_LINEDATA;
 
     try {
         const ShapeMapDX *sourcemap;
@@ -1220,7 +1220,7 @@ bool MetaGraphDX::convertToDrawing(Communicator *, std::string layerName,
     m_state |= oldstate;
 
     if (converted) {
-        m_state |= LINEDATA;
+        m_state |= DX_LINEDATA;
     }
 
     return converted;
@@ -1235,7 +1235,7 @@ bool MetaGraphDX::convertAxialToSegment(Communicator *comm, std::string layerNam
     auto axialShapeGraphRef = getDisplayedShapeGraphRef();
 
     int oldstate = m_state;
-    m_state &= ~SHAPEGRAPHS;
+    m_state &= ~DX_SHAPEGRAPHS;
 
     bool converted = true;
 
@@ -1263,8 +1263,8 @@ bool MetaGraphDX::convertAxialToSegment(Communicator *comm, std::string layerNam
         if (!keeporiginal) {
             removeShapeGraph(axialShapeGraphRef);
         }
-        m_state |= SHAPEGRAPHS;
-        setViewClass(SHOWAXIALTOP);
+        m_state |= DX_SHAPEGRAPHS;
+        setViewClass(DX_SHOWAXIALTOP);
     }
 
     return converted;
@@ -1272,7 +1272,7 @@ bool MetaGraphDX::convertAxialToSegment(Communicator *comm, std::string layerNam
 
 int MetaGraphDX::loadMifMap(Communicator *comm, std::istream &miffile, std::istream &midfile) {
     int oldstate = m_state;
-    m_state &= ~DATAMAPS;
+    m_state &= ~DX_DATAMAPS;
 
     int mapLoaded = -1;
 
@@ -1298,8 +1298,8 @@ int MetaGraphDX::loadMifMap(Communicator *comm, std::istream &miffile, std::istr
 
     if (mapLoaded == MINFO_OK ||
         mapLoaded == MINFO_MULTIPLE) { // MINFO_MULTIPLE is simply a warning
-        m_state |= DATAMAPS;
-        setViewClass(SHOWSHAPETOP);
+        m_state |= DX_DATAMAPS;
+        setViewClass(DX_SHOWSHAPETOP);
     }
 
     return mapLoaded;
@@ -1307,9 +1307,9 @@ int MetaGraphDX::loadMifMap(Communicator *comm, std::istream &miffile, std::istr
 
 bool MetaGraphDX::makeAllLineMap(Communicator *communicator, const Point2f &seed) {
     int oldstate = m_state;
-    m_state &= ~SHAPEGRAPHS;   // Clear axial map data flag (stops accidental redraw
-                               // during reload)
-    m_viewClass &= ~VIEWAXIAL; // Also clear the view_class flag
+    m_state &= ~DX_SHAPEGRAPHS;   // Clear axial map data flag (stops accidental redraw
+                                  // during reload)
+    m_viewClass &= ~DX_VIEWAXIAL; // Also clear the view_class flag
 
     bool mapMade = true;
 
@@ -1342,8 +1342,8 @@ bool MetaGraphDX::makeAllLineMap(Communicator *communicator, const Point2f &seed
     m_state = oldstate;
 
     if (mapMade) {
-        m_state |= SHAPEGRAPHS;
-        setViewClass(SHOWAXIALTOP);
+        m_state |= DX_SHAPEGRAPHS;
+        setViewClass(DX_SHOWAXIALTOP);
     }
 
     return mapMade;
@@ -1351,8 +1351,8 @@ bool MetaGraphDX::makeAllLineMap(Communicator *communicator, const Point2f &seed
 
 bool MetaGraphDX::makeFewestLineMap(Communicator *communicator, int replace) {
     int oldstate = m_state;
-    m_state &= ~SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                             // during reload)
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
+                                // during reload)
 
     bool mapMade = true;
 
@@ -1407,8 +1407,8 @@ bool MetaGraphDX::makeFewestLineMap(Communicator *communicator, int replace) {
     m_state = oldstate;
 
     if (mapMade) {
-        m_state |= SHAPEGRAPHS; // note: should originally have at least one axial map
-        setViewClass(SHOWAXIALTOP);
+        m_state |= DX_SHAPEGRAPHS; // note: should originally have at least one axial map
+        setViewClass(DX_SHOWAXIALTOP);
     }
 
     return mapMade;
@@ -1417,8 +1417,8 @@ bool MetaGraphDX::makeFewestLineMap(Communicator *communicator, int replace) {
 bool MetaGraphDX::analyseAxial(Communicator *communicator, Options options,
                                bool forceLegacyColumnOrder) // options copied to keep thread safe
 {
-    m_state &= ~SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                             // during reload)
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
+                                // during reload)
 
     bool analysisCompleted = false;
 
@@ -1445,7 +1445,7 @@ bool MetaGraphDX::analyseAxial(Communicator *communicator, Options options,
         analysisCompleted = false;
     }
 
-    m_state |= SHAPEGRAPHS;
+    m_state |= DX_SHAPEGRAPHS;
 
     return analysisCompleted;
 }
@@ -1454,8 +1454,8 @@ bool MetaGraphDX::analyseSegmentsTulip(
     Communicator *communicator, Options options,
     bool forceLegacyColumnOrder) // <- options copied to keep thread safe
 {
-    m_state &= ~SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                             // during reload)
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
+                                // during reload)
 
     bool analysisCompleted = false;
 
@@ -1482,7 +1482,7 @@ bool MetaGraphDX::analyseSegmentsTulip(
         analysisCompleted = false;
     }
 
-    m_state |= SHAPEGRAPHS;
+    m_state |= DX_SHAPEGRAPHS;
 
     return analysisCompleted;
 }
@@ -1490,8 +1490,8 @@ bool MetaGraphDX::analyseSegmentsTulip(
 bool MetaGraphDX::analyseSegmentsAngular(Communicator *communicator,
                                          Options options) // <- options copied to keep thread safe
 {
-    m_state &= ~SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                             // during reload)
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
+                                // during reload)
 
     bool analysisCompleted = false;
 
@@ -1511,7 +1511,7 @@ bool MetaGraphDX::analyseSegmentsAngular(Communicator *communicator,
         analysisCompleted = false;
     }
 
-    m_state |= SHAPEGRAPHS;
+    m_state |= DX_SHAPEGRAPHS;
 
     return analysisCompleted;
 }
@@ -1520,8 +1520,8 @@ bool MetaGraphDX::analyseTopoMetMultipleRadii(
     Communicator *communicator,
     Options options) // <- options copied to keep thread safe
 {
-    m_state &= ~SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                             // during reload)
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
+                                // during reload)
 
     bool analysisCompleted = true;
 
@@ -1565,7 +1565,7 @@ bool MetaGraphDX::analyseTopoMetMultipleRadii(
         analysisCompleted = false;
     }
 
-    m_state |= SHAPEGRAPHS;
+    m_state |= DX_SHAPEGRAPHS;
 
     return analysisCompleted;
 }
@@ -1573,8 +1573,8 @@ bool MetaGraphDX::analyseTopoMetMultipleRadii(
 bool MetaGraphDX::analyseTopoMet(Communicator *communicator,
                                  Options options) // <- options copied to keep thread safe
 {
-    m_state &= ~SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                             // during reload)
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
+                                // during reload)
 
     bool analysisCompleted = false;
 
@@ -1615,7 +1615,7 @@ bool MetaGraphDX::analyseTopoMet(Communicator *communicator,
         analysisCompleted = false;
     }
 
-    m_state |= SHAPEGRAPHS;
+    m_state |= DX_SHAPEGRAPHS;
 
     return analysisCompleted;
 }
@@ -1624,17 +1624,17 @@ size_t MetaGraphDX::loadLineData(Communicator *communicator, const std::string &
                                  int loadType) {
 
     depthmapX::ImportFileType importFileType = depthmapX::ImportFileType::DXF;
-    if (loadType & DXF) {
+    if (loadType & DX_DXF) {
         importFileType = depthmapX::ImportFileType::DXF;
     }
-    if (loadType & CAT) {
+    if (loadType & DX_CAT) {
         importFileType = depthmapX::ImportFileType::CAT;
-    } else if (loadType & RT1) {
+    } else if (loadType & DX_RT1) {
         importFileType = depthmapX::ImportFileType::RT1;
-    } else if (loadType & NTF) {
+    } else if (loadType & DX_NTF) {
         importFileType = depthmapX::ImportFileType::NTF;
     }
-    return loadLineData(communicator, fileName, importFileType, loadType & REPLACE);
+    return loadLineData(communicator, fileName, importFileType, loadType & DX_REPLACE);
 }
 
 size_t MetaGraphDX::loadLineData(Communicator *communicator, const std::string &fileName,
@@ -1643,7 +1643,7 @@ size_t MetaGraphDX::loadLineData(Communicator *communicator, const std::string &
     // if bsp tree exists
     m_bspNodeTree.destroy();
 
-    m_state &= ~LINEDATA; // Clear line data flag (stops accidental redraw during reload)
+    m_state &= ~DX_LINEDATA; // Clear line data flag (stops accidental redraw during reload)
 
     if (replace) {
         m_drawingFiles.clear();
@@ -1657,7 +1657,7 @@ size_t MetaGraphDX::loadLineData(Communicator *communicator, const std::string &
         fileName, depthmapX::importFile(fstream, communicator, fileName,
                                         depthmapX::ImportType::DRAWINGMAP, importFileType));
 
-    m_state |= LINEDATA;
+    m_state |= DX_LINEDATA;
 
     return newDrawingFile;
 }
@@ -1758,7 +1758,7 @@ bool MetaGraphDX::pushValuesToLayer(int desttype, size_t destlayer, PushValues::
 
     // temporarily turn off everything to prevent redraw during sensitive time:
     int oldstate = m_state;
-    m_state &= ~(DATAMAPS | AXIALLINES | POINTMAPS);
+    m_state &= ~(DX_DATAMAPS | DX_AXIALLINES | DX_POINTMAPS);
 
     AttributeTable &tableIn = getAttributeTable(sourcetype, sourcelayer);
     AttributeTable &tableOut = getAttributeTable(desttype, destlayer);
@@ -1793,17 +1793,17 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
         tableOut.insertOrResetColumn(countColName.value());
     }
 
-    if (colIn.has_value() && desttype == VIEWVGA &&
-        ((sourcetype & VIEWDATA) || (sourcetype & VIEWAXIAL))) {
+    if (colIn.has_value() && desttype == DX_VIEWVGA &&
+        ((sourcetype & DX_VIEWDATA) || (sourcetype & DX_VIEWAXIAL))) {
         auto &sourceMap =
-            sourcetype & VIEWDATA ? m_dataMaps[sourcelayer] : m_shapeGraphs[sourcelayer];
+            sourcetype & DX_VIEWDATA ? m_dataMaps[sourcelayer] : m_shapeGraphs[sourcelayer];
         auto &destMap = m_pointMaps[destlayer];
         auto colInName = sourceMap.getAttributeTable().getColumnName(*colIn);
         auto colOutName = destMap.getAttributeTable().getColumnName(colOut);
         PushValues::shapeToPoint(sourceMap.getInternalMap(), colInName, destMap.getInternalMap(),
                                  colOutName, pushFunc, countColName);
-    } else if (sourcetype & VIEWDATA) {
-        if (desttype == VIEWAXIAL) {
+    } else if (sourcetype & DX_VIEWDATA) {
+        if (desttype == DX_VIEWAXIAL) {
             auto &sourceMap = m_dataMaps[sourcelayer];
             auto &destMap = m_shapeGraphs[destlayer];
             auto colInName =
@@ -1813,7 +1813,7 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
             auto colOutName = destMap.getAttributeTable().getColumnName(colOut);
             PushValues::shapeToAxial(sourceMap.getInternalMap(), colInName,
                                      destMap.getInternalMap(), colOutName, pushFunc);
-        } else if (desttype == VIEWDATA) {
+        } else if (desttype == DX_VIEWDATA) {
             if (sourcelayer == destlayer) {
                 // error: pushing to same map
                 return false;
@@ -1830,8 +1830,8 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
         }
     } else {
 
-        if (sourcetype & VIEWVGA) {
-            if (desttype == VIEWDATA) {
+        if (sourcetype & DX_VIEWVGA) {
+            if (desttype == DX_VIEWDATA) {
                 auto &sourceMap = m_pointMaps[sourcelayer];
                 auto &destMap = m_dataMaps[destlayer];
                 auto colInName =
@@ -1841,7 +1841,7 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
                 auto colOutName = destMap.getAttributeTable().getColumnName(colOut);
                 PushValues::pointToShape(sourceMap.getInternalMap(), colInName,
                                          destMap.getInternalMap(), colOutName, pushFunc);
-            } else if (desttype == VIEWAXIAL) {
+            } else if (desttype == DX_VIEWAXIAL) {
                 auto &sourceMap = m_pointMaps[sourcelayer];
                 auto &destMap = m_shapeGraphs[destlayer];
                 auto colInName =
@@ -1853,8 +1853,8 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
                 PushValues::pointToAxial(sourceMap.getInternalMap(), colInName,
                                          destMap.getInternalMap(), colOutName, pushFunc);
             }
-        } else if (sourcetype & VIEWAXIAL) {
-            if (desttype == VIEWDATA) {
+        } else if (sourcetype & DX_VIEWAXIAL) {
+            if (desttype == DX_VIEWDATA) {
                 auto &sourceMap = m_shapeGraphs[sourcelayer];
                 auto &destMap = m_dataMaps[destlayer];
                 auto colInName =
@@ -1864,7 +1864,7 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
                 auto colOutName = destMap.getAttributeTable().getColumnName(colOut);
                 PushValues::axialToShape(sourceMap.getInternalMap(), colInName,
                                          destMap.getInternalMap(), colOutName, pushFunc);
-            } else if (desttype == VIEWAXIAL) {
+            } else if (desttype == DX_VIEWAXIAL) {
                 auto &sourceMap = m_shapeGraphs[sourcelayer];
                 auto &destMap = m_shapeGraphs[destlayer];
                 auto colInName =
@@ -1879,13 +1879,13 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
     }
 
     // display new data in the relevant layer
-    if (desttype == VIEWVGA) {
+    if (desttype == DX_VIEWVGA) {
         m_pointMaps[destlayer].overrideDisplayedAttribute(-2);
         m_pointMaps[destlayer].setDisplayedAttribute(static_cast<int>(colOut));
-    } else if (desttype == VIEWAXIAL) {
+    } else if (desttype == DX_VIEWAXIAL) {
         m_shapeGraphs[destlayer].overrideDisplayedAttribute(-2);
         m_shapeGraphs[destlayer].setDisplayedAttribute(static_cast<int>(colOut));
-    } else if (desttype == VIEWDATA) {
+    } else if (desttype == DX_VIEWDATA) {
         m_dataMaps[destlayer].overrideDisplayedAttribute(-2);
         m_dataMaps[destlayer].setDisplayedAttribute(static_cast<int>(colOut));
     }
@@ -1908,7 +1908,7 @@ void MetaGraphDX::runAgentEngine(Communicator *comm, std::unique_ptr<IAnalysis> 
     agentAnalysis->run(comm);
 
     if (agentAnalysis->setTooRecordTrails()) {
-        m_state |= DATAMAPS;
+        m_state |= DX_DATAMAPS;
     }
     map.overrideDisplayedAttribute(-2);
     map.setDisplayedAttribute(AgentAnalysis::Column::GATE_COUNTS);
@@ -1927,7 +1927,7 @@ bool MetaGraphDX::analyseThruVision(Communicator *comm, std::optional<size_t> ga
 
     if (gatelayer.has_value()) {
         // switch the reference numbers from the gates layer to the vga layer
-        pushValuesToLayer(VIEWDATA, gatelayer.value(), VIEWVGA, getDisplayedPointMapRef(),
+        pushValuesToLayer(DX_VIEWDATA, gatelayer.value(), DX_VIEWVGA, getDisplayedPointMapRef(),
                           std::nullopt, colgates, PushValues::Func::TOT);
     }
 
@@ -1945,7 +1945,7 @@ bool MetaGraphDX::analyseThruVision(Communicator *comm, std::optional<size_t> ga
     if (analysisCompleted && gatelayer.has_value()) {
         AttributeTable &tableout = m_dataMaps[gatelayer.value()].getAttributeTable();
         auto targetcol = tableout.insertOrResetColumn("Thru Vision Counts");
-        pushValuesToLayer(VIEWVGA, getDisplayedPointMapRef(), VIEWDATA, gatelayer.value(),
+        pushValuesToLayer(DX_VIEWVGA, getDisplayedPointMapRef(), DX_VIEWDATA, gatelayer.value(),
                           colcounts, targetcol, PushValues::Func::TOT);
     }
 
@@ -1960,18 +1960,18 @@ bool MetaGraphDX::analyseThruVision(Communicator *comm, std::optional<size_t> ga
 
 std::optional<size_t> MetaGraphDX::getDisplayedMapRef() const {
     std::optional<size_t> ref = std::nullopt;
-    switch (m_viewClass & VIEWFRONT) {
-    case VIEWVGA:
+    switch (m_viewClass & DX_VIEWFRONT) {
+    case DX_VIEWVGA:
         if (!hasDisplayedPointMap())
             return std::nullopt;
         ref = getDisplayedPointMapRef();
         break;
-    case VIEWAXIAL:
+    case DX_VIEWAXIAL:
         if (!hasDisplayedShapeGraph())
             return std::nullopt;
         ref = getDisplayedShapeGraphRef();
         break;
-    case VIEWDATA:
+    case DX_VIEWDATA:
         if (!hasDisplayedDataMap())
             return std::nullopt;
         ref = getDisplayedDataMapRef();
@@ -1984,26 +1984,26 @@ std::optional<size_t> MetaGraphDX::getDisplayedMapRef() const {
 // and shape graphs can be used in the future
 
 int MetaGraphDX::getDisplayedMapType() {
-    switch (m_viewClass & VIEWFRONT) {
-    case VIEWVGA:
+    switch (m_viewClass & DX_VIEWFRONT) {
+    case DX_VIEWVGA:
         return ShapeMap::POINTMAP;
-    case VIEWAXIAL:
+    case DX_VIEWAXIAL:
         return hasDisplayedShapeGraph() && getDisplayedShapeGraphRef() != static_cast<size_t>(-1)
                    ? getDisplayedShapeGraph().getMapType()
                    : ShapeMap::EMPTYMAP;
-    case VIEWDATA:
+    case DX_VIEWDATA:
         return getDisplayedDataMap().getMapType();
     }
     return ShapeMap::EMPTYMAP;
 }
 
 AttributeTable &MetaGraphDX::getDisplayedMapAttributes() {
-    switch (m_viewClass & VIEWFRONT) {
-    case VIEWVGA:
+    switch (m_viewClass & DX_VIEWFRONT) {
+    case DX_VIEWVGA:
         return getDisplayedPointMap().getAttributeTable();
-    case VIEWAXIAL:
+    case DX_VIEWAXIAL:
         return getDisplayedShapeGraph().getAttributeTable();
-    case VIEWDATA:
+    case DX_VIEWDATA:
         return getDisplayedDataMap().getAttributeTable();
     }
     throw depthmapX::RuntimeException("No map displayed to get attribute table from");
@@ -2023,10 +2023,11 @@ bool MetaGraphDX::hasVisibleDrawingLayers() {
 
 Region4f MetaGraphDX::getBoundingBox() const {
     Region4f bounds = m_metaGraph.region;
-    if (bounds.atZero() && ((getState() & MetaGraphDX::SHAPEGRAPHS) == MetaGraphDX::SHAPEGRAPHS)) {
+    if (bounds.atZero() &&
+        ((getState() & MetaGraphDX::DX_SHAPEGRAPHS) == MetaGraphDX::DX_SHAPEGRAPHS)) {
         bounds = getDisplayedShapeGraph().getRegion();
     }
-    if (bounds.atZero() && ((getState() & MetaGraphDX::DATAMAPS) == MetaGraphDX::DATAMAPS)) {
+    if (bounds.atZero() && ((getState() & MetaGraphDX::DX_DATAMAPS) == MetaGraphDX::DX_DATAMAPS)) {
         bounds = getDisplayedDataMap().getRegion();
     }
     return bounds;
@@ -2035,24 +2036,24 @@ Region4f MetaGraphDX::getBoundingBox() const {
 // note: 0 is not at all editable, 1 is editable off and 2 is editable on
 int MetaGraphDX::isEditable() const {
     int editable = 0;
-    switch (m_viewClass & VIEWFRONT) {
-    case VIEWVGA:
+    switch (m_viewClass & DX_VIEWFRONT) {
+    case DX_VIEWVGA:
         if (getDisplayedPointMap().getInternalMap().isProcessed()) {
-            editable = NOT_EDITABLE;
+            editable = DX_NOT_EDITABLE;
         } else {
-            editable = EDITABLE_ON;
+            editable = DX_EDITABLE_ON;
         }
         break;
-    case VIEWAXIAL: {
+    case DX_VIEWAXIAL: {
         int type = getDisplayedShapeGraph().getInternalMap().getMapType();
         if (type != ShapeMap::SEGMENTMAP && type != ShapeMap::ALLLINEMAP) {
-            editable = getDisplayedShapeGraph().isEditable() ? EDITABLE_ON : EDITABLE_OFF;
+            editable = getDisplayedShapeGraph().isEditable() ? DX_EDITABLE_ON : DX_EDITABLE_OFF;
         } else {
-            editable = NOT_EDITABLE;
+            editable = DX_NOT_EDITABLE;
         }
     } break;
-    case VIEWDATA:
-        editable = getDisplayedDataMap().isEditable() ? EDITABLE_ON : EDITABLE_OFF;
+    case DX_VIEWDATA:
+        editable = getDisplayedDataMap().isEditable() ? DX_EDITABLE_ON : DX_EDITABLE_OFF;
         break;
     }
     return editable;
@@ -2060,14 +2061,14 @@ int MetaGraphDX::isEditable() const {
 
 bool MetaGraphDX::canUndo() const {
     bool canundo = false;
-    switch (m_viewClass & VIEWFRONT) {
-    case VIEWVGA:
+    switch (m_viewClass & DX_VIEWFRONT) {
+    case DX_VIEWVGA:
         canundo = getDisplayedPointMap().getInternalMap().canUndo();
         break;
-    case VIEWAXIAL:
+    case DX_VIEWAXIAL:
         canundo = getDisplayedShapeGraph().getInternalMap().canUndo();
         break;
-    case VIEWDATA:
+    case DX_VIEWDATA:
         canundo = getDisplayedDataMap().getInternalMap().canUndo();
         break;
     }
@@ -2075,14 +2076,14 @@ bool MetaGraphDX::canUndo() const {
 }
 
 void MetaGraphDX::undo() {
-    switch (m_viewClass & VIEWFRONT) {
-    case VIEWVGA:
+    switch (m_viewClass & DX_VIEWFRONT) {
+    case DX_VIEWVGA:
         getDisplayedPointMap().getInternalMap().undoPoints();
         break;
-    case VIEWAXIAL:
+    case DX_VIEWAXIAL:
         getDisplayedShapeGraph().undo();
         break;
-    case VIEWDATA:
+    case DX_VIEWDATA:
         getDisplayedDataMap().undo();
         break;
     }
@@ -2092,14 +2093,14 @@ void MetaGraphDX::undo() {
 
 std::optional<size_t> MetaGraphDX::addAttribute(const std::string &name) {
     std::optional<size_t> col = std::nullopt;
-    switch (m_viewClass & VIEWFRONT) {
-    case VIEWVGA:
+    switch (m_viewClass & DX_VIEWFRONT) {
+    case DX_VIEWVGA:
         col = getDisplayedPointMap().getInternalMap().addAttribute(name);
         break;
-    case VIEWAXIAL:
+    case DX_VIEWAXIAL:
         col = getDisplayedShapeGraph().getInternalMap().addAttribute(name);
         break;
-    case VIEWDATA:
+    case DX_VIEWDATA:
         col = getDisplayedDataMap().getInternalMap().addAttribute(name);
         break;
     }
@@ -2107,14 +2108,14 @@ std::optional<size_t> MetaGraphDX::addAttribute(const std::string &name) {
 }
 
 void MetaGraphDX::removeAttribute(size_t col) {
-    switch (m_viewClass & VIEWFRONT) {
-    case VIEWVGA:
+    switch (m_viewClass & DX_VIEWFRONT) {
+    case DX_VIEWVGA:
         getDisplayedPointMap().getInternalMap().removeAttribute(col);
         break;
-    case VIEWAXIAL:
+    case DX_VIEWAXIAL:
         getDisplayedShapeGraph().getInternalMap().removeAttribute(col);
         break;
-    case VIEWDATA:
+    case DX_VIEWDATA:
         getDisplayedDataMap().getInternalMap().removeAttribute(col);
         break;
     }
@@ -2126,14 +2127,14 @@ bool MetaGraphDX::isAttributeLocked(size_t col) {
 
 int MetaGraphDX::getDisplayedAttribute() const {
     int col = -1;
-    switch (m_viewClass & VIEWFRONT) {
-    case VIEWVGA:
+    switch (m_viewClass & DX_VIEWFRONT) {
+    case DX_VIEWVGA:
         col = getDisplayedPointMap().getDisplayedAttribute();
         break;
-    case VIEWAXIAL:
+    case DX_VIEWAXIAL:
         col = getDisplayedShapeGraph().getDisplayedAttribute();
         break;
-    case VIEWDATA:
+    case DX_VIEWDATA:
         col = getDisplayedDataMap().getDisplayedAttribute();
         break;
     }
@@ -2142,16 +2143,16 @@ int MetaGraphDX::getDisplayedAttribute() const {
 
 // this is coming from the front end, so force override:
 void MetaGraphDX::setDisplayedAttribute(int col) {
-    switch (m_viewClass & VIEWFRONT) {
-    case VIEWVGA:
+    switch (m_viewClass & DX_VIEWFRONT) {
+    case DX_VIEWVGA:
         getDisplayedPointMap().overrideDisplayedAttribute(-2);
         getDisplayedPointMap().setDisplayedAttribute(col);
         break;
-    case VIEWAXIAL:
+    case DX_VIEWAXIAL:
         getDisplayedShapeGraph().overrideDisplayedAttribute(-2);
         getDisplayedShapeGraph().setDisplayedAttribute(col);
         break;
-    case VIEWDATA:
+    case DX_VIEWDATA:
         getDisplayedDataMap().overrideDisplayedAttribute(-2);
         getDisplayedDataMap().setDisplayedAttribute(col);
         break;
@@ -2166,16 +2167,16 @@ AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
     if (!type.has_value()) {
         type = m_viewClass;
     }
-    switch (type.value() & VIEWFRONT) {
-    case VIEWVGA:
+    switch (type.value() & DX_VIEWFRONT) {
+    case DX_VIEWVGA:
         tab = (!layer.has_value()) ? &(getDisplayedPointMap().getAttributeTable())
                                    : &(m_pointMaps[layer.value()].getAttributeTable());
         break;
-    case VIEWAXIAL:
+    case DX_VIEWAXIAL:
         tab = (!layer.has_value()) ? &(getDisplayedShapeGraph().getAttributeTable())
                                    : &(m_shapeGraphs[layer.value()].getAttributeTable());
         break;
-    case VIEWDATA:
+    case DX_VIEWDATA:
         tab = (!layer.has_value()) ? &(getDisplayedDataMap().getAttributeTable())
                                    : &(m_dataMaps[layer.value()].getAttributeTable());
         break;
@@ -2187,18 +2188,18 @@ const AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
                                                      std::optional<size_t> layer) const {
     const AttributeTable *tab = nullptr;
     if (!type.has_value()) {
-        type = m_viewClass & VIEWFRONT;
+        type = m_viewClass & DX_VIEWFRONT;
     }
     switch (type.value()) {
-    case VIEWVGA:
+    case DX_VIEWVGA:
         tab = (!layer.has_value()) ? &(getDisplayedPointMap().getAttributeTable())
                                    : &(m_pointMaps[layer.value()].getAttributeTable());
         break;
-    case VIEWAXIAL:
+    case DX_VIEWAXIAL:
         tab = (!layer.has_value()) ? &(getDisplayedShapeGraph().getAttributeTable())
                                    : &(m_shapeGraphs[layer.value()].getAttributeTable());
         break;
-    case VIEWDATA:
+    case DX_VIEWDATA:
         tab = (!layer.has_value()) ? &(getDisplayedDataMap().getAttributeTable())
                                    : &(m_dataMaps[layer.value()].getAttributeTable());
         break;
@@ -2206,10 +2207,10 @@ const AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
     return *tab;
 }
 
-MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromFile(const std::string &filename) {
+MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromFile(const std::string &filename) {
 
     if (filename.empty()) {
-        return MetaGraphReadWrite::ReadStatus::NOT_A_GRAPH;
+        return MetaGraphReadWrite::ReadWriteStatus::NOT_A_GRAPH;
     }
 
 #ifdef _WIN32
@@ -2222,8 +2223,8 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromFile(const std::string &file
     return result;
 }
 
-MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromStream(std::istream &stream,
-                                                           const std::string &) {
+MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromStream(std::istream &stream,
+                                                                const std::string &) {
     m_state = 0; // <- clear the state out
 
     // clear BSP tree if it exists:
@@ -2231,7 +2232,7 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromStream(std::istream &stream,
 
     try {
         auto mgd = MetaGraphReadWrite::readFromStream(stream);
-        m_readStatus = mgd.readStatus;
+        m_readStatus = mgd.readWriteStatus;
 
         auto &dd = mgd.displayData;
 
@@ -2294,7 +2295,7 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromStream(std::istream &stream,
         m_showText = dd.showText;
         if (!dd.displayedPointMap.has_value() || dd.displayedPointMap == -1) {
             if (!mgd.dataMaps.empty()) {
-                setViewClass(SHOWVGATOP);
+                setViewClass(DX_SHOWVGATOP);
                 m_displayedPointmap = 0;
             } else {
                 m_displayedPointmap = std::nullopt;
@@ -2304,7 +2305,7 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromStream(std::istream &stream,
         }
         if (!dd.displayedDataMap.has_value() || dd.displayedDataMap == -1) {
             if (!mgd.dataMaps.empty()) {
-                setViewClass(SHOWSHAPETOP);
+                setViewClass(DX_SHOWSHAPETOP);
                 m_displayedDatamap = 0;
             } else {
                 m_displayedDatamap = std::nullopt;
@@ -2315,7 +2316,7 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromStream(std::istream &stream,
 
         if (!dd.displayedShapeGraph.has_value() || dd.displayedShapeGraph == -1) {
             if (!mgd.dataMaps.empty()) {
-                setViewClass(SHOWAXIALTOP);
+                setViewClass(DX_SHOWAXIALTOP);
                 m_displayedShapegraph = 0;
             } else {
                 m_displayedShapegraph = std::nullopt;
@@ -2326,11 +2327,11 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::readFromStream(std::istream &stream,
     } catch (MetaGraphReadWrite::MetaGraphReadError &e) {
         std::cerr << "MetaGraph reading failed: " << e.what() << std::endl;
     }
-    return MetaGraphReadWrite::ReadStatus::OK;
+    return MetaGraphReadWrite::ReadWriteStatus::OK;
 }
 
-MetaGraphReadWrite::ReadStatus MetaGraphDX::write(const std::string &filename, int version,
-                                                  bool currentlayer, bool ignoreDisplayData) {
+MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::write(const std::string &filename, int version,
+                                                       bool currentlayer, bool ignoreDisplayData) {
     std::ofstream stream;
 
     int oldstate = m_state;
@@ -2381,15 +2382,15 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::write(const std::string &filename, i
 
         int tempState = 0, tempViewClass = 0;
         if (currentlayer) {
-            if (m_viewClass & VIEWVGA) {
-                tempState = POINTMAPS;
-                tempViewClass = VIEWVGA;
-            } else if (m_viewClass & VIEWAXIAL) {
-                tempState = SHAPEGRAPHS;
-                tempViewClass = VIEWAXIAL;
-            } else if (m_viewClass & VIEWDATA) {
-                tempState = DATAMAPS;
-                tempViewClass = VIEWDATA;
+            if (m_viewClass & DX_VIEWVGA) {
+                tempState = DX_POINTMAPS;
+                tempViewClass = DX_VIEWVGA;
+            } else if (m_viewClass & DX_VIEWAXIAL) {
+                tempState = DX_SHAPEGRAPHS;
+                tempViewClass = DX_VIEWAXIAL;
+            } else if (m_viewClass & DX_VIEWDATA) {
+                tempState = DX_DATAMAPS;
+                tempViewClass = DX_VIEWDATA;
             }
         } else {
             tempState = oldstate;
@@ -2410,7 +2411,7 @@ MetaGraphReadWrite::ReadStatus MetaGraphDX::write(const std::string &filename, i
                                         dataMaps, shapeGraphs, m_allLineMapData);
     }
     m_state = oldstate;
-    return MetaGraphReadWrite::ReadStatus::OK;
+    return MetaGraphReadWrite::ReadWriteStatus::OK;
 }
 
 std::streampos MetaGraphDX::skipVirtualMem(std::istream &stream) {
@@ -2463,10 +2464,10 @@ size_t MetaGraphDX::addNewPointMap(const std::string &name) {
 
 void MetaGraphDX::makeViewportShapes(const Region4f &viewport) const {
     currentLayer = -1;
-    size_t i = m_drawingFiles.size() - 1;
+    size_t di = m_drawingFiles.size() - 1;
     for (auto iter = m_drawingFiles.rbegin(); iter != m_drawingFiles.rend(); iter++) {
         if (isShown(*iter)) {
-            currentLayer = (int)i;
+            currentLayer = (int)di;
 
             iter->groupData.invalidateCurrentLayer();
             for (size_t i = iter->maps.size() - 1; static_cast<int>(i) != -1; i--) {
@@ -2480,7 +2481,7 @@ void MetaGraphDX::makeViewportShapes(const Region4f &viewport) const {
                 }
             }
         }
-        i--;
+        di--;
     }
 }
 

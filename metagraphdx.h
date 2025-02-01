@@ -37,7 +37,7 @@ class Communicator;
 class MetaGraphDX {
     MetaGraph m_metaGraph;
 
-    MetaGraphReadWrite::ReadStatus m_readStatus = MetaGraphReadWrite::ReadStatus::OK;
+    MetaGraphReadWrite::ReadWriteStatus m_readStatus = MetaGraphReadWrite::ReadWriteStatus::OK;
     int m_state;
     int m_viewClass;
     bool m_showGrid;
@@ -81,43 +81,43 @@ class MetaGraphDX {
 
   public:
     enum {
-        SHOWHIDEVGA = 0x0100,
-        SHOWVGATOP = 0x0200,
-        SHOWHIDEAXIAL = 0x0400,
-        SHOWAXIALTOP = 0x0800,
-        SHOWHIDESHAPE = 0x1000,
-        SHOWSHAPETOP = 0x2000
+        DX_SHOWHIDEVGA = 0x0100,
+        DX_SHOWVGATOP = 0x0200,
+        DX_SHOWHIDEAXIAL = 0x0400,
+        DX_SHOWAXIALTOP = 0x0800,
+        DX_SHOWHIDESHAPE = 0x1000,
+        DX_SHOWSHAPETOP = 0x2000
     };
     enum {
-        VIEWNONE = 0x00,
-        VIEWVGA = 0x01,
-        VIEWBACKVGA = 0x02,
-        VIEWAXIAL = 0x04,
-        VIEWBACKAXIAL = 0x08,
-        VIEWDATA = 0x20,
-        VIEWBACKDATA = 0x40,
-        VIEWFRONT = 0x25
+        DX_VIEWNONE = 0x00,
+        DX_VIEWVGA = 0x01,
+        DX_VIEWBACKVGA = 0x02,
+        DX_VIEWAXIAL = 0x04,
+        DX_VIEWBACKAXIAL = 0x08,
+        DX_VIEWDATA = 0x20,
+        DX_VIEWBACKDATA = 0x40,
+        DX_VIEWFRONT = 0x25
     };
     enum {
-        ADD = 0x0001,
-        REPLACE = 0x0002,
-        CAT = 0x0010,
-        DXF = 0x0020,
-        NTF = 0x0040,
-        RT1 = 0x0080,
-        GML = 0x0100
+        DX_ADD = 0x0001,
+        DX_REPLACE = 0x0002,
+        DX_CAT = 0x0010,
+        DX_DXF = 0x0020,
+        DX_NTF = 0x0040,
+        DX_RT1 = 0x0080,
+        DX_GML = 0x0100
     };
     enum {
-        NONE = 0x0000,
-        POINTMAPS = 0x0002,
-        LINEDATA = 0x0004,
-        ANGULARGRAPH = 0x0010,
-        DATAMAPS = 0x0020,
-        AXIALLINES = 0x0040,
-        SHAPEGRAPHS = 0x0100,
-        BUGGY = 0x8000
+        DX_NONE = 0x0000,
+        DX_POINTMAPS = 0x0002,
+        DX_LINEDATA = 0x0004,
+        DX_ANGULARGRAPH = 0x0010,
+        DX_DATAMAPS = 0x0020,
+        DX_AXIALLINES = 0x0040,
+        DX_SHAPEGRAPHS = 0x0100,
+        DX_BUGGY = 0x8000
     };
-    enum { NOT_EDITABLE = 0, EDITABLE_OFF = 1, EDITABLE_ON = 2 };
+    enum { DX_NOT_EDITABLE = 0, DX_EDITABLE_OFF = 1, DX_EDITABLE_ON = 2 };
 
     std::string &getName() { return m_metaGraph.name; }
     const Region4f &getRegion() { return m_metaGraph.region; }
@@ -125,7 +125,7 @@ class MetaGraphDX {
         m_metaGraph.region.bottomLeft = bottomLeft;
         m_metaGraph.region.topRight = topRight;
     }
-    MetaGraphReadWrite::ReadStatus getReadStatus() const { return m_readStatus; };
+    MetaGraphReadWrite::ReadWriteStatus getReadStatus() const { return m_readStatus; };
     bool isShown() const {
         for (auto &drawingFile : m_drawingFiles)
             for (auto &map : drawingFile.maps)
@@ -392,19 +392,22 @@ class MetaGraphDX {
     }
     int getViewClass() { return m_viewClass; }
     // These functions make specifying conditions to do things much easier:
-    bool viewingNone() { return (m_viewClass == VIEWNONE); }
+    bool viewingNone() { return (m_viewClass == DX_VIEWNONE); }
     bool viewingProcessed() {
-        return ((m_viewClass & (VIEWAXIAL | VIEWDATA)) ||
-                (m_viewClass & VIEWVGA && getDisplayedPointMap().getInternalMap().isProcessed()));
+        return (
+            (m_viewClass & (DX_VIEWAXIAL | DX_VIEWDATA)) ||
+            (m_viewClass & DX_VIEWVGA && getDisplayedPointMap().getInternalMap().isProcessed()));
     }
-    bool viewingShapes() { return (m_viewClass & (VIEWAXIAL | VIEWDATA)) != 0; }
-    bool viewingProcessedLines() { return ((m_viewClass & VIEWAXIAL) == VIEWAXIAL); }
-    bool viewingProcessedShapes() { return ((m_viewClass & VIEWDATA) == VIEWDATA); }
+    bool viewingShapes() { return (m_viewClass & (DX_VIEWAXIAL | DX_VIEWDATA)) != 0; }
+    bool viewingProcessedLines() { return ((m_viewClass & DX_VIEWAXIAL) == DX_VIEWAXIAL); }
+    bool viewingProcessedShapes() { return ((m_viewClass & DX_VIEWDATA) == DX_VIEWDATA); }
     bool viewingProcessedPoints() {
-        return ((m_viewClass & VIEWVGA) && getDisplayedPointMap().getInternalMap().isProcessed());
+        return ((m_viewClass & DX_VIEWVGA) &&
+                getDisplayedPointMap().getInternalMap().isProcessed());
     }
     bool viewingUnprocessedPoints() {
-        return ((m_viewClass & VIEWVGA) && !getDisplayedPointMap().getInternalMap().isProcessed());
+        return ((m_viewClass & DX_VIEWVGA) &&
+                !getDisplayedPointMap().getInternalMap().isProcessed());
     }
     //
     bool setViewClass(int command);
@@ -415,29 +418,30 @@ class MetaGraphDX {
     // these are dependent on what the view class is:
     bool isSelected() // does a selection exist
     {
-        if (m_viewClass & VIEWVGA)
+        if (m_viewClass & DX_VIEWVGA)
             return getDisplayedPointMap().isSelected();
-        else if (m_viewClass & VIEWAXIAL)
+        else if (m_viewClass & DX_VIEWAXIAL)
             return getDisplayedShapeGraph().hasSelectedElements();
-        else if (m_viewClass & VIEWDATA)
+        else if (m_viewClass & DX_VIEWDATA)
             return getDisplayedDataMap().hasSelectedElements();
         else
             return false;
     }
     bool setCurSel(Region4f &r, bool add = false) // set current selection
     {
-        if (m_viewClass & VIEWAXIAL)
+        if (m_viewClass & DX_VIEWAXIAL)
             return getDisplayedShapeGraph().setCurSel(r, add);
-        else if (m_viewClass & VIEWDATA)
+        else if (m_viewClass & DX_VIEWDATA)
             return getDisplayedDataMap().setCurSel(r, add);
-        else if (m_viewClass & VIEWVGA)
+        else if (m_viewClass & DX_VIEWVGA)
             return getDisplayedPointMap().setCurSel(r, add);
-        else if (m_state & POINTMAPS && !getDisplayedPointMap()
-                                             .getInternalMap()
-                                             .isProcessed()) // this is a default select application
+        else if (m_state & DX_POINTMAPS &&
+                 !getDisplayedPointMap()
+                      .getInternalMap()
+                      .isProcessed()) // this is a default select application
             return getDisplayedPointMap().setCurSel(r, add);
-        else if (m_state & DATAMAPS) // I'm not sure why this is a possibility, but it appears
-                                     // you might have state & DATAMAPS without VIEWDATA...
+        else if (m_state & DX_DATAMAPS) // I'm not sure why this is a possibility, but it appears
+                                        // you might have state & DATAMAPS without VIEWDATA...
             return getDisplayedDataMap().setCurSel(r, add);
         else
             return false;
@@ -445,66 +449,66 @@ class MetaGraphDX {
     bool clearSel() {
         // really needs a separate clearSel for the datalayers... at the moment this is handled
         // in PointMap
-        if (m_viewClass & VIEWVGA)
+        if (m_viewClass & DX_VIEWVGA)
             return getDisplayedPointMap().clearSel();
-        else if (m_viewClass & VIEWAXIAL)
+        else if (m_viewClass & DX_VIEWAXIAL)
             return getDisplayedShapeGraph().clearSel();
-        else if (m_viewClass & VIEWDATA)
+        else if (m_viewClass & DX_VIEWDATA)
             return getDisplayedDataMap().clearSel();
         else
             return false;
     }
     int getSelCount() {
-        if (m_viewClass & VIEWVGA)
+        if (m_viewClass & DX_VIEWVGA)
             return getDisplayedPointMap().getSelCount();
-        else if (m_viewClass & VIEWAXIAL)
+        else if (m_viewClass & DX_VIEWAXIAL)
             return (int)getDisplayedShapeGraph().getSelCount();
-        else if (m_viewClass & VIEWDATA)
+        else if (m_viewClass & DX_VIEWDATA)
             return (int)getDisplayedDataMap().getSelCount();
         else
             return 0;
     }
     float getSelAvg() {
-        if (m_viewClass & VIEWVGA)
+        if (m_viewClass & DX_VIEWVGA)
             return (float)getDisplayedPointMap().getDisplayedSelectedAvg();
-        else if (m_viewClass & VIEWAXIAL)
+        else if (m_viewClass & DX_VIEWAXIAL)
             return (float)getDisplayedShapeGraph().getDisplayedSelectedAvg();
-        else if (m_viewClass & VIEWDATA)
+        else if (m_viewClass & DX_VIEWDATA)
             return (float)getDisplayedDataMap().getDisplayedSelectedAvg();
         else
             return -1.0f;
     }
     Region4f getSelBounds() {
-        if (m_viewClass & VIEWVGA)
+        if (m_viewClass & DX_VIEWVGA)
             return getDisplayedPointMap().getSelBounds();
-        else if (m_viewClass & VIEWAXIAL)
+        else if (m_viewClass & DX_VIEWAXIAL)
             return getDisplayedShapeGraph().getSelBounds();
-        else if (m_viewClass & VIEWDATA)
+        else if (m_viewClass & DX_VIEWDATA)
             return getDisplayedDataMap().getSelBounds();
         else
             return Region4f();
     }
     // setSelSet expects a set of ref ids:
     void setSelSet(const std::vector<int> &selset, bool add = false) {
-        if (m_viewClass & VIEWVGA && m_state & POINTMAPS)
+        if (m_viewClass & DX_VIEWVGA && m_state & DX_POINTMAPS)
             getDisplayedPointMap().setCurSel(selset, add);
-        else if (m_viewClass & VIEWAXIAL)
+        else if (m_viewClass & DX_VIEWAXIAL)
             getDisplayedShapeGraph().setCurSel(selset, add);
         else // if (m_viewClass & VIEWDATA)
             getDisplayedDataMap().setCurSel(selset, add);
     }
     std::set<int> &getSelSet() {
-        if (m_viewClass & VIEWVGA && m_state & POINTMAPS)
+        if (m_viewClass & DX_VIEWVGA && m_state & DX_POINTMAPS)
             return getDisplayedPointMap().getSelSet();
-        else if (m_viewClass & VIEWAXIAL)
+        else if (m_viewClass & DX_VIEWAXIAL)
             return getDisplayedShapeGraph().getSelSet();
         else // if (m_viewClass & VIEWDATA)
             return getDisplayedDataMap().getSelSet();
     }
     const std::set<int> &getSelSet() const {
-        if (m_viewClass & VIEWVGA && m_state & POINTMAPS)
+        if (m_viewClass & DX_VIEWVGA && m_state & DX_POINTMAPS)
             return getDisplayedPointMap().getSelSet();
-        else if (m_viewClass & VIEWAXIAL)
+        else if (m_viewClass & DX_VIEWAXIAL)
             return getDisplayedShapeGraph().getSelSet();
         else // if (m_viewClass & VIEWDATA)
             return getDisplayedDataMap().getSelSet();
@@ -530,10 +534,11 @@ class MetaGraphDX {
     // properties
   public:
     // likely to use communicator if too slow...
-    MetaGraphReadWrite::ReadStatus readFromFile(const std::string &filename);
-    MetaGraphReadWrite::ReadStatus readFromStream(std::istream &stream, const std::string &);
-    MetaGraphReadWrite::ReadStatus write(const std::string &filename, int version,
-                                         bool currentlayer = false, bool ignoreDisplayData = false);
+    MetaGraphReadWrite::ReadWriteStatus readFromFile(const std::string &filename);
+    MetaGraphReadWrite::ReadWriteStatus readFromStream(std::istream &stream, const std::string &);
+    MetaGraphReadWrite::ReadWriteStatus write(const std::string &filename, int version,
+                                              bool currentlayer = false,
+                                              bool ignoreDisplayData = false);
 
     std::vector<SimpleLine> getVisibleDrawingLines();
 
