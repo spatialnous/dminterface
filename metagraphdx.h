@@ -458,13 +458,13 @@ class MetaGraphDX {
         else
             return false;
     }
-    int getSelCount() {
+    size_t getSelCount() {
         if (m_viewClass & DX_VIEWVGA)
             return getDisplayedPointMap().getSelCount();
         else if (m_viewClass & DX_VIEWAXIAL)
-            return (int)getDisplayedShapeGraph().getSelCount();
+            return getDisplayedShapeGraph().getSelCount();
         else if (m_viewClass & DX_VIEWDATA)
-            return (int)getDisplayedDataMap().getSelCount();
+            return getDisplayedDataMap().getSelCount();
         else
             return 0;
     }

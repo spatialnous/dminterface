@@ -127,7 +127,7 @@ class PointMapDX : public AttributeMapDX {
     std::set<int> &getSelSet() { return m_selectionSet; }
     const std::set<int> &getSelSet() const { return m_selectionSet; }
 
-    int getSelCount() { return (int)m_selectionSet.size(); }
+    size_t getSelCount() { return m_selectionSet.size(); }
     const Region4f &getSelBounds() const { return m_selBounds; }
 
     bool clearPoints() {

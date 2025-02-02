@@ -74,7 +74,7 @@ void ShapeMapDX::clearAll() {
 }
 
 int ShapeMapDX::makePointShape(const Point2f &point, bool tempshape,
-                               const std::map<int, float> &extraAttributes) {
+                               const std::map<size_t, float> &extraAttributes) {
     return makePointShapeWithRef(point, getInternalMap().getNextShapeKey(), tempshape,
                                  extraAttributes);
 }
@@ -157,7 +157,7 @@ void ShapeMapDX::makeViewportShapes(const Region4f &viewport) const {
 }
 
 int ShapeMapDX::makePointShapeWithRef(const Point2f &point, int shapeRef, bool tempshape,
-                                      const std::map<int, float> &extraAttributes) {
+                                      const std::map<size_t, float> &extraAttributes) {
     int newShapeRef =
         getInternalMap().makePointShapeWithRef(point, shapeRef, tempshape, extraAttributes);
     if (!tempshape) {
@@ -167,13 +167,14 @@ int ShapeMapDX::makePointShapeWithRef(const Point2f &point, int shapeRef, bool t
 }
 
 int ShapeMapDX::makeLineShape(const Line4f &line, bool throughUi, bool tempshape,
-                              const std::map<int, float> &extraAttributes) {
+                              const std::map<size_t, float> &extraAttributes) {
     return makeLineShapeWithRef(line, getInternalMap().getNextShapeKey(), throughUi, tempshape,
                                 extraAttributes);
 }
 
 int ShapeMapDX::makeLineShapeWithRef(const Line4f &line, int shapeRef, bool throughUi,
-                                     bool tempshape, const std::map<int, float> &extraAttributes) {
+                                     bool tempshape,
+                                     const std::map<size_t, float> &extraAttributes) {
     // note, map must have editable flag on if we are to make a shape through the
     // user interface:
     if (throughUi && !m_editable) {
@@ -195,13 +196,14 @@ int ShapeMapDX::makeLineShapeWithRef(const Line4f &line, int shapeRef, bool thro
 }
 
 int ShapeMapDX::makePolyShape(const std::vector<Point2f> &points, bool open, bool tempshape,
-                              const std::map<int, float> &extraAttributes) {
+                              const std::map<size_t, float> &extraAttributes) {
     return makePolyShapeWithRef(points, getInternalMap().getNextShapeKey(), open, tempshape,
                                 extraAttributes);
 }
 
 int ShapeMapDX::makePolyShapeWithRef(const std::vector<Point2f> &points, bool open, int shapeRef,
-                                     bool tempshape, const std::map<int, float> &extraAttributes) {
+                                     bool tempshape,
+                                     const std::map<size_t, float> &extraAttributes) {
     int newShapeRef =
         getInternalMap().makePolyShapeWithRef(points, open, shapeRef, tempshape, extraAttributes);
     if (!tempshape) {
@@ -211,7 +213,7 @@ int ShapeMapDX::makePolyShapeWithRef(const std::vector<Point2f> &points, bool op
 }
 
 int ShapeMapDX::makeShape(const SalaShape &poly, int overrideShapeRef,
-                          const std::map<int, float> &extraAttributes) {
+                          const std::map<size_t, float> &extraAttributes) {
     int shapeRef = getInternalMap().makeShape(poly, overrideShapeRef, extraAttributes);
     m_newshape = true;
     return shapeRef;

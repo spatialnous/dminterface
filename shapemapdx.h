@@ -104,22 +104,23 @@ class ShapeMapDX : public AttributeMapDX {
 
     void clearAll();
 
-    int makePointShapeWithRef(const Point2f &point, int shapeRef, bool tempshape = false,
-                              const std::map<int, float> &extraAttributes = std::map<int, float>());
+    int makePointShapeWithRef(
+        const Point2f &point, int shapeRef, bool tempshape = false,
+        const std::map<size_t, float> &extraAttributes = std::map<size_t, float>());
     int makePointShape(const Point2f &point, bool tempshape = false,
-                       const std::map<int, float> &extraAttributes = std::map<int, float>());
-    int makeLineShapeWithRef(const Line4f &line, int shapeRef, bool throughUi = false,
-                             bool tempshape = false,
-                             const std::map<int, float> &extraAttributes = std::map<int, float>());
+                       const std::map<size_t, float> &extraAttributes = std::map<size_t, float>());
+    int makeLineShapeWithRef(
+        const Line4f &line, int shapeRef, bool throughUi = false, bool tempshape = false,
+        const std::map<size_t, float> &extraAttributes = std::map<size_t, float>());
     int makeLineShape(const Line4f &line, bool throughUi = false, bool tempshape = false,
-                      const std::map<int, float> &extraAttributes = std::map<int, float>());
-    int makePolyShapeWithRef(const std::vector<Point2f> &points, bool open, int shapeRef,
-                             bool tempshape = false,
-                             const std::map<int, float> &extraAttributes = std::map<int, float>());
+                      const std::map<size_t, float> &extraAttributes = std::map<size_t, float>());
+    int makePolyShapeWithRef(
+        const std::vector<Point2f> &points, bool open, int shapeRef, bool tempshape = false,
+        const std::map<size_t, float> &extraAttributes = std::map<size_t, float>());
     int makePolyShape(const std::vector<Point2f> &points, bool open, bool tempshape = false,
-                      const std::map<int, float> &extraAttributes = std::map<int, float>());
+                      const std::map<size_t, float> &extraAttributes = std::map<size_t, float>());
     int makeShape(const SalaShape &poly, int overrideShapeRef = -1,
-                  const std::map<int, float> &extraAttributes = std::map<int, float>());
+                  const std::map<size_t, float> &extraAttributes = std::map<size_t, float>());
     int makeShapeFromPointSet(const PointMapDX &pointmap);
 
     bool moveShape(int shaperef, const Line4f &line, bool undoing = false);
