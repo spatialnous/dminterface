@@ -2293,7 +2293,7 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromStream(std::istream &st
         m_viewClass = dd.viewClass;
         m_showGrid = dd.showGrid;
         m_showText = dd.showText;
-        if (!dd.displayedPointMap.has_value() || dd.displayedPointMap == -1) {
+        if (!dd.displayedPointMap.has_value() || static_cast<int>(*dd.displayedPointMap) == -1) {
             if (!mgd.dataMaps.empty()) {
                 setViewClass(DX_SHOWVGATOP);
                 m_displayedPointmap = 0;

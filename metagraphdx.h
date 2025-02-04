@@ -64,9 +64,9 @@ class MetaGraphDX {
     std::vector<ShapeMapDX> m_dataMaps;
     std::vector<ShapeGraphDX> m_shapeGraphs;
     std::vector<PointMapDX> m_pointMaps;
-    std::optional<size_t> m_displayedDatamap = std::nullopt;
-    std::optional<size_t> m_displayedPointmap = std::nullopt;
-    std::optional<size_t> m_displayedShapegraph = std::nullopt;
+    std::optional<unsigned int> m_displayedDatamap = std::nullopt;
+    std::optional<unsigned int> m_displayedPointmap = std::nullopt;
+    std::optional<unsigned int> m_displayedShapegraph = std::nullopt;
 
     BSPNodeTree m_bspNodeTree;
 
@@ -174,7 +174,7 @@ class MetaGraphDX {
     void setDisplayedPointMapRef(size_t map) {
         if (m_displayedPointmap.has_value() && m_displayedPointmap != map)
             getDisplayedPointMap().clearSel();
-        m_displayedPointmap = map;
+        m_displayedPointmap = static_cast<unsigned int>(map);
     }
     size_t getDisplayedPointMapRef() const { return m_displayedPointmap.value(); }
     void redoPointMapBlockLines() // (flags blockedlines, but also flags that you need to rebuild a
