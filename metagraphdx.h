@@ -64,9 +64,10 @@ class MetaGraphDX {
     std::vector<ShapeMapDX> m_dataMaps;
     std::vector<ShapeGraphDX> m_shapeGraphs;
     std::vector<PointMapDX> m_pointMaps;
-    std::optional<unsigned int> m_displayedDatamap = std::nullopt;
-    std::optional<unsigned int> m_displayedPointmap = std::nullopt;
-    std::optional<unsigned int> m_displayedShapegraph = std::nullopt;
+    std::optional<decltype(MetaGraphDX::m_dataMaps)::size_type> m_displayedDatamap = std::nullopt;
+    std::optional<decltype(MetaGraphDX::m_pointMaps)::size_type> m_displayedPointmap = std::nullopt;
+    std::optional<decltype(MetaGraphDX::m_shapeGraphs)::size_type> m_displayedShapegraph =
+        std::nullopt;
 
     BSPNodeTree m_bspNodeTree;
 
@@ -171,12 +172,12 @@ class MetaGraphDX {
     const PointMapDX &getDisplayedPointMap() const {
         return m_pointMaps[m_displayedPointmap.value()];
     }
-    void setDisplayedPointMapRef(size_t map) {
+    void setDisplayedPointMapRef(decltype(MetaGraphDX::m_pointMaps)::size_type map) {
         if (m_displayedPointmap.has_value() && m_displayedPointmap != map)
             getDisplayedPointMap().clearSel();
-        m_displayedPointmap = static_cast<unsigned int>(map);
+        m_displayedPointmap = map;
     }
-    size_t getDisplayedPointMapRef() const { return m_displayedPointmap.value(); }
+    auto getDisplayedPointMapRef() const { return m_displayedPointmap.value(); }
     void redoPointMapBlockLines() // (flags blockedlines, but also flags that you need to rebuild a
                                   // bsp tree if you have one)
     {
@@ -307,7 +308,7 @@ class MetaGraphDX {
     bool hasDisplayedDataMap() const { return m_displayedDatamap.has_value(); }
     ShapeMapDX &getDisplayedDataMap() { return m_dataMaps[m_displayedDatamap.value()]; }
     const ShapeMapDX &getDisplayedDataMap() const { return m_dataMaps[m_displayedDatamap.value()]; }
-    size_t getDisplayedDataMapRef() const { return m_displayedDatamap.value(); }
+    auto getDisplayedDataMapRef() const { return m_displayedDatamap.value(); }
 
     void removeDataMap(size_t i) {
         if (m_displayedDatamap.has_value()) {
@@ -319,7 +320,7 @@ class MetaGraphDX {
         m_dataMaps.erase(std::next(m_dataMaps.begin(), static_cast<int>(i)));
     }
 
-    void setDisplayedDataMapRef(size_t map) {
+    void setDisplayedDataMapRef(decltype(MetaGraphDX::m_dataMaps)::size_type map) {
         if (m_displayedDatamap.has_value() && m_displayedDatamap != map)
             getDisplayedDataMap().clearSel();
         m_displayedDatamap = map;
@@ -342,12 +343,12 @@ class MetaGraphDX {
         return m_shapeGraphs[m_displayedShapegraph.value()];
     }
     void unsetDisplayedShapeGraphRef() { m_displayedShapegraph = std::nullopt; }
-    void setDisplayedShapeGraphRef(size_t map) {
+    void setDisplayedShapeGraphRef(decltype(MetaGraphDX::m_shapeGraphs)::size_type map) {
         if (m_displayedShapegraph.has_value() && m_displayedShapegraph != map)
             getDisplayedShapeGraph().clearSel();
         m_displayedShapegraph = map;
     }
-    size_t getDisplayedShapeGraphRef() const { return m_displayedShapegraph.value(); }
+    auto getDisplayedShapeGraphRef() const { return m_displayedShapegraph.value(); }
 
     void removeShapeGraph(size_t i) {
         if (m_displayedShapegraph.has_value()) {
