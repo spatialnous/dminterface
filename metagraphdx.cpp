@@ -2293,7 +2293,7 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromStream(std::istream &st
         m_viewClass = dd.viewClass;
         m_showGrid = dd.showGrid;
         m_showText = dd.showText;
-        if (!dd.displayedPointMap.has_value() || static_cast<int>(*dd.displayedPointMap) == -1) {
+        if (!dd.displayedPointMap.has_value()) {
             if (!mgd.dataMaps.empty()) {
                 setViewClass(DX_SHOWVGATOP);
                 m_displayedPointmap = 0;
@@ -2303,7 +2303,7 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromStream(std::istream &st
         } else {
             m_displayedPointmap = dd.displayedPointMap;
         }
-        if (!dd.displayedDataMap.has_value() || dd.displayedDataMap == -1) {
+        if (!dd.displayedDataMap.has_value()) {
             if (!mgd.dataMaps.empty()) {
                 setViewClass(DX_SHOWSHAPETOP);
                 m_displayedDatamap = 0;
@@ -2314,7 +2314,7 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromStream(std::istream &st
             m_displayedDatamap = dd.displayedDataMap;
         }
 
-        if (!dd.displayedShapeGraph.has_value() || dd.displayedShapeGraph == -1) {
+        if (!dd.displayedShapeGraph.has_value()) {
             if (!mgd.dataMaps.empty()) {
                 setViewClass(DX_SHOWAXIALTOP);
                 m_displayedShapegraph = 0;
@@ -2403,9 +2403,18 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::write(const std::string &filena
             pointMaps, dataMaps, shapeGraphs, m_allLineMapData,
             // display data
             tempState, tempViewClass, m_showGrid, m_showText, perDrawingMap,
-            static_cast<std::optional<unsigned int>>(m_displayedPointmap), perPointMap,
-            static_cast<std::optional<unsigned int>>(m_displayedDatamap), perDataMap,
-            static_cast<std::optional<unsigned int>>(m_displayedShapegraph), perShapeGraph);
+            m_displayedPointmap.has_value()
+                ? std::make_optional(static_cast<unsigned int>(*m_displayedPointmap))
+                : std::nullopt,
+            perPointMap,
+            m_displayedDatamap.has_value()
+                ? std::make_optional(static_cast<unsigned int>(*m_displayedDatamap))
+                : std::nullopt,
+            perDataMap,
+            m_displayedShapegraph.has_value()
+                ? std::make_optional(static_cast<unsigned int>(*m_displayedShapegraph))
+                : std::nullopt,
+            perShapeGraph);
     } else {
         MetaGraphReadWrite::writeToFile(filename, // MetaGraph Data
                                         version, m_metaGraph.name, m_metaGraph.region,
