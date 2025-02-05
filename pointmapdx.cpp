@@ -294,11 +294,9 @@ PafColor PointMapDX::getPointColor(PixelRef pixelRef) const {
                 return PafColor(0x00777777);
             }
         } else {
-            return PafColor();
+            return PafColor(); // <- note alpha channel set to transparent - will not be drawn
         }
     }
-    return PafColor(); // <- note alpha channel set to transparent - will not be
-                       // drawn
 }
 
 PafColor PointMapDX::getCurrentPointColor() const { return getPointColor(m_cur); }

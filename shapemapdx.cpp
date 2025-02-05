@@ -268,8 +268,7 @@ bool ShapeMapDX::polyCancel(int shapeRef) {
 
 bool ShapeMapDX::removeSelected() {
     // note, map must have editable flag on if we are to remove shape:
-    if (!m_editable) {
-        return false;
+    if (m_editable) {
         // m_selectionSet selection set is in order!
         // (it should be: code currently uses add() throughout)
         for (auto &shapeRef : m_selectionSet) {
