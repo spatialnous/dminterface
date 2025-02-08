@@ -604,7 +604,8 @@ int MetaGraphDX::makeIsovist(Communicator *communicator, const Point2f &p, doubl
     if (makeBSPtree(m_bspNodeTree, communicator)) {
         m_viewClass &= ~DX_VIEWDATA;
         isovistMade = 1;
-        iso.makeit(m_bspNodeTree.getRoot(), p, m_metaGraph.region, startangle, endangle);
+        iso.makeit(m_bspNodeTree.getRoot(), p, m_metaGraph.region, startangle, endangle,
+                   closeIsovistPoly);
         size_t shapelayer = 0;
         auto mapRef = getMapRef(m_dataMaps, "Isovists");
         if (!mapRef.has_value()) {
@@ -620,12 +621,6 @@ int MetaGraphDX::makeIsovist(Communicator *communicator, const Point2f &p, doubl
 
         std::vector<Point2f> polygon = iso.getPolygon();
 
-        if (closeIsovistPoly) {
-            // if the polygon is not closed force it to close
-            if (polygon.front().x != polygon.back().x || polygon.front().y != polygon.back().y) {
-                polygon.push_back(polygon.front());
-            }
-        }
         // false: closed polygon, true: isovist
         int polyref = map.getInternalMap().makePolyShape(polygon, false);
         map.getInternalMap().getAllShapes()[polyref].setCentroid(p);
