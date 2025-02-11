@@ -165,7 +165,7 @@ bool PointMapDX::setCurSel(const std::vector<int> &selset, bool add) {
 
 void PointMapDX::setScreenPixel(double unit) {
     if (unit / getInternalMap().getSpacing() > 1) {
-        m_drawStep = int(unit / getInternalMap().getSpacing());
+        m_drawStep = static_cast<int>(unit / getInternalMap().getSpacing());
     } else {
         m_drawStep = 1;
     }

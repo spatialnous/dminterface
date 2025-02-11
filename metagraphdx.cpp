@@ -818,7 +818,8 @@ size_t MetaGraphDX::addShapeGraph(ShapeGraph &&shapeGraph) {
 size_t MetaGraphDX::addShapeGraph(const std::string &name, int type) {
     auto mapref = addShapeGraph(ShapeGraphDX(std::make_unique<ShapeGraph>(name, type)));
     // add a couple of default columns:
-    AttributeTable &table = m_shapeGraphs[size_t(mapref)].getInternalMap().getAttributeTable();
+    AttributeTable &table =
+        m_shapeGraphs[static_cast<size_t>(mapref)].getInternalMap().getAttributeTable();
     auto connIdx = table.insertOrResetLockedColumn(ShapeGraph::Column::CONNECTIVITY);
     if ((type & ShapeMap::LINEMAP) != 0) {
         table.insertOrResetLockedColumn(ShapeGraph::Column::LINE_LENGTH);
@@ -1106,7 +1107,8 @@ bool MetaGraphDX::convertToData(Communicator *, std::string layerName, bool keep
                 auto refShapes = pixel.first.get().getAllShapes();
                 for (const auto &refShape : refShapes) {
                     int key = destmap.makeShape(refShape.second);
-                    table.getRow(AttributeKey(key)).setValue(layercol, float(pixel.second + 1));
+                    table.getRow(AttributeKey(key))
+                        .setValue(layercol, static_cast<float>(pixel.second + 1));
                     count++;
                 }
             }
@@ -1379,7 +1381,7 @@ bool MetaGraphDX::makeFewestLineMap(Communicator *communicator, int replace) {
             for (size_t i = 0; i < m_shapeGraphs.size(); i++) {
                 if (m_shapeGraphs[i].getName() == "Fewest-Line Map (Subsets)" ||
                     m_shapeGraphs[i].getName() == "Fewest Line Map (Subsets)") {
-                    index = int(i);
+                    index = static_cast<int>(i);
                 }
             }
 
