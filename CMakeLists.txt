@@ -9,11 +9,11 @@ target_sources(${dxproject}
         shapemapdx.cpp
         shapegraphdx.cpp
     PUBLIC
-        metagraphdx.h
-        pointmapdx.h
-        shapemapdx.h
-        shapegraphdx.h
-        shapemapgroupdatadx.h
-        attributemapdx.h
+        metagraphdx.hpp
+        pointmapdx.hpp
+        shapemapdx.hpp
+        shapegraphdx.hpp
+        shapemapgroupdatadx.hpp
+        attributemapdx.hpp
 )
 

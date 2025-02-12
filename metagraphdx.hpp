@@ -7,21 +7,21 @@
 #pragma once
 
 // Interface: the meta graph loads and holds all sorts of arbitrary data...
-#include "options.h"
-#include "pointmapdx.h"
-#include "shapegraphdx.h"
-#include "shapemapdx.h"
-#include "shapemapgroupdatadx.h"
+#include "options.hpp"
+#include "pointmapdx.hpp"
+#include "shapegraphdx.hpp"
+#include "shapemapdx.hpp"
+#include "shapemapgroupdatadx.hpp"
 
-#include "salalib/bspnodetree.h"
-#include "salalib/connector.h"
-#include "salalib/ianalysis.h"
-#include "salalib/importtypedefs.h"
-#include "salalib/isovist.h"
-#include "salalib/metagraph.h"
-#include "salalib/metagraphreadwrite.h"
-#include "salalib/pushvalues.h"
-#include "salalib/spacepix.h"
+#include "salalib/bspnodetree.hpp"
+#include "salalib/connector.hpp"
+#include "salalib/ianalysis.hpp"
+#include "salalib/importtypedefs.hpp"
+#include "salalib/isovist.hpp"
+#include "salalib/metagraph.hpp"
+#include "salalib/metagraphreadwrite.hpp"
+#include "salalib/pushvalues.hpp"
+#include "salalib/spacepix.hpp"
 
 #include <memory>
 #include <mutex>

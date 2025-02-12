@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "salalib/shapemapgroupdata.h"
+#include "salalib/shapemapgroupdata.hpp"
 
 #include <deque>
 #include <string>

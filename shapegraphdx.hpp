@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include "shapemapdx.h"
+#include "shapemapdx.hpp"
 
-#include "salalib/shapegraph.h"
+#include "salalib/shapegraph.hpp"
 
 class ShapeGraphDX : public ShapeMapDX {
 

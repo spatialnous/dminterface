@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include "attributemapdx.h"
+#include "attributemapdx.hpp"
 
-#include "salalib/pointmap.h"
+#include "salalib/pointmap.hpp"
 
 class PointMapDX : public AttributeMapDX {
 

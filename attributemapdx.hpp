@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "salalib/attributemap.h"
+#include "salalib/attributemap.hpp"
 
 class AttributeMapDX {
 

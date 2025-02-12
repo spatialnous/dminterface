@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "salalib/analysistype.h"
-#include "salalib/radiustype.h"
+#include "salalib/analysistype.hpp"
+#include "salalib/radiustype.hpp"
 
 #include <set>
 #include <string>

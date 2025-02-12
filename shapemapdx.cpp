@@ -4,8 +4,8 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "shapemapdx.h"
-#include "salalib/tolerances.h"
+#include "shapemapdx.hpp"
+#include "salalib/tolerances.hpp"
 #include <numeric>
 
 void ShapeMapDX::init(size_t size, const Region4f &r) {

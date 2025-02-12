@@ -4,7 +4,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "shapegraphdx.h"
+#include "shapegraphdx.hpp"
 
 void ShapeGraphDX::makeConnections(const KeyVertices &keyvertices) {
     getInternalMap().makeConnections(keyvertices);
