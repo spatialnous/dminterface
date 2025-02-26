@@ -1362,7 +1362,7 @@ bool MetaGraphDX::makeFewestLineMap(Communicator *communicator, int replace) {
         auto &alllinemap = m_shapeGraphs[m_allLineMapData->index];
 
         auto [fewestlinemap_subsets, fewestlinemap_minimal] = AllLine::extractFewestLineMaps(
-            communicator, alllinemap.getInternalMap(), *m_allLineMapData);
+            communicator, alllinemap.getInternalMap(), *m_allLineMapData, 0);
 
         if (replace != 0) {
             std::optional<size_t> index = std::nullopt;
