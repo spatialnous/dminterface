@@ -2483,7 +2483,7 @@ void MetaGraphDX::makeViewportShapes(const Region4f &viewport) const {
                     if (!iter->maps[i].isValid()) {
                         continue;
                     }
-                    iter->groupData.setCurrentLayer(static_cast<int>(i));
+                    iter->groupData.setCurrentLayer(i);
                     iter->maps[i].makeViewportShapes(
                         (viewport.atZero() ? m_metaGraph.region : viewport));
                 }
@@ -2497,14 +2497,15 @@ bool MetaGraphDX::findNextShape(const ShapeMapGroup &spf, bool &nextlayer) const
     if (!spf.groupData.hasCurrentLayer())
         return false;
 
-    while (
-        spf.maps[static_cast<size_t>(spf.groupData.getCurrentLayer())].valid() &&
-        !spf.maps[static_cast<size_t>(spf.groupData.getCurrentLayer())].findNextShape(nextlayer)) {
-        spf.groupData.setCurrentLayer(spf.groupData.getCurrentLayer() + 1);
-        while (spf.groupData.getCurrentLayer() < (int)spf.maps.size() &&
-               !spf.maps[static_cast<size_t>(spf.groupData.getCurrentLayer())].isShown())
-            spf.groupData.setCurrentLayer(spf.groupData.getCurrentLayer() + 1);
-        if (spf.groupData.getCurrentLayer() == static_cast<int>(spf.maps.size())) {
+    while (spf.groupData.getCurrentLayer().has_value() &&
+           spf.maps[spf.groupData.getCurrentLayer().value()].valid() &&
+           !spf.maps[spf.groupData.getCurrentLayer().value()].findNextShape(nextlayer)) {
+        spf.groupData.setCurrentLayer(spf.groupData.getCurrentLayer().value() + 1);
+        while (spf.groupData.getCurrentLayer().has_value() &&
+               spf.groupData.getCurrentLayer().value() < spf.maps.size() &&
+               !spf.maps[spf.groupData.getCurrentLayer().value()].isShown())
+            spf.groupData.setCurrentLayer(spf.groupData.getCurrentLayer().value() + 1);
+        if (spf.groupData.getCurrentLayer().value() == spf.maps.size()) {
             spf.groupData.invalidateCurrentLayer();
             return false;
         }
@@ -2513,14 +2514,14 @@ bool MetaGraphDX::findNextShape(const ShapeMapGroup &spf, bool &nextlayer) const
 }
 
 bool MetaGraphDX::findNextShape(bool &nextlayer) const {
-    if (currentLayer == -1)
+    if (!currentLayer.has_value())
         return false;
-    while (!findNextShape(m_drawingFiles[static_cast<size_t>(currentLayer)], nextlayer)) {
-        while (++currentLayer < (int)m_drawingFiles.size() &&
-               !isShown(m_drawingFiles[static_cast<size_t>(currentLayer)]))
+    while (!findNextShape(m_drawingFiles[currentLayer.value()], nextlayer)) {
+        while (++(*currentLayer) < m_drawingFiles.size() &&
+               !isShown(m_drawingFiles[currentLayer.value()]))
             ;
-        if (currentLayer == static_cast<int>(m_drawingFiles.size())) {
-            currentLayer = -1;
+        if (currentLayer == m_drawingFiles.size()) {
+            currentLayer = std::nullopt;
             return false;
         }
     }

@@ -39,11 +39,9 @@ class ShapeMapGroupDataDX {
     const ShapeMapGroupData &getInternalData() const { return m_mapGroupData; }
 
     bool hasCurrentLayer() const { return m_currentLayer.has_value(); }
-    int getCurrentLayer() const {
-        return m_currentLayer.has_value() ? static_cast<int>(*m_currentLayer) : -1;
-    }
+    std::optional<size_t> getCurrentLayer() const { return m_currentLayer; }
     void invalidateCurrentLayer() const { m_currentLayer = std::nullopt; }
-    void setCurrentLayer(int currentLayer) const { m_currentLayer = currentLayer; }
+    void setCurrentLayer(size_t currentLayer) const { m_currentLayer = currentLayer; }
 
   public:
     bool read(std::istream &stream);

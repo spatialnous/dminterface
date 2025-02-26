@@ -153,12 +153,19 @@ class MetaGraphDX {
     bool findNextShape(const ShapeMapGroup &spf, bool &nextlayer) const;
     bool findNextShape(bool &nextlayer) const;
     const SalaShape &getNextShape() const {
-        auto &currentDrawingFile = m_drawingFiles[static_cast<size_t>(currentLayer)];
-        return currentDrawingFile
-            .maps[static_cast<size_t>(currentDrawingFile.groupData.getCurrentLayer())]
+        if (!currentLayer.has_value()) {
+            throw new depthmapX::RuntimeException("No current layer selected");
+        }
+        auto &currentDrawingFile = m_drawingFiles[currentLayer.value()];
+        if (!currentDrawingFile.groupData.getCurrentLayer().has_value()) {
+            throw new depthmapX::RuntimeException("Current drawing file (" +
+                                                  currentDrawingFile.groupData.getName() +
+                                                  ") has no layer to match to a map");
+        }
+        return currentDrawingFile.maps[currentDrawingFile.groupData.getCurrentLayer().value()]
             .getNextShape();
     }
-    mutable int currentLayer;
+    mutable std::optional<size_t> currentLayer;
 
   public:
     int getVersion() {
