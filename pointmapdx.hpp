@@ -202,7 +202,7 @@ class PointMapDX : public AttributeMapDX {
     }
 
     // Simple wrappers
-    auto getName() { return getInternalMap().getName(); }
+    const auto &getName() { return getInternalMap().getName(); }
     auto getSpacing() const { return getInternalMap().getSpacing(); }
     auto getCols() const { return getInternalMap().getCols(); }
     auto getRows() const { return getInternalMap().getRows(); }

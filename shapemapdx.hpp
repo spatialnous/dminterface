@@ -211,7 +211,7 @@ class ShapeMapDX : public AttributeMapDX {
     auto getAllPolygonsWithColour() {
         return getInternalMap().getAllPolygonsWithColour(m_selectionSet);
     }
-    auto getAllShapes() const { return getInternalMap().getAllShapes(); }
+    const auto &getAllShapes() const { return getInternalMap().getAllShapes(); }
     auto linkShapesFromRefs(int ref1, int ref2) {
         return getInternalMap().linkShapesFromRefs(ref1, ref2);
     };

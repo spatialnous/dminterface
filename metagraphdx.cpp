@@ -1795,19 +1795,19 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
         auto &sourceMap =
             sourcetype & DX_VIEWDATA ? m_dataMaps[sourcelayer] : m_shapeGraphs[sourcelayer];
         auto &destMap = m_pointMaps[destlayer];
-        auto colInName = sourceMap.getAttributeTable().getColumnName(*colIn);
-        auto colOutName = destMap.getAttributeTable().getColumnName(colOut);
+        const auto &colInName = sourceMap.getAttributeTable().getColumnName(*colIn);
+        const auto &colOutName = destMap.getAttributeTable().getColumnName(colOut);
         PushValues::shapeToPoint(sourceMap.getInternalMap(), colInName, destMap.getInternalMap(),
                                  colOutName, pushFunc, countColName);
     } else if (sourcetype & DX_VIEWDATA) {
         if (desttype == DX_VIEWAXIAL) {
             auto &sourceMap = m_dataMaps[sourcelayer];
             auto &destMap = m_shapeGraphs[destlayer];
-            auto colInName =
+            const auto colInName =
                 colIn.has_value()
                     ? std::make_optional(sourceMap.getAttributeTable().getColumnName(*colIn))
                     : std::nullopt;
-            auto colOutName = destMap.getAttributeTable().getColumnName(colOut);
+            const auto &colOutName = destMap.getAttributeTable().getColumnName(colOut);
             PushValues::shapeToAxial(sourceMap.getInternalMap(), colInName,
                                      destMap.getInternalMap(), colOutName, pushFunc);
         } else if (desttype == DX_VIEWDATA) {
@@ -1817,11 +1817,11 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
             }
             auto &sourceMap = m_dataMaps[sourcelayer];
             auto &destMap = m_dataMaps[destlayer];
-            auto colInName =
+            const auto colInName =
                 colIn.has_value()
                     ? std::make_optional(sourceMap.getAttributeTable().getColumnName(*colIn))
                     : std::nullopt;
-            auto colOutName = destMap.getAttributeTable().getColumnName(colOut);
+            const auto &colOutName = destMap.getAttributeTable().getColumnName(colOut);
             PushValues::shapeToShape(sourceMap.getInternalMap(), colInName,
                                      destMap.getInternalMap(), colOutName, pushFunc);
         }
@@ -1831,22 +1831,22 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
             if (desttype == DX_VIEWDATA) {
                 auto &sourceMap = m_pointMaps[sourcelayer];
                 auto &destMap = m_dataMaps[destlayer];
-                auto colInName =
+                const auto colInName =
                     colIn.has_value()
                         ? std::make_optional(sourceMap.getAttributeTable().getColumnName(*colIn))
                         : std::nullopt;
-                auto colOutName = destMap.getAttributeTable().getColumnName(colOut);
+                const auto &colOutName = destMap.getAttributeTable().getColumnName(colOut);
                 PushValues::pointToShape(sourceMap.getInternalMap(), colInName,
                                          destMap.getInternalMap(), colOutName, pushFunc);
             } else if (desttype == DX_VIEWAXIAL) {
                 auto &sourceMap = m_pointMaps[sourcelayer];
                 auto &destMap = m_shapeGraphs[destlayer];
-                auto colInName =
+                const auto colInName =
                     colIn.has_value()
                         ? std::make_optional(sourceMap.getAttributeTable().getColumnName(*colIn))
                         : std::nullopt;
 
-                auto colOutName = destMap.getAttributeTable().getColumnName(colOut);
+                const auto &colOutName = destMap.getAttributeTable().getColumnName(colOut);
                 PushValues::pointToAxial(sourceMap.getInternalMap(), colInName,
                                          destMap.getInternalMap(), colOutName, pushFunc);
             }
@@ -1854,21 +1854,21 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
             if (desttype == DX_VIEWDATA) {
                 auto &sourceMap = m_shapeGraphs[sourcelayer];
                 auto &destMap = m_dataMaps[destlayer];
-                auto colInName =
+                const auto colInName =
                     colIn.has_value()
                         ? std::make_optional(sourceMap.getAttributeTable().getColumnName(*colIn))
                         : std::nullopt;
-                auto colOutName = destMap.getAttributeTable().getColumnName(colOut);
+                const auto &colOutName = destMap.getAttributeTable().getColumnName(colOut);
                 PushValues::axialToShape(sourceMap.getInternalMap(), colInName,
                                          destMap.getInternalMap(), colOutName, pushFunc);
             } else if (desttype == DX_VIEWAXIAL) {
                 auto &sourceMap = m_shapeGraphs[sourcelayer];
                 auto &destMap = m_shapeGraphs[destlayer];
-                auto colInName =
+                const auto colInName =
                     colIn.has_value()
                         ? std::make_optional(sourceMap.getAttributeTable().getColumnName(*colIn))
                         : std::nullopt;
-                auto colOutName = destMap.getAttributeTable().getColumnName(colOut);
+                const auto &colOutName = destMap.getAttributeTable().getColumnName(colOut);
                 PushValues::axialToAxial(sourceMap.getInternalMap(), colInName,
                                          destMap.getInternalMap(), colOutName, pushFunc);
             }
