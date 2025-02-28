@@ -8,6 +8,7 @@ target_sources(${dxproject}
         pointmapdx.cpp
         shapemapdx.cpp
         shapegraphdx.cpp
+        options.hpp
     PUBLIC
         metagraphdx.hpp
         pointmapdx.hpp

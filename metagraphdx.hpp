@@ -74,9 +74,10 @@ class MetaGraphDX {
   public:
     MetaGraphDX(std::string name = "");
     MetaGraphDX(MetaGraphDX &&other)
-        : m_drawingFiles(std::move(other.m_drawingFiles)), m_dataMaps(std::move(other.m_dataMaps)),
-          m_shapeGraphs(std::move(other.m_shapeGraphs)), m_pointMaps(std::move(other.m_pointMaps)) {
-    }
+        : m_state(), m_viewClass(), m_showGrid(), m_showText(),
+          m_drawingFiles(std::move(other.m_drawingFiles)), m_dataMaps(std::move(other.m_dataMaps)),
+          m_shapeGraphs(std::move(other.m_shapeGraphs)), m_pointMaps(std::move(other.m_pointMaps)),
+          currentLayer(std::nullopt) {}
     MetaGraphDX &operator=(MetaGraphDX &&other) = default;
     ~MetaGraphDX(){};
 

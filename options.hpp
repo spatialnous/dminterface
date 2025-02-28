@@ -43,7 +43,8 @@ struct Options {
     // default values
     Options()
         : outputType(AnalysisType::ISOVIST), local(0), global(1), cliques(0), choice(false),
-          fulloutput(false), radiusType(RadiusType::TOPOLOGICAL), radius(-1),
+          fulloutput(false), radiusType(RadiusType::TOPOLOGICAL), radius(-1), radiusSet(),
           pointDepthSelection(0), tulipBins(1024), processInMemory(false), selOnly(false),
-          gatesOnly(false), gatelayer(-1), weightedMeasureCol(-1) {}
+          gatesOnly(false), gatelayer(-1), weightedMeasureCol(-1), weightedMeasureCol2(-1),
+          routeweightCol(-1), outputFile() {}
 };

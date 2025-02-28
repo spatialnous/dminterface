@@ -42,7 +42,8 @@
 #include <tuple>
 
 MetaGraphDX::MetaGraphDX(std::string name)
-    : m_state(0), m_viewClass(DX_VIEWNONE), m_showGrid(false), m_showText(false) {
+    : m_state(0), m_viewClass(DX_VIEWNONE), m_showGrid(false), m_showText(false),
+      currentLayer(std::nullopt) {
     m_metaGraph.name = name;
     m_metaGraph.version = -1; // <- if unsaved, file version is -1
 
