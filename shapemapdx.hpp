@@ -137,8 +137,6 @@ class ShapeMapDX : public AttributeMapDX {
     void makeShapeConnections();
 
     double getLocationValue(const Point2f &point) const;
-    bool findNextShape(bool &nextlayer) const;
-    const SalaShape &getNextShape() const;
     const PafColor getShapeColor() const;
     bool getShapeSelected() const;
 
@@ -175,8 +173,6 @@ class ShapeMapDX : public AttributeMapDX {
     getAllPointsWithColour(const std::set<int> &selSet);
 
     std::vector<Point2f> getAllUnlinkPoints();
-
-    void makeViewportShapes(const Region4f &viewport) const;
 
     auto getShapeCount() { return getInternalMap().getShapeCount(); }
     auto getSpacing() const { return getInternalMap().getSpacing(); }
