@@ -728,8 +728,13 @@ int MetaGraphDX::makeIsovistPath(Communicator *communicator, double fov, bool) {
                                    angles.second);
                         int polyref =
                             isovists->getInternalMap().makePolyShape(iso.getPolygon(), false);
-                        isovists->getInternalMap().getAllShapes().find(polyref)->second.setCentroid(
-                            start);
+                        auto newPolyIter = isovists->getInternalMap().getAllShapes().find(polyref);
+                        if (newPolyIter == isovists->getInternalMap().getAllShapes().end()) {
+                            throw depthmapX::RuntimeException("Failed to create shape (" +
+                                                              std::to_string(polyref) +
+                                                              ") when making isovist path");
+                        }
+                        newPolyIter->second.setCentroid(start);
                         AttributeTable &table = isovists->getInternalMap().getAttributeTable();
                         AttributeRow &row = table.getRow(AttributeKey(polyref));
                         IsovistUtils::setIsovistData(iso, table, row);
