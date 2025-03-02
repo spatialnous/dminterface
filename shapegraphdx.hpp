@@ -15,7 +15,7 @@
 class ShapeGraphDX : public ShapeMapDX {
 
   public:
-    ShapeGraphDX(std::unique_ptr<ShapeGraph> &&map) : ShapeMapDX(std::move(map)){};
+    ShapeGraphDX(std::unique_ptr<ShapeGraph> &&map) : ShapeMapDX(std::move(map)) {}
 
     ShapeGraph &getInternalMap() override { return *static_cast<ShapeGraph *>(m_map.get()); }
     const ShapeGraph &getInternalMap() const override {

@@ -48,15 +48,13 @@ class ShapeMapDX : public AttributeMapDX {
   public: // ctor
     ShapeMapDX(std::unique_ptr<ShapeMap> &&map)
         : AttributeMapDX(std::move(map)), m_show(true), m_editable(false), m_showLines(true),
-          m_showFill(true), m_showCentroids(false), m_displayedAttribute(-1),
-          m_invalidate(false){
-              // -1 is the shape ref column (which will be shown by default)
+          m_showFill(true), m_showCentroids(false), m_displayedAttribute(-1), m_invalidate(false) {
+        // -1 is the shape ref column (which will be shown by default)
 
-              // for polygons:
+        // for polygons:
 
-              // note show is
-
-          };
+        // note show is
+    }
     ShapeMapDX(const std::string &name, int type)
         : ShapeMapDX(std::make_unique<ShapeMap>(name, type)) {}
 
@@ -210,10 +208,10 @@ class ShapeMapDX : public AttributeMapDX {
     const auto &getAllShapes() const { return getInternalMap().getAllShapes(); }
     auto linkShapesFromRefs(int ref1, int ref2) {
         return getInternalMap().linkShapesFromRefs(ref1, ref2);
-    };
+    }
     auto unlinkShapesFromRefs(int ref1, int ref2) {
         return getInternalMap().unlinkShapesFromRefs(ref1, ref2);
-    };
+    }
     auto getShapesInRegion(const Region4f &r) const {
         return getInternalMap().getShapesInRegion(r);
     }

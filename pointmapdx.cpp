@@ -252,14 +252,14 @@ Line4f PointMapDX::getNextPointCol() const {
 }
 
 bool PointMapDX::findNextMergeLine() const {
-    if (m_curmergeline < (int)getInternalMap().getMergeLines().size()) {
+    if (m_curmergeline < static_cast<int>(getInternalMap().getMergeLines().size())) {
         m_curmergeline++;
     }
-    return (m_curmergeline < (int)getInternalMap().getMergeLines().size());
+    return (m_curmergeline < static_cast<int>(getInternalMap().getMergeLines().size()));
 }
 
 Line4f PointMapDX::getNextMergeLine() const {
-    if (m_curmergeline < (int)getInternalMap().getMergeLines().size()) {
+    if (m_curmergeline < static_cast<int>(getInternalMap().getMergeLines().size())) {
         return Line4f(
             depixelate(getInternalMap().getMergeLines()[static_cast<size_t>(m_curmergeline)].a),
             depixelate(getInternalMap().getMergeLines()[static_cast<size_t>(m_curmergeline)].b));

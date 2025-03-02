@@ -51,11 +51,10 @@ class PointMapDX : public AttributeMapDX {
     PointMapDX(std::unique_ptr<PointMap> &&map)
         : AttributeMapDX(std::move(map)), m_selection(NO_SELECTION), m_pinnedSelection(false),
           m_sBl(NoPixel), m_sTr(NoPixel), m_curmergeline(-1), m_viewingDeprecated(-1),
-          m_drawStep(1), m_displayedAttribute(-2){
-                             // -2 follows axial map convention, where -1 is the reference number
-                             // screen
-
-                         };
+          m_drawStep(1), m_displayedAttribute(-2) {
+        // -2 follows axial map convention, where -1 is the reference number
+        // screen
+    }
     ~PointMapDX() override {}
     PointMapDX() = delete;
     PointMapDX(const PointMapDX &other) = delete;

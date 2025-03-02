@@ -79,7 +79,7 @@ class MetaGraphDX {
           m_shapeGraphs(std::move(other.m_shapeGraphs)), m_pointMaps(std::move(other.m_pointMaps)),
           currentLayer(std::nullopt) {}
     MetaGraphDX &operator=(MetaGraphDX &&other) = default;
-    ~MetaGraphDX(){};
+    ~MetaGraphDX() {}
 
   public:
     enum {
@@ -127,7 +127,7 @@ class MetaGraphDX {
         m_metaGraph.region.bottomLeft = bottomLeft;
         m_metaGraph.region.topRight = topRight;
     }
-    MetaGraphReadWrite::ReadWriteStatus getReadStatus() const { return m_readStatus; };
+    MetaGraphReadWrite::ReadWriteStatus getReadStatus() const { return m_readStatus; }
     bool isShown() const {
         for (auto &drawingFile : m_drawingFiles)
             for (auto &map : drawingFile.maps)
@@ -370,7 +370,7 @@ class MetaGraphDX {
     const AttributeTable &getAttributeTable(std::optional<size_t> type = std::nullopt,
                                             std::optional<size_t> layer = std::nullopt) const;
 
-    int getLineFileCount() const { return (int)m_drawingFiles.size(); }
+    int getLineFileCount() const { return static_cast<int>(m_drawingFiles.size()); }
 
     const std::string &getLineFileName(size_t fileIdx) const {
         return m_drawingFiles[fileIdx].groupData.getName();
@@ -463,11 +463,11 @@ class MetaGraphDX {
     }
     float getSelAvg() {
         if (m_viewClass & DX_VIEWVGA)
-            return (float)getDisplayedPointMap().getDisplayedSelectedAvg();
+            return static_cast<float>(getDisplayedPointMap().getDisplayedSelectedAvg());
         else if (m_viewClass & DX_VIEWAXIAL)
-            return (float)getDisplayedShapeGraph().getDisplayedSelectedAvg();
+            return static_cast<float>(getDisplayedShapeGraph().getDisplayedSelectedAvg());
         else if (m_viewClass & DX_VIEWDATA)
-            return (float)getDisplayedDataMap().getDisplayedSelectedAvg();
+            return static_cast<float>(getDisplayedDataMap().getDisplayedSelectedAvg());
         else
             return -1.0f;
     }

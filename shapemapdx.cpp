@@ -275,7 +275,6 @@ const PafColor ShapeMapDX::getShapeColor() const {
     const AttributeRow &row = getInternalMap().getAttributeTable().getRow(key);
     return dXreimpl::getDisplayColor(key, row, getInternalMap().getAttributeTableHandle(),
                                      m_selectionSet, true);
-    ;
 }
 
 bool ShapeMapDX::getShapeSelected() const {
@@ -299,15 +298,15 @@ bool ShapeMapDX::unlinkShapes(const Point2f &p) {
 }
 
 bool ShapeMapDX::findNextLinkLine() const {
-    if (m_curlinkline < (int)getInternalMap().getLinks().size()) {
+    if (m_curlinkline < static_cast<int>(getInternalMap().getLinks().size())) {
         m_curlinkline++;
     }
-    return (m_curlinkline < (int)getInternalMap().getLinks().size());
+    return (m_curlinkline < static_cast<int>(getInternalMap().getLinks().size()));
 }
 
 Line4f ShapeMapDX::getNextLinkLine() const {
     // note, links are stored directly by rowid, not by key:
-    if (m_curlinkline < (int)getInternalMap().getLinks().size()) {
+    if (m_curlinkline < static_cast<int>(getInternalMap().getLinks().size())) {
         return Line4f(depthmapX::getMapAtIndex(
                           getInternalMap().getAllShapes(),
                           getInternalMap().getLinks()[static_cast<size_t>(m_curlinkline)].a)
@@ -320,15 +319,15 @@ Line4f ShapeMapDX::getNextLinkLine() const {
     return Line4f();
 }
 bool ShapeMapDX::findNextUnlinkPoint() const {
-    if (m_curunlinkpoint < (int)getInternalMap().getUnlinks().size()) {
+    if (m_curunlinkpoint < static_cast<int>(getInternalMap().getUnlinks().size())) {
         m_curunlinkpoint++;
     }
-    return (m_curunlinkpoint < (int)getInternalMap().getUnlinks().size());
+    return (m_curunlinkpoint < static_cast<int>(getInternalMap().getUnlinks().size()));
 }
 
 Point2f ShapeMapDX::getNextUnlinkPoint() const {
     // note, links are stored directly by rowid, not by key:
-    if (m_curunlinkpoint < (int)getInternalMap().getUnlinks().size()) {
+    if (m_curunlinkpoint < static_cast<int>(getInternalMap().getUnlinks().size())) {
         return depthmapX::getMapAtIndex(
                    getInternalMap().getAllShapes(),
                    getInternalMap().getUnlinks()[static_cast<size_t>(m_curunlinkpoint)].a)
