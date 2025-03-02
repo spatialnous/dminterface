@@ -8,6 +8,7 @@
 
 #include "metagraphdx.hpp"
 
+#include "depthmapXcli/dxinterface/options.hpp"
 #include "salalib/agents/agentanalysis.hpp"
 #include "salalib/alllinemap.hpp"
 #include "salalib/axialmodules/axialintegration.hpp"
@@ -301,12 +302,12 @@ bool MetaGraphDX::unmakeGraph(bool removeLinks) {
     return graphUnmade;
 }
 
-bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
-                               bool simpleVersion) // <- options copied to keep thread safe
-{
+bool MetaGraphDX::analyseGraph(Communicator *communicator, int pointDepthSelection,
+                               AnalysisType outputType, int local, bool gatesOnly, int global,
+                               double radius, bool simpleVersion) {
     bool analysisCompleted = false;
 
-    if (options.pointDepthSelection) {
+    if (pointDepthSelection) {
         if (m_viewClass & DX_VIEWVGA && !getDisplayedPointMap().isSelected()) {
             return false;
         } else if (m_viewClass & DX_VIEWAXIAL && !getDisplayedShapeGraph().hasSelectedElements()) {
@@ -316,7 +317,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
 
     try {
         analysisCompleted = true;
-        if (options.pointDepthSelection == 1) {
+        if (pointDepthSelection == 1) {
             if (m_viewClass & DX_VIEWVGA) {
                 auto &map = getDisplayedPointMap();
                 std::set<PixelRef> origins;
@@ -352,7 +353,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             }
             // REPLACES:
             // Graph::calculate_point_depth_matrix( communicator );
-        } else if (options.pointDepthSelection == 2) {
+        } else if (pointDepthSelection == 2) {
             if (m_viewClass & DX_VIEWVGA) {
                 auto &map = getDisplayedPointMap();
                 std::set<PixelRef> origins;
@@ -381,7 +382,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                                         .completed;
                 map.setDisplayedAttribute(SegmentMetricPD::Column::METRIC_STEP_DEPTH);
             }
-        } else if (options.pointDepthSelection == 3) {
+        } else if (pointDepthSelection == 3) {
             auto &map = getDisplayedPointMap();
             std::set<PixelRef> origins;
             for (auto &sel : map.getSelSet()) {
@@ -395,7 +396,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             analysisCompleted = analysisResult.completed;
             map.setDisplayedAttribute(-2);
             map.setDisplayedAttribute(VGAAngularDepth::Column::ANGULAR_STEP_DEPTH);
-        } else if (options.pointDepthSelection == 4) {
+        } else if (pointDepthSelection == 4) {
             if (m_viewClass & DX_VIEWVGA) {
                 auto &map = getDisplayedPointMap();
                 map.getInternalMap().binDisplay(communicator, map.getSelSet());
@@ -409,7 +410,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                 map.setDisplayedAttribute(-2);
                 map.setDisplayedAttribute(SegmentTopologicalPD::Column::TOPOLOGICAL_STEP_DEPTH);
             }
-        } else if (options.outputType == AnalysisType::ISOVIST) {
+        } else if (outputType == AnalysisType::ISOVIST) {
             auto shapes = getShownDrawingFilesAsShapes();
             auto &map = getDisplayedPointMap();
             auto analysis = VGAIsovist(map.getInternalMap(), shapes);
@@ -421,12 +422,12 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             analysisCompleted = analysisResult.completed;
             map.setDisplayedAttribute(-2);
             map.setDisplayedAttribute(VGAIsovist::Column::ISOVIST_AREA);
-        } else if (options.outputType == AnalysisType::VISUAL) {
+        } else if (outputType == AnalysisType::VISUAL) {
             bool localResult = true;
             bool globalResult = true;
-            if (options.local) {
+            if (local) {
                 auto &map = getDisplayedPointMap();
-                auto analysis = VGAVisualLocal(map.getInternalMap(), options.gatesOnly);
+                auto analysis = VGAVisualLocal(map.getInternalMap(), gatesOnly);
                 auto analysisResult = analysis.run(communicator);
                 analysis.copyResultToMap(analysisResult.getAttributes(),
                                          analysisResult.getAttributeData(), map.getInternalMap(),
@@ -435,10 +436,9 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                 map.setDisplayedAttribute(-2);
                 map.setDisplayedAttribute(VGAVisualLocal::Column::VISUAL_CLUSTERING_COEFFICIENT);
             }
-            if (options.global) {
+            if (global) {
                 auto &map = getDisplayedPointMap();
-                auto analysis =
-                    VGAVisualGlobal(map.getInternalMap(), options.radius, options.gatesOnly);
+                auto analysis = VGAVisualGlobal(map.getInternalMap(), radius, gatesOnly);
                 analysis.setSimpleVersion(simpleVersion);
                 analysis.setLegacyWriteMiscs(true);
                 auto analysisResult = analysis.run(communicator);
@@ -448,12 +448,12 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
                 globalResult = analysisResult.completed;
                 map.setDisplayedAttribute(-2);
                 map.setDisplayedAttribute(VGAVisualGlobal::getColumnWithRadius(
-                    VGAVisualGlobal::Column::VISUAL_INTEGRATION_HH, options.radius));
+                    VGAVisualGlobal::Column::VISUAL_INTEGRATION_HH, radius));
             }
             analysisCompleted = globalResult & localResult;
-        } else if (options.outputType == AnalysisType::METRIC) {
+        } else if (outputType == AnalysisType::METRIC) {
             auto &map = getDisplayedPointMap();
-            auto analysis = VGAMetric(map.getInternalMap(), options.radius, options.gatesOnly);
+            auto analysis = VGAMetric(map.getInternalMap(), radius, gatesOnly);
             auto analysisResult = analysis.run(communicator);
             analysis.copyResultToMap(analysisResult.getAttributes(),
                                      analysisResult.getAttributeData(), map.getInternalMap(),
@@ -461,21 +461,20 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, Options options,
             analysisCompleted = analysisResult.completed;
             map.overrideDisplayedAttribute(-2);
             map.setDisplayedAttribute(VGAMetric::getColumnWithRadius(
-                VGAMetric::Column::METRIC_MEAN_SHORTEST_PATH_DISTANCE, options.radius,
+                VGAMetric::Column::METRIC_MEAN_SHORTEST_PATH_DISTANCE, radius,
                 map.getInternalMap().getRegion()));
-        } else if (options.outputType == AnalysisType::ANGULAR) {
+        } else if (outputType == AnalysisType::ANGULAR) {
             auto &map = getDisplayedPointMap();
-            auto analysis = VGAAngular(map.getInternalMap(), options.radius, options.gatesOnly);
+            auto analysis = VGAAngular(map.getInternalMap(), radius, gatesOnly);
             auto analysisResult = analysis.run(communicator);
             analysis.copyResultToMap(analysisResult.getAttributes(),
                                      analysisResult.getAttributeData(), map.getInternalMap(),
                                      analysisResult.columnStats);
             analysisCompleted = analysisResult.completed;
             map.overrideDisplayedAttribute(-2);
-            map.setDisplayedAttribute(
-                VGAAngular::getColumnWithRadius(VGAAngular::Column::ANGULAR_MEAN_DEPTH,
-                                                options.radius, map.getInternalMap().getRegion()));
-        } else if (options.outputType == AnalysisType::THRU_VISION) {
+            map.setDisplayedAttribute(VGAAngular::getColumnWithRadius(
+                VGAAngular::Column::ANGULAR_MEAN_DEPTH, radius, map.getInternalMap().getRegion()));
+        } else if (outputType == AnalysisType::THRU_VISION) {
             auto &map = getDisplayedPointMap();
             auto analysis = VGAThroughVision(map.getInternalMap());
             auto analysisResult = analysis.run(communicator);
@@ -1417,9 +1416,9 @@ bool MetaGraphDX::makeFewestLineMap(Communicator *communicator, int replace) {
     return mapMade;
 }
 
-bool MetaGraphDX::analyseAxial(Communicator *communicator, Options options,
-                               bool forceLegacyColumnOrder) // options copied to keep thread safe
-{
+bool MetaGraphDX::analyseAxial(Communicator *communicator, std::set<double> radiusSet,
+                               int weightedMeasureCol, bool choice, bool fulloutput,
+                               bool localAnalysis, bool forceLegacyColumnOrder) {
     m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
                                 // during reload)
 
@@ -1427,8 +1426,7 @@ bool MetaGraphDX::analyseAxial(Communicator *communicator, Options options,
 
     try {
         auto &map = getDisplayedShapeGraph();
-        AxialIntegration analysis(options.radiusSet, options.weightedMeasureCol, options.choice,
-                                  options.fulloutput);
+        AxialIntegration analysis(radiusSet, weightedMeasureCol, choice, fulloutput);
         analysis.setForceLegacyColumnOrder(forceLegacyColumnOrder);
         analysisCompleted = analysis.run(communicator, map.getInternalMap(), false).completed;
 
@@ -1436,10 +1434,10 @@ bool MetaGraphDX::analyseAxial(Communicator *communicator, Options options,
 
         map.setDisplayedAttribute(static_cast<int>(AxialIntegration::getFormattedColumnIdx(
             map.getInternalMap().getAttributeTable(), AxialIntegration::Column::INTEGRATION,
-            static_cast<int>(*options.radiusSet.rbegin()), std::nullopt,
+            static_cast<int>(*radiusSet.rbegin()), std::nullopt,
             AxialIntegration::Normalisation::HH)));
 
-        if (options.local)
+        if (localAnalysis)
             analysisCompleted &=
                 AxialLocal()
                     .run(communicator, getDisplayedShapeGraph().getInternalMap(), false)
@@ -1453,10 +1451,11 @@ bool MetaGraphDX::analyseAxial(Communicator *communicator, Options options,
     return analysisCompleted;
 }
 
-bool MetaGraphDX::analyseSegmentsTulip(
-    Communicator *communicator, Options options,
-    bool forceLegacyColumnOrder) // <- options copied to keep thread safe
-{
+bool MetaGraphDX::analyseSegmentsTulip(Communicator *communicator, std::set<double> &radiusSet,
+                                       bool selOnly, int tulipBins, int weightedMeasureCol,
+                                       RadiusType radiusType, bool choice, bool interactive,
+                                       int weightedMeasureCol2, int routeweightCol,
+                                       bool forceLegacyColumnOrder) {
     m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
                                 // during reload)
 
@@ -1464,22 +1463,21 @@ bool MetaGraphDX::analyseSegmentsTulip(
 
     try {
         auto &map = getDisplayedShapeGraph();
-        SegmentTulip analysis(
-            options.radiusSet, options.selOnly ? std::make_optional(map.getSelSet()) : std::nullopt,
-            options.tulipBins, options.weightedMeasureCol, options.radiusType, options.choice);
+        SegmentTulip analysis(radiusSet,
+                              selOnly ? std::make_optional(map.getSelSet()) : std::nullopt,
+                              tulipBins, weightedMeasureCol, radiusType, choice, interactive,
+                              weightedMeasureCol2, routeweightCol);
         analysis.setForceLegacyColumnOrder(forceLegacyColumnOrder);
         analysisCompleted = analysis.run(communicator, map.getInternalMap(), false).completed;
         map.setDisplayedAttribute(-2); // <- override if it's already showing
-        if (options.choice) {
+        if (choice) {
             map.setDisplayedAttribute(static_cast<int>(SegmentTulip::getFormattedColumnIdx(
-                map.getInternalMap().getAttributeTable(), SegmentTulip::Column::CHOICE,
-                options.tulipBins, options.radiusType,
-                static_cast<int>(*options.radiusSet.begin()))));
+                map.getInternalMap().getAttributeTable(), SegmentTulip::Column::CHOICE, tulipBins,
+                radiusType, static_cast<int>(*radiusSet.begin()))));
         } else {
             map.setDisplayedAttribute(static_cast<int>(SegmentTulip::getFormattedColumnIdx(
                 map.getInternalMap().getAttributeTable(), SegmentTulip::Column::TOTAL_DEPTH,
-                options.tulipBins, options.radiusType,
-                static_cast<int>(*options.radiusSet.begin()))));
+                tulipBins, radiusType, static_cast<int>(*radiusSet.begin()))));
         }
     } catch (Communicator::CancelledException) {
         analysisCompleted = false;
@@ -1490,9 +1488,7 @@ bool MetaGraphDX::analyseSegmentsTulip(
     return analysisCompleted;
 }
 
-bool MetaGraphDX::analyseSegmentsAngular(Communicator *communicator,
-                                         Options options) // <- options copied to keep thread safe
-{
+bool MetaGraphDX::analyseSegmentsAngular(Communicator *communicator, std::set<double> radiusSet) {
     m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
                                 // during reload)
 
@@ -1500,14 +1496,12 @@ bool MetaGraphDX::analyseSegmentsAngular(Communicator *communicator,
 
     try {
         auto &map = getDisplayedShapeGraph();
-        analysisCompleted = SegmentAngular(options.radiusSet)
-                                .run(communicator, map.getInternalMap(), false)
-                                .completed;
+        analysisCompleted =
+            SegmentAngular(radiusSet).run(communicator, map.getInternalMap(), false).completed;
 
         map.setDisplayedAttribute(-2); // <- override if it's already showing
-        std::string depthColText =
-            SegmentAngular::getFormattedColumn(SegmentAngular::Column::ANGULAR_MEAN_DEPTH,
-                                               static_cast<int>(*options.radiusSet.begin()));
+        std::string depthColText = SegmentAngular::getFormattedColumn(
+            SegmentAngular::Column::ANGULAR_MEAN_DEPTH, static_cast<int>(*radiusSet.begin()));
         map.setDisplayedAttribute(depthColText);
 
     } catch (Communicator::CancelledException) {
@@ -1519,10 +1513,9 @@ bool MetaGraphDX::analyseSegmentsAngular(Communicator *communicator,
     return analysisCompleted;
 }
 
-bool MetaGraphDX::analyseTopoMetMultipleRadii(
-    Communicator *communicator,
-    Options options) // <- options copied to keep thread safe
-{
+bool MetaGraphDX::analyseTopoMetMultipleRadii(Communicator *communicator,
+                                              std::set<double> &radiusSet, AnalysisType outputType,
+                                              double radius, bool selOnly) {
     m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
                                 // during reload)
 
@@ -1532,35 +1525,33 @@ bool MetaGraphDX::analyseTopoMetMultipleRadii(
         // note: "outputType" reused for analysis type (either 0 = topological or 1
         // = metric)
         auto &map = getDisplayedShapeGraph();
-        for (size_t r = 0; r < options.radiusSet.size(); r++) {
-            if (options.outputType == AnalysisType::ISOVIST) {
-                if (!SegmentTopological(options.radius, options.selOnly
-                                                            ? std::make_optional(map.getSelSet())
-                                                            : std::nullopt)
+        for (size_t r = 0; r < radiusSet.size(); r++) {
+            if (outputType == AnalysisType::ISOVIST) {
+                if (!SegmentTopological(radius, selOnly ? std::make_optional(map.getSelSet())
+                                                        : std::nullopt)
                          .run(communicator, map.getInternalMap(), false)
                          .completed)
                     analysisCompleted = false;
-                if (!options.selOnly) {
+                if (!selOnly) {
                     map.setDisplayedAttribute(SegmentTopological::getFormattedColumn(
-                        SegmentTopological::Column::TOPOLOGICAL_CHOICE, options.radius));
+                        SegmentTopological::Column::TOPOLOGICAL_CHOICE, radius));
                 } else {
                     map.setDisplayedAttribute(SegmentTopological::getFormattedColumn(
-                        SegmentTopological::Column::TOPOLOGICAL_MEAN_DEPTH, options.radius));
+                        SegmentTopological::Column::TOPOLOGICAL_MEAN_DEPTH, radius));
                 }
 
             } else {
-                if (!SegmentMetric(options.radius, options.selOnly
-                                                       ? std::make_optional(map.getSelSet())
-                                                       : std::nullopt)
+                if (!SegmentMetric(radius,
+                                   selOnly ? std::make_optional(map.getSelSet()) : std::nullopt)
                          .run(communicator, map.getInternalMap(), false)
                          .completed)
                     analysisCompleted = false;
-                if (!options.selOnly) {
+                if (!selOnly) {
                     map.setDisplayedAttribute(SegmentMetric::getFormattedColumn(
-                        SegmentMetric::Column::METRIC_CHOICE, options.radius));
+                        SegmentMetric::Column::METRIC_CHOICE, radius));
                 } else {
                     map.setDisplayedAttribute(SegmentMetric::getFormattedColumn(
-                        SegmentMetric::Column::METRIC_MEAN_DEPTH, options.radius));
+                        SegmentMetric::Column::METRIC_MEAN_DEPTH, radius));
                 }
             }
         }
@@ -1573,9 +1564,8 @@ bool MetaGraphDX::analyseTopoMetMultipleRadii(
     return analysisCompleted;
 }
 
-bool MetaGraphDX::analyseTopoMet(Communicator *communicator,
-                                 Options options) // <- options copied to keep thread safe
-{
+bool MetaGraphDX::analyseTopoMet(Communicator *communicator, AnalysisType outputType, double radius,
+                                 bool selOnly) {
     m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
                                 // during reload)
 
@@ -1586,32 +1576,30 @@ bool MetaGraphDX::analyseTopoMet(Communicator *communicator,
     try {
         // note: "outputType" reused for analysis type (either 0 = topological or 1
         // = metric)
-        if (options.outputType == AnalysisType::ISOVIST) {
+        if (outputType == AnalysisType::ISOVIST) {
             analysisCompleted =
-                SegmentTopological(options.radius, options.selOnly
-                                                       ? std::make_optional(map.getSelSet())
-                                                       : std::nullopt)
+                SegmentTopological(radius,
+                                   selOnly ? std::make_optional(map.getSelSet()) : std::nullopt)
                     .run(communicator, map.getInternalMap(), false)
                     .completed;
-            if (!options.selOnly) {
+            if (!selOnly) {
                 map.setDisplayedAttribute(SegmentTopological::getFormattedColumn(
-                    SegmentTopological::Column::TOPOLOGICAL_CHOICE, options.radius));
+                    SegmentTopological::Column::TOPOLOGICAL_CHOICE, radius));
             } else {
                 map.setDisplayedAttribute(SegmentTopological::getFormattedColumn(
-                    SegmentTopological::Column::TOPOLOGICAL_MEAN_DEPTH, options.radius));
+                    SegmentTopological::Column::TOPOLOGICAL_MEAN_DEPTH, radius));
             }
         } else {
             analysisCompleted =
-                SegmentMetric(options.radius,
-                              options.selOnly ? std::make_optional(map.getSelSet()) : std::nullopt)
+                SegmentMetric(radius, selOnly ? std::make_optional(map.getSelSet()) : std::nullopt)
                     .run(communicator, map.getInternalMap(), false)
                     .completed;
-            if (!options.selOnly) {
+            if (!selOnly) {
                 map.setDisplayedAttribute(SegmentMetric::getFormattedColumn(
-                    SegmentMetric::Column::METRIC_CHOICE, options.radius));
+                    SegmentMetric::Column::METRIC_CHOICE, radius));
             } else {
                 map.setDisplayedAttribute(SegmentMetric::getFormattedColumn(
-                    SegmentMetric::Column::METRIC_MEAN_DEPTH, options.radius));
+                    SegmentMetric::Column::METRIC_MEAN_DEPTH, radius));
             }
         }
     } catch (Communicator::CancelledException) {

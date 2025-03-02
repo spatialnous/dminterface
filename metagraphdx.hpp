@@ -7,8 +7,9 @@
 #pragma once
 
 // Interface: the meta graph loads and holds all sorts of arbitrary data...
-#include "options.hpp"
 #include "pointmapdx.hpp"
+#include "salalib/analysistype.hpp"
+#include "salalib/radiustype.hpp"
 #include "shapegraphdx.hpp"
 #include "shapemapdx.hpp"
 #include "shapemapgroupdatadx.hpp"
@@ -220,8 +221,8 @@ class MetaGraphDX {
     std::vector<SalaShape> getShownDrawingFilesAsShapes();
     bool makeGraph(Communicator *communicator, int algorithm, double maxdist);
     bool unmakeGraph(bool removeLinks);
-    bool analyseGraph(Communicator *communicator, Options options,
-                      bool simpleVersion); // <- options copied to keep thread safe
+    bool analyseGraph(Communicator *communicator, int pointDepthSelection, AnalysisType outputType,
+                      int local, bool gatesOnly, int global, double radius, bool simpleVersion);
     //
     // helpers for editing maps
     bool isEditableMap();
@@ -260,17 +261,18 @@ class MetaGraphDX {
     int loadMifMap(Communicator *comm, std::istream &miffile, std::istream &midfile);
     bool makeAllLineMap(Communicator *communicator, const Point2f &seed);
     bool makeFewestLineMap(Communicator *communicator, int replace);
-    bool analyseAxial(Communicator *communicator, Options options,
-                      bool forceLegacyColumnOrder = false); // <- options copied to keep thread safe
-    bool analyseSegmentsTulip(
-        Communicator *communicator, Options options,
-        bool forceLegacyColumnOrder = false); // <- options copied to keep thread safe
-    bool analyseSegmentsAngular(Communicator *communicator,
-                                Options options); // <- options copied to keep thread safe
-    bool analyseTopoMetMultipleRadii(Communicator *communicator,
-                                     Options options); // <- options copied to keep thread safe
-    bool analyseTopoMet(Communicator *communicator,
-                        Options options); // <- options copied to keep thread safe
+    bool analyseAxial(Communicator *communicator, std::set<double> radiusSet,
+                      int weightedMeasureCol, bool choice, bool fulloutput, bool localAnalysis,
+                      bool forceLegacyColumnOrder = false);
+    bool analyseSegmentsTulip(Communicator *communicator, std::set<double> &radiusSet, bool selOnly,
+                              int tulipBins, int weightedMeasureCol, RadiusType radiusType,
+                              bool choice, bool interactive = false, int weightedMeasureCol2 = -1,
+                              int routeweightCol = -1, bool forceLegacyColumnOrder = false);
+    bool analyseSegmentsAngular(Communicator *communicator, std::set<double> radiusSet);
+    bool analyseTopoMetMultipleRadii(Communicator *communicator, std::set<double> &radiusSet,
+                                     AnalysisType outputType, double radius, bool selOnly);
+    bool analyseTopoMet(Communicator *communicator, AnalysisType outputType, double radius,
+                        bool selOnly);
     //
     bool hasAllLineMap() { return m_allLineMapData.has_value(); }
     bool hasFewestLineMaps() {
