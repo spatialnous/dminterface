@@ -2459,3 +2459,61 @@ size_t MetaGraphDX::addNewPointMap(const std::string &name) {
     setDisplayedPointMapRef(m_pointMaps.size() - 1);
     return m_pointMaps.size() - 1;
 }
+
+void MetaGraphDX::makeViewportShapes(const Region4f &viewport) const {
+    currentLayer = -1;
+    size_t di = m_drawingFiles.size() - 1;
+    for (auto iter = m_drawingFiles.rbegin(); iter != m_drawingFiles.rend(); iter++) {
+        if (isShown(*iter)) {
+            currentLayer = (int)di;
+
+            iter->groupData.invalidateCurrentLayer();
+            for (size_t i = iter->maps.size() - 1; static_cast<int>(i) != -1; i--) {
+                if (iter->maps[i].isShown()) {
+                    if (!iter->maps[i].isValid()) {
+                        continue;
+                    }
+                    iter->groupData.setCurrentLayer(i);
+                    iter->maps[i].makeViewportShapes(
+                        (viewport.atZero() ? m_metaGraph.region : viewport));
+                }
+            }
+        }
+        di--;
+    }
+}
+
+bool MetaGraphDX::findNextShape(const ShapeMapGroup &spf, bool &nextlayer) const {
+    if (!spf.groupData.hasCurrentLayer())
+        return false;
+
+    while (spf.groupData.getCurrentLayer().has_value() &&
+           spf.maps[spf.groupData.getCurrentLayer().value()].valid() &&
+           !spf.maps[spf.groupData.getCurrentLayer().value()].findNextShape(nextlayer)) {
+        spf.groupData.setCurrentLayer(spf.groupData.getCurrentLayer().value() + 1);
+        while (spf.groupData.getCurrentLayer().has_value() &&
+               spf.groupData.getCurrentLayer().value() < spf.maps.size() &&
+               !spf.maps[spf.groupData.getCurrentLayer().value()].isShown())
+            spf.groupData.setCurrentLayer(spf.groupData.getCurrentLayer().value() + 1);
+        if (spf.groupData.getCurrentLayer().value() == spf.maps.size()) {
+            spf.groupData.invalidateCurrentLayer();
+            return false;
+        }
+    }
+    return true;
+}
+
+bool MetaGraphDX::findNextShape(bool &nextlayer) const {
+    if (!currentLayer.has_value())
+        return false;
+    while (!findNextShape(m_drawingFiles[currentLayer.value()], nextlayer)) {
+        while (++(*currentLayer) < m_drawingFiles.size() &&
+               !isShown(m_drawingFiles[currentLayer.value()]))
+            ;
+        if (currentLayer == m_drawingFiles.size()) {
+            currentLayer = std::nullopt;
+            return false;
+        }
+    }
+    return true;
+}

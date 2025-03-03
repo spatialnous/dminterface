@@ -151,6 +151,22 @@ class MetaGraphDX {
     }
 
     // TODO: drawing state functions/fields that should be eventually removed
+    void makeViewportShapes(const Region4f &viewport) const;
+    bool findNextShape(const ShapeMapGroup &spf, bool &nextlayer) const;
+    bool findNextShape(bool &nextlayer) const;
+    const SalaShape &getNextShape() const {
+        if (!currentLayer.has_value()) {
+            throw new depthmapX::RuntimeException("No current layer selected");
+        }
+        auto &currentDrawingFile = m_drawingFiles[currentLayer.value()];
+        if (!currentDrawingFile.groupData.getCurrentLayer().has_value()) {
+            throw new depthmapX::RuntimeException("Current drawing file (" +
+                                                  currentDrawingFile.groupData.getName() +
+                                                  ") has no layer to match to a map");
+        }
+        return currentDrawingFile.maps[currentDrawingFile.groupData.getCurrentLayer().value()]
+            .getNextShape();
+    }
     mutable std::optional<size_t> currentLayer;
 
   public:

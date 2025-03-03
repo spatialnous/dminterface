@@ -110,7 +110,51 @@ bool ShapeMapDX::write(std::ostream &stream) {
     return written;
 }
 
+bool ShapeMapDX::findNextShape(bool &nextlayer) const {
+    // note: will not work immediately after a new poly has been added:
+    // makeViewportShapes first
+    if (m_newshape) {
+        return false;
+    }
+
+    // TODO: Remove static_cast<size_t>(-1)
+    while ((++m_currentShape < (int)getInternalMap().getAllShapes().size()) &&
+           m_displayShapes[static_cast<size_t>(m_currentShape)] == static_cast<size_t>(-1))
+        ;
+
+    if (m_currentShape < (int)getInternalMap().getAllShapes().size()) {
+        return true;
+    } else {
+        m_currentShape = (int)getInternalMap().getAllShapes().size();
+        nextlayer = true;
+        return false;
+    }
+}
+
+const SalaShape &ShapeMapDX::getNextShape() const {
+    auto x = m_displayShapes[static_cast<size_t>(m_currentShape)]; // x has display order in it
+    m_displayShapes[static_cast<size_t>(m_currentShape)] =
+        static_cast<size_t>(-1); // you've drawn it
+    return depthmapX::getMapAtIndex(getInternalMap().getAllShapes(), x)->second;
+}
+
 // this is all very similar to spacepixel, apart from a few minor details
+
+void ShapeMapDX::makeViewportShapes(const Region4f &viewport) const {
+
+    auto &shapes = getInternalMap().getAllShapes();
+    if (m_displayShapes.empty() || m_newshape) {
+        m_displayShapes.assign(shapes.size(), static_cast<size_t>(-1));
+        m_newshape = false;
+    }
+
+    m_currentShape = -1; // note: findNext expects first to be labelled -1
+
+    m_displayShapes = getInternalMap().makeViewportShapes(viewport);
+
+    m_curlinkline = -1;
+    m_curunlinkpoint = -1;
+}
 
 int ShapeMapDX::makePointShapeWithRef(const Point2f &point, int shapeRef, bool tempshape,
                                       const std::map<size_t, float> &extraAttributes) {
