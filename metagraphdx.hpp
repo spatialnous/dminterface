@@ -266,8 +266,8 @@ class MetaGraphDX {
                       bool forceLegacyColumnOrder = false);
     bool analyseSegmentsTulip(Communicator *communicator, std::set<double> &radiusSet, bool selOnly,
                               int tulipBins, int weightedMeasureCol, RadiusType radiusType,
-                              bool choice, bool interactive = false, int weightedMeasureCol2 = -1,
-                              int routeweightCol = -1, bool forceLegacyColumnOrder = false);
+                              bool choice, int weightedMeasureCol2 = -1, int routeweightCol = -1,
+                              bool forceLegacyColumnOrder = false);
     bool analyseSegmentsAngular(Communicator *communicator, std::set<double> radiusSet);
     bool analyseTopoMetMultipleRadii(Communicator *communicator, std::set<double> &radiusSet,
                                      AnalysisType outputType, double radius, bool selOnly);
