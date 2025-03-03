@@ -8,7 +8,6 @@
 
 #include "metagraphdx.hpp"
 
-#include "depthmapXcli/dxinterface/options.hpp"
 #include "salalib/agents/agentanalysis.hpp"
 #include "salalib/alllinemap.hpp"
 #include "salalib/axialmodules/axialintegration.hpp"
@@ -1454,7 +1453,8 @@ bool MetaGraphDX::analyseAxial(Communicator *communicator, std::set<double> radi
 bool MetaGraphDX::analyseSegmentsTulip(Communicator *communicator, std::set<double> &radiusSet,
                                        bool selOnly, int tulipBins, int weightedMeasureCol,
                                        RadiusType radiusType, bool choice, int weightedMeasureCol2,
-                                       int routeweightCol, bool forceLegacyColumnOrder) {
+                                       int routeweightCol, bool interactive,
+                                       bool forceLegacyColumnOrder) {
     m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
                                 // during reload)
 
@@ -1464,7 +1464,7 @@ bool MetaGraphDX::analyseSegmentsTulip(Communicator *communicator, std::set<doub
         auto &map = getDisplayedShapeGraph();
         auto selSet = selOnly ? std::make_optional(map.getSelSet()) : std::nullopt;
         SegmentTulip analysis(radiusSet, selSet, tulipBins, weightedMeasureCol, radiusType, choice,
-                              weightedMeasureCol2, routeweightCol, false);
+                              weightedMeasureCol2, routeweightCol, interactive);
         analysis.setForceLegacyColumnOrder(forceLegacyColumnOrder);
         analysisCompleted = analysis.run(communicator, map.getInternalMap(), false).completed;
         map.setDisplayedAttribute(-2); // <- override if it's already showing
