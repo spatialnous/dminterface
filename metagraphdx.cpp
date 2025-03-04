@@ -322,7 +322,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, int pointDepthSelecti
                 std::set<PixelRef> origins;
                 for (auto &sel : map.getSelSet())
                     origins.insert(sel);
-                auto analysis = VGAVisualGlobalDepth(map.getInternalMap(), origins);
+                auto analysis = VGAVisualGlobalDepth(map.getInternalMap(), std::move(origins));
                 auto analysisResult = analysis.run(communicator);
                 analysis.copyResultToMap(analysisResult.getAttributes(),
                                          analysisResult.getAttributeData(), map.getInternalMap(),
@@ -364,7 +364,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, int pointDepthSelecti
                         ? std::unique_ptr<IVGAMetric>(
                               new VGAMetricDepthLinkCost(map.getInternalMap(), origins))
                         : std::unique_ptr<IVGAMetric>(
-                              new VGAMetricDepth(map.getInternalMap(), origins));
+                              new VGAMetricDepth(map.getInternalMap(), std::move(origins)));
                 auto analysisResult = analysis->run(communicator);
                 analysis->copyResultToMap(analysisResult.getAttributes(),
                                           analysisResult.getAttributeData(), map.getInternalMap(),
@@ -387,7 +387,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, int pointDepthSelecti
             for (auto &sel : map.getSelSet()) {
                 origins.insert(sel);
             }
-            auto analysis = VGAAngularDepth(map.getInternalMap(), origins);
+            auto analysis = VGAAngularDepth(map.getInternalMap(), std::move(origins));
             auto analysisResult = analysis.run(communicator);
             analysis.copyResultToMap(analysisResult.getAttributes(),
                                      analysisResult.getAttributeData(), map.getInternalMap(),
@@ -1462,8 +1462,9 @@ bool MetaGraphDX::analyseSegmentsTulip(Communicator *communicator, std::set<doub
 
     try {
         auto &map = getDisplayedShapeGraph();
-        auto selSet = selOnly ? std::make_optional(map.getSelSet()) : std::nullopt;
-        SegmentTulip analysis(radiusSet, selSet, tulipBins, weightedMeasureCol, radiusType, choice,
+        SegmentTulip analysis(radiusSet,
+                              selOnly ? std::make_optional(map.getSelSet()) : std::nullopt,
+                              tulipBins, weightedMeasureCol, radiusType, choice,
                               weightedMeasureCol2, routeweightCol, interactive);
         analysis.setForceLegacyColumnOrder(forceLegacyColumnOrder);
         analysisCompleted = analysis.run(communicator, map.getInternalMap(), false).completed;
@@ -1525,8 +1526,8 @@ bool MetaGraphDX::analyseTopoMetMultipleRadii(Communicator *communicator,
         auto &map = getDisplayedShapeGraph();
         for (size_t r = 0; r < radiusSet.size(); r++) {
             if (outputType == AnalysisType::ISOVIST) {
-                auto selSet = selOnly ? std::make_optional(map.getSelSet()) : std::nullopt;
-                if (!SegmentTopological(radius, selSet)
+                if (!SegmentTopological(radius, selOnly ? std::make_optional(map.getSelSet())
+                                                        : std::nullopt)
                          .run(communicator, map.getInternalMap(), false)
                          .completed)
                     analysisCompleted = false;
@@ -1539,8 +1540,8 @@ bool MetaGraphDX::analyseTopoMetMultipleRadii(Communicator *communicator,
                 }
 
             } else {
-                auto selSet = selOnly ? std::make_optional(map.getSelSet()) : std::nullopt;
-                if (!SegmentMetric(radius, selSet)
+                if (!SegmentMetric(radius,
+                                   selOnly ? std::make_optional(map.getSelSet()) : std::nullopt)
                          .run(communicator, map.getInternalMap(), false)
                          .completed)
                     analysisCompleted = false;
@@ -1575,10 +1576,11 @@ bool MetaGraphDX::analyseTopoMet(Communicator *communicator, AnalysisType output
         // note: "outputType" reused for analysis type (either 0 = topological or 1
         // = metric)
         if (outputType == AnalysisType::ISOVIST) {
-            auto selSet = selOnly ? std::make_optional(map.getSelSet()) : std::nullopt;
-            analysisCompleted = SegmentTopological(radius, selSet)
-                                    .run(communicator, map.getInternalMap(), false)
-                                    .completed;
+            analysisCompleted =
+                SegmentTopological(radius,
+                                   selOnly ? std::make_optional(map.getSelSet()) : std::nullopt)
+                    .run(communicator, map.getInternalMap(), false)
+                    .completed;
             if (!selOnly) {
                 map.setDisplayedAttribute(SegmentTopological::getFormattedColumn(
                     SegmentTopological::Column::TOPOLOGICAL_CHOICE, radius));
@@ -1587,10 +1589,10 @@ bool MetaGraphDX::analyseTopoMet(Communicator *communicator, AnalysisType output
                     SegmentTopological::Column::TOPOLOGICAL_MEAN_DEPTH, radius));
             }
         } else {
-            auto selSet = selOnly ? std::make_optional(map.getSelSet()) : std::nullopt;
-            analysisCompleted = SegmentMetric(radius, selSet)
-                                    .run(communicator, map.getInternalMap(), false)
-                                    .completed;
+            analysisCompleted =
+                SegmentMetric(radius, selOnly ? std::make_optional(map.getSelSet()) : std::nullopt)
+                    .run(communicator, map.getInternalMap(), false)
+                    .completed;
             if (!selOnly) {
                 map.setDisplayedAttribute(SegmentMetric::getFormattedColumn(
                     SegmentMetric::Column::METRIC_CHOICE, radius));
