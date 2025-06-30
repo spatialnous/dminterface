@@ -22,7 +22,7 @@
 #include "salalib/metagraph.hpp"
 #include "salalib/metagraphreadwrite.hpp"
 #include "salalib/pushvalues.hpp"
-#include "salalib/spacepix.hpp"
+#include "salalib/spacepixel.hpp"
 
 #include <memory>
 #include <mutex>
