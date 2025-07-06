@@ -4,16 +4,16 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// A representation of a sala PointMap in depthmapX
+// A representation of a sala PointMap in the Qt gui
 
 #pragma once
 
-#include "attributemapdx.hpp"
-#include "pointmapdx.hpp"
+#include "attributemapdm.hpp"
+#include "pointmapdm.hpp"
 
 #include "salalib/shapemap.hpp"
 
-class ShapeMapDX : public AttributeMapDX {
+class ShapeMapDM : public AttributeMapDM {
 
     mutable bool m_show; // used when shape map is a drawing layer
     bool m_editable;
@@ -33,7 +33,7 @@ class ShapeMapDX : public AttributeMapDX {
     std::set<int> m_selectionSet; // note: uses keys
 
   private:
-    void moveData(ShapeMapDX &other) {
+    void moveData(ShapeMapDM &other) {
         getInternalMap().moveData(other.getInternalMap());
         m_show = other.isShown();
         m_displayedAttribute = other.m_displayedAttribute;
@@ -46,8 +46,8 @@ class ShapeMapDX : public AttributeMapDX {
     mutable bool m_invalidate;
 
   public: // ctor
-    ShapeMapDX(std::unique_ptr<ShapeMap> &&map)
-        : AttributeMapDX(std::move(map)), m_show(true), m_editable(false), m_showLines(true),
+    ShapeMapDM(std::unique_ptr<ShapeMap> &&map)
+        : AttributeMapDM(std::move(map)), m_show(true), m_editable(false), m_showLines(true),
           m_showFill(true), m_showCentroids(false), m_displayedAttribute(-1), m_invalidate(false) {
         // -1 is the shape ref column (which will be shown by default)
 
@@ -55,17 +55,17 @@ class ShapeMapDX : public AttributeMapDX {
 
         // note show is
     }
-    ShapeMapDX(const std::string &name, int type)
-        : ShapeMapDX(std::make_unique<ShapeMap>(name, type)) {}
+    ShapeMapDM(const std::string &name, int type)
+        : ShapeMapDM(std::make_unique<ShapeMap>(name, type)) {}
 
-    void copy(const ShapeMapDX &other, int copyflags = 0, bool copyMapType = false) {
+    void copy(const ShapeMapDM &other, int copyflags = 0, bool copyMapType = false) {
         getInternalMap().copy(other.getInternalMap(), copyflags, copyMapType);
     }
-    ~ShapeMapDX() override {}
-    ShapeMapDX() = delete;
-    ShapeMapDX(const ShapeMapDX &other) = delete;
-    ShapeMapDX(ShapeMapDX &&other) = default;
-    ShapeMapDX &operator=(ShapeMapDX &&other) = default;
+    ~ShapeMapDM() override {}
+    ShapeMapDM() = delete;
+    ShapeMapDM(const ShapeMapDM &other) = delete;
+    ShapeMapDM(ShapeMapDM &&other) = default;
+    ShapeMapDM &operator=(ShapeMapDM &&other) = default;
 
   public: // methods
     bool valid() const { return !m_invalidate; }
@@ -119,7 +119,7 @@ class ShapeMapDX : public AttributeMapDX {
                       const std::map<size_t, float> &extraAttributes = std::map<size_t, float>());
     int makeShape(const SalaShape &poly, int overrideShapeRef = -1,
                   const std::map<size_t, float> &extraAttributes = std::map<size_t, float>());
-    int makeShapeFromPointSet(const PointMapDX &pointmap);
+    int makeShapeFromPointSet(const PointMapDM &pointmap);
 
     bool moveShape(int shaperef, const Line4f &line, bool undoing = false);
 

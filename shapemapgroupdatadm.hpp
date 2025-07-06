@@ -10,25 +10,25 @@
 #include <deque>
 #include <string>
 
-class ShapeMapGroupDataDX {
+class ShapeMapGroupDataDM {
 
     ShapeMapGroupData m_mapGroupData;
     mutable std::optional<size_t> m_currentLayer;
 
   public:
-    ShapeMapGroupDataDX(ShapeMapGroupData &&mapGroupData)
+    ShapeMapGroupDataDM(ShapeMapGroupData &&mapGroupData)
         : m_mapGroupData(mapGroupData), m_currentLayer(std::nullopt) {}
-    ShapeMapGroupDataDX(const std::string &name = std::string())
+    ShapeMapGroupDataDM(const std::string &name = std::string())
         : m_mapGroupData(name), m_currentLayer(std::nullopt) {}
-    ShapeMapGroupDataDX(ShapeMapGroupDataDX &&other)
+    ShapeMapGroupDataDM(ShapeMapGroupDataDM &&other)
         : m_mapGroupData(other.m_mapGroupData), m_currentLayer(other.m_currentLayer) {}
-    ShapeMapGroupDataDX &operator=(ShapeMapGroupDataDX &&other) {
+    ShapeMapGroupDataDM &operator=(ShapeMapGroupDataDM &&other) {
         m_mapGroupData = other.m_mapGroupData;
         m_currentLayer = other.m_currentLayer;
         return *this;
     }
-    ShapeMapGroupDataDX(const ShapeMapGroupDataDX &) = default;
-    ShapeMapGroupDataDX &operator=(const ShapeMapGroupDataDX &) = default;
+    ShapeMapGroupDataDM(const ShapeMapGroupDataDM &) = default;
+    ShapeMapGroupDataDM &operator=(const ShapeMapGroupDataDM &) = default;
 
     void setName(const std::string &name) { m_mapGroupData.name = name; }
     const std::string &getName() const { return m_mapGroupData.name; }

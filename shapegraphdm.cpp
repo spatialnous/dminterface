@@ -4,9 +4,9 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "shapegraphdx.hpp"
+#include "shapegraphdm.hpp"
 
-void ShapeGraphDX::makeConnections(const KeyVertices &keyvertices) {
+void ShapeGraphDM::makeConnections(const KeyVertices &keyvertices) {
     getInternalMap().makeConnections(keyvertices);
     m_displayedAttribute = -1; // <- override if it's already showing
     auto connCol =
@@ -15,7 +15,7 @@ void ShapeGraphDX::makeConnections(const KeyVertices &keyvertices) {
     setDisplayedAttribute(static_cast<int>(connCol));
 }
 
-void ShapeGraphDX::unlinkFromShapeMap(const ShapeMap &shapemap) {
+void ShapeGraphDM::unlinkFromShapeMap(const ShapeMap &shapemap) {
     getInternalMap().unlinkFromShapeMap(shapemap);
 
     // reset displayed attribute if it happens to be "Connectivity":
@@ -28,7 +28,7 @@ void ShapeGraphDX::unlinkFromShapeMap(const ShapeMap &shapemap) {
     }
 }
 
-void ShapeGraphDX::makeSegmentConnections(std::vector<Connector> &connectionset) {
+void ShapeGraphDM::makeSegmentConnections(std::vector<Connector> &connectionset) {
     getInternalMap().makeSegmentConnections(connectionset);
 
     m_displayedAttribute = -2; // <- override if it's already showing
@@ -38,20 +38,20 @@ void ShapeGraphDX::makeSegmentConnections(std::vector<Connector> &connectionset)
     setDisplayedAttribute(static_cast<int>(uwConnCol));
 }
 
-bool ShapeGraphDX::read(std::istream &stream) {
+bool ShapeGraphDM::read(std::istream &stream) {
 
     bool read = getInternalMap().readShapeGraphData(stream);
     // now base class read:
-    read = read && ShapeMapDX::read(stream);
+    read = read && ShapeMapDM::read(stream);
 
     return read;
 }
 
-bool ShapeGraphDX::write(std::ostream &stream) {
+bool ShapeGraphDM::write(std::ostream &stream) {
     bool written = getInternalMap().writeShapeGraphData(stream);
 
     // now simply run base class write:
-    written = written & ShapeMapDX::write(stream);
+    written = written & ShapeMapDM::write(stream);
 
     return written;
 }

@@ -6,7 +6,7 @@
 
 // The meta graph
 
-#include "metagraphdx.hpp"
+#include "metagraphdm.hpp"
 
 #include "salalib/agents/agentanalysis.hpp"
 #include "salalib/alllinemap.hpp"
@@ -38,10 +38,9 @@
 
 #include "salalib/genlib/comm.hpp"
 
-#include <sstream>
 #include <tuple>
 
-MetaGraphDX::MetaGraphDX(std::string name)
+MetaGraphDM::MetaGraphDM(std::string name)
     : m_state(0), m_viewClass(DX_VIEWNONE), m_showGrid(false), m_showText(false),
       currentLayer(std::nullopt) {
     m_metaGraph.name = std::move(name);
@@ -53,7 +52,7 @@ MetaGraphDX::MetaGraphDX(std::string name)
     m_bspNodeTree = BSPNodeTree();
 }
 
-bool MetaGraphDX::setViewClass(int command) {
+bool MetaGraphDM::setViewClass(int command) {
     if (command < 0x10) {
         throw("Use with a show command, not a view class type");
     }
@@ -140,7 +139,7 @@ bool MetaGraphDX::setViewClass(int command) {
     return true;
 }
 
-double MetaGraphDX::getLocationValue(const Point2f &point) {
+double MetaGraphDM::getLocationValue(const Point2f &point) {
     // this varies according to whether axial or vga information is displayed on
     // top
     double val = -2;
@@ -156,7 +155,7 @@ double MetaGraphDX::getLocationValue(const Point2f &point) {
     return val;
 }
 
-bool MetaGraphDX::setGrid(double spacing, const Point2f &offset) {
+bool MetaGraphDM::setGrid(double spacing, const Point2f &offset) {
     m_state &= ~DX_POINTMAPS;
 
     getDisplayedPointMap().getInternalMap().setGrid(spacing, offset);
@@ -172,7 +171,7 @@ bool MetaGraphDX::setGrid(double spacing, const Point2f &offset) {
 }
 
 // AV TV // semifilled
-bool MetaGraphDX::makePoints(const Point2f &p, int fillType, Communicator *communicator) {
+bool MetaGraphDM::makePoints(const Point2f &p, int fillType, Communicator *communicator) {
     //   m_state &= ~POINTS;
 
     try {
@@ -194,12 +193,12 @@ bool MetaGraphDX::makePoints(const Point2f &p, int fillType, Communicator *commu
     return true;
 }
 
-bool MetaGraphDX::clearPoints() {
+bool MetaGraphDM::clearPoints() {
     bool bReturn = getDisplayedPointMap().clearPoints();
     return bReturn;
 }
 
-bool MetaGraphDX::hasVisibleDrawingShapes() {
+bool MetaGraphDM::hasVisibleDrawingShapes() {
     // tries to find at least one visible shape
     for (const auto &pixelGroup : m_drawingFiles) {
         for (const auto &pixel : pixelGroup.maps) {
@@ -211,9 +210,9 @@ bool MetaGraphDX::hasVisibleDrawingShapes() {
     return false;
 }
 
-std::vector<std::pair<std::reference_wrapper<const ShapeMapDX>, int>>
-MetaGraphDX::getShownDrawingMaps() {
-    std::vector<std::pair<std::reference_wrapper<const ShapeMapDX>, int>> maps;
+std::vector<std::pair<std::reference_wrapper<const ShapeMapDM>, int>>
+MetaGraphDM::getShownDrawingMaps() {
+    std::vector<std::pair<std::reference_wrapper<const ShapeMapDM>, int>> maps;
     for (const auto &pixelGroup : m_drawingFiles) {
         int j = 0;
         for (const auto &pixel : pixelGroup.maps) {
@@ -227,19 +226,19 @@ MetaGraphDX::getShownDrawingMaps() {
     return maps;
 }
 
-std::vector<std::pair<std::reference_wrapper<const ShapeMap>, int>> MetaGraphDX::getAsInternalMaps(
-    std::vector<std::pair<std::reference_wrapper<const ShapeMapDX>, int>> maps) {
+std::vector<std::pair<std::reference_wrapper<const ShapeMap>, int>> MetaGraphDM::getAsInternalMaps(
+    std::vector<std::pair<std::reference_wrapper<const ShapeMapDM>, int>> maps) {
     std::vector<std::pair<std::reference_wrapper<const ShapeMap>, int>> internalMaps;
     internalMaps.reserve(maps.size());
     std::transform(maps.begin(), maps.end(), std::back_inserter(internalMaps),
-                   [](std::pair<std::reference_wrapper<const ShapeMapDX>, int> &map) {
+                   [](std::pair<std::reference_wrapper<const ShapeMapDM>, int> &map) {
                        return std::make_pair(std::ref(map.first.get().getInternalMap()),
                                              map.second);
                    });
     return internalMaps;
 }
 
-std::vector<Line4f> MetaGraphDX::getShownDrawingFilesAsLines() {
+std::vector<Line4f> MetaGraphDM::getShownDrawingFilesAsLines() {
     std::vector<Line4f> lines;
     auto shownMaps = getShownDrawingMaps();
     for (const auto &map : shownMaps) {
@@ -252,7 +251,7 @@ std::vector<Line4f> MetaGraphDX::getShownDrawingFilesAsLines() {
     return lines;
 }
 
-std::vector<SalaShape> MetaGraphDX::getShownDrawingFilesAsShapes() {
+std::vector<SalaShape> MetaGraphDM::getShownDrawingFilesAsShapes() {
     std::vector<SalaShape> shapes;
 
     auto shownMaps = getShownDrawingMaps();
@@ -265,7 +264,7 @@ std::vector<SalaShape> MetaGraphDX::getShownDrawingFilesAsShapes() {
     return shapes;
 }
 
-bool MetaGraphDX::makeGraph(Communicator *communicator, int algorithm, double maxdist) {
+bool MetaGraphDM::makeGraph(Communicator *communicator, int algorithm, double maxdist) {
     // this is essentially a version tag, and remains for historical reasons:
     m_state |= DX_ANGULARGRAPH;
 
@@ -289,7 +288,7 @@ bool MetaGraphDX::makeGraph(Communicator *communicator, int algorithm, double ma
     return graphMade;
 }
 
-bool MetaGraphDX::unmakeGraph(bool removeLinks) {
+bool MetaGraphDM::unmakeGraph(bool removeLinks) {
     bool graphUnmade = getDisplayedPointMap().getInternalMap().unmake(removeLinks);
 
     getDisplayedPointMap().setDisplayedAttribute(-2);
@@ -301,7 +300,7 @@ bool MetaGraphDX::unmakeGraph(bool removeLinks) {
     return graphUnmade;
 }
 
-bool MetaGraphDX::analyseGraph(Communicator *communicator, int pointDepthSelection,
+bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelection,
                                AnalysisType outputType, int local, bool gatesOnly, int global,
                                double radius, bool simpleVersion) {
     bool analysisCompleted = false;
@@ -493,7 +492,7 @@ bool MetaGraphDX::analyseGraph(Communicator *communicator, int pointDepthSelecti
 
 //////////////////////////////////////////////////////////////////
 
-bool MetaGraphDX::isEditableMap() {
+bool MetaGraphDM::isEditableMap() {
     if (m_viewClass & DX_VIEWAXIAL) {
         return getDisplayedShapeGraph().isEditable();
     } else if (m_viewClass & DX_VIEWDATA) {
@@ -503,8 +502,8 @@ bool MetaGraphDX::isEditableMap() {
     return false;
 }
 
-ShapeMapDX &MetaGraphDX::getEditableMap() {
-    ShapeMapDX *map = nullptr;
+ShapeMapDM &MetaGraphDM::getEditableMap() {
+    ShapeMapDM *map = nullptr;
     if (m_viewClass & DX_VIEWAXIAL) {
         map = &(getDisplayedShapeGraph());
     } else if (m_viewClass & DX_VIEWDATA) {
@@ -518,7 +517,7 @@ ShapeMapDX &MetaGraphDX::getEditableMap() {
     return *map;
 }
 
-bool MetaGraphDX::makeShape(const Line4f &line) {
+bool MetaGraphDM::makeShape(const Line4f &line) {
     if (!isEditableMap()) {
         return false;
     }
@@ -526,7 +525,7 @@ bool MetaGraphDX::makeShape(const Line4f &line) {
     return (map.makeLineShape(line, true) != -1);
 }
 
-int MetaGraphDX::polyBegin(const Line4f &line) {
+int MetaGraphDM::polyBegin(const Line4f &line) {
     if (!isEditableMap()) {
         return -1;
     }
@@ -534,7 +533,7 @@ int MetaGraphDX::polyBegin(const Line4f &line) {
     return map.polyBegin(line);
 }
 
-bool MetaGraphDX::polyAppend(int shapeRef, const Point2f &point) {
+bool MetaGraphDM::polyAppend(int shapeRef, const Point2f &point) {
     if (!isEditableMap()) {
         return false;
     }
@@ -542,7 +541,7 @@ bool MetaGraphDX::polyAppend(int shapeRef, const Point2f &point) {
     return map.polyAppend(shapeRef, point);
 }
 
-bool MetaGraphDX::polyClose(int shapeRef) {
+bool MetaGraphDM::polyClose(int shapeRef) {
     if (!isEditableMap()) {
         return false;
     }
@@ -550,7 +549,7 @@ bool MetaGraphDX::polyClose(int shapeRef) {
     return map.polyClose(shapeRef);
 }
 
-bool MetaGraphDX::polyCancel(int shapeRef) {
+bool MetaGraphDM::polyCancel(int shapeRef) {
     if (!isEditableMap()) {
         return false;
     }
@@ -558,7 +557,7 @@ bool MetaGraphDX::polyCancel(int shapeRef) {
     return map.polyCancel(shapeRef);
 }
 
-bool MetaGraphDX::moveSelShape(const Line4f &line) {
+bool MetaGraphDM::moveSelShape(const Line4f &line) {
     bool shapeMoved = false;
     if (m_viewClass & DX_VIEWAXIAL) {
         auto &map = getDisplayedShapeGraph();
@@ -594,7 +593,7 @@ bool MetaGraphDX::moveSelShape(const Line4f &line) {
 
 // returns 0: fail, 1: made isovist, 2: made isovist and added new shapemap
 // layer
-int MetaGraphDX::makeIsovist(Communicator *communicator, const Point2f &p, double startangle,
+int MetaGraphDM::makeIsovist(Communicator *communicator, const Point2f &p, double startangle,
                              double endangle, bool, bool closeIsovistPoly) {
     int isovistMade = 0;
     // first make isovist
@@ -648,7 +647,7 @@ static std::pair<double, double> startendangle(Point2f vec, double fov) {
 
 // returns 0: fail, 1: made isovist, 2: made isovist and added new shapemap
 // layer
-int MetaGraphDX::makeIsovistPath(Communicator *communicator, double fov, bool) {
+int MetaGraphDM::makeIsovistPath(Communicator *communicator, double fov, bool) {
     int pathMade = 0;
 
     // must be showing a suitable map -- that is, one which may have polylines or
@@ -670,7 +669,7 @@ int MetaGraphDX::makeIsovistPath(Communicator *communicator, double fov, bool) {
         return 0;
     }
 
-    ShapeMapDX *isovists = nullptr;
+    ShapeMapDM *isovists = nullptr;
 
     bool first = true;
     if (makeBSPtree(m_bspNodeTree, communicator)) {
@@ -728,9 +727,9 @@ int MetaGraphDX::makeIsovistPath(Communicator *communicator, double fov, bool) {
                             isovists->getInternalMap().makePolyShape(iso.getPolygon(), false);
                         auto newPolyIter = isovists->getInternalMap().getAllShapes().find(polyref);
                         if (newPolyIter == isovists->getInternalMap().getAllShapes().end()) {
-                            throw depthmapX::RuntimeException("Failed to create shape (" +
-                                                              std::to_string(polyref) +
-                                                              ") when making isovist path");
+                            throw genlib::RuntimeException("Failed to create shape (" +
+                                                           std::to_string(polyref) +
+                                                           ") when making isovist path");
                         }
                         newPolyIter->second.setCentroid(start);
                         AttributeTable &table = isovists->getInternalMap().getAttributeTable();
@@ -751,7 +750,7 @@ int MetaGraphDX::makeIsovistPath(Communicator *communicator, double fov, bool) {
 
 // this version uses your own isovist (and assumes no communicator required for
 // BSP tree
-bool MetaGraphDX::makeIsovist(const Point2f &p, Isovist &iso) {
+bool MetaGraphDM::makeIsovist(const Point2f &p, Isovist &iso) {
     if (makeBSPtree(m_bspNodeTree)) {
         iso.makeit(m_bspNodeTree.getRoot(), p, m_metaGraph.region);
         return true;
@@ -759,7 +758,7 @@ bool MetaGraphDX::makeIsovist(const Point2f &p, Isovist &iso) {
     return false;
 }
 
-bool MetaGraphDX::makeBSPtree(BSPNodeTree &bspNodeTree, Communicator *communicator) {
+bool MetaGraphDM::makeBSPtree(BSPNodeTree &bspNodeTree, Communicator *communicator) {
     if (bspNodeTree.built()) {
         return true;
     }
@@ -806,7 +805,7 @@ bool MetaGraphDX::makeBSPtree(BSPNodeTree &bspNodeTree, Communicator *communicat
     return m_bspNodeTree.built();
 }
 
-size_t MetaGraphDX::addShapeGraph(ShapeGraphDX &&shapeGraph) {
+size_t MetaGraphDM::addShapeGraph(ShapeGraphDM &&shapeGraph) {
     m_shapeGraphs.emplace_back(std::move(shapeGraph));
     auto mapref = m_shapeGraphs.size() - 1;
     setDisplayedShapeGraphRef(mapref);
@@ -815,12 +814,12 @@ size_t MetaGraphDX::addShapeGraph(ShapeGraphDX &&shapeGraph) {
     return mapref;
 }
 
-size_t MetaGraphDX::addShapeGraph(ShapeGraph &&shapeGraph) {
-    return addShapeGraph(ShapeGraphDX(std::make_unique<ShapeGraph>(std::move(shapeGraph))));
+size_t MetaGraphDM::addShapeGraph(ShapeGraph &&shapeGraph) {
+    return addShapeGraph(ShapeGraphDM(std::make_unique<ShapeGraph>(std::move(shapeGraph))));
 }
 
-size_t MetaGraphDX::addShapeGraph(const std::string &name, int type) {
-    auto mapref = addShapeGraph(ShapeGraphDX(std::make_unique<ShapeGraph>(name, type)));
+size_t MetaGraphDM::addShapeGraph(const std::string &name, int type) {
+    auto mapref = addShapeGraph(ShapeGraphDM(std::make_unique<ShapeGraph>(name, type)));
     // add a couple of default columns:
     AttributeTable &table =
         m_shapeGraphs[static_cast<size_t>(mapref)].getInternalMap().getAttributeTable();
@@ -831,13 +830,13 @@ size_t MetaGraphDX::addShapeGraph(const std::string &name, int type) {
     m_shapeGraphs[mapref].setDisplayedAttribute(static_cast<int>(connIdx));
     return mapref;
 }
-size_t MetaGraphDX::addShapeMap(const std::string &name) {
+size_t MetaGraphDM::addShapeMap(const std::string &name) {
     m_dataMaps.emplace_back(name, ShapeMap::DATAMAP);
     m_state |= DX_DATAMAPS;
     setViewClass(DX_SHOWSHAPETOP);
     return m_dataMaps.size() - 1;
 }
-void MetaGraphDX::removeDisplayedMap() {
+void MetaGraphDM::removeDisplayedMap() {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA: {
         if (!hasDisplayedPointMap())
@@ -873,7 +872,7 @@ void MetaGraphDX::removeDisplayedMap() {
 
 //////////////////////////////////////////////////////////////////
 
-bool MetaGraphDX::convertDrawingToAxial(Communicator *comm, std::string layerName) {
+bool MetaGraphDM::convertDrawingToAxial(Communicator *comm, std::string layerName) {
     int oldstate = m_state;
 
     m_state &= ~DX_SHAPEGRAPHS;
@@ -905,7 +904,7 @@ bool MetaGraphDX::convertDrawingToAxial(Communicator *comm, std::string layerNam
     return converted;
 }
 
-bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layerName, bool keeporiginal,
+bool MetaGraphDM::convertDataToAxial(Communicator *comm, std::string layerName, bool keeporiginal,
                                      bool pushvalues) {
     int oldstate = m_state;
 
@@ -949,7 +948,7 @@ bool MetaGraphDX::convertDataToAxial(Communicator *comm, std::string layerName, 
 
 // typeflag: -1 convert drawing to convex, 0 or 1, convert data to convex (1 is
 // pushvalues)
-bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layerName, bool keeporiginal,
+bool MetaGraphDM::convertToConvex(Communicator *comm, std::string layerName, bool keeporiginal,
                                   int shapeMapType, bool copydata) {
     int oldstate = m_state;
 
@@ -1001,7 +1000,7 @@ bool MetaGraphDX::convertToConvex(Communicator *comm, std::string layerName, boo
     return converted;
 }
 
-bool MetaGraphDX::convertDrawingToSegment(Communicator *comm, std::string layerName) {
+bool MetaGraphDM::convertDrawingToSegment(Communicator *comm, std::string layerName) {
     int oldstate = m_state;
 
     m_state &= ~DX_SHAPEGRAPHS;
@@ -1039,7 +1038,7 @@ bool MetaGraphDX::convertDrawingToSegment(Communicator *comm, std::string layerN
     return converted;
 }
 
-bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layerName, bool keeporiginal,
+bool MetaGraphDM::convertDataToSegment(Communicator *comm, std::string layerName, bool keeporiginal,
                                        bool pushvalues) {
     int oldstate = m_state;
 
@@ -1081,7 +1080,7 @@ bool MetaGraphDX::convertDataToSegment(Communicator *comm, std::string layerName
 
 // note: type flag says whether this is graph to data map or drawing to data map
 
-bool MetaGraphDX::convertToData(Communicator *, std::string layerName, bool keeporiginal,
+bool MetaGraphDM::convertToData(Communicator *, std::string layerName, bool keeporiginal,
                                 int shapeMapType, bool copydata) {
     int oldstate = m_state;
 
@@ -1163,7 +1162,7 @@ bool MetaGraphDX::convertToData(Communicator *, std::string layerName, bool keep
     return converted;
 }
 
-bool MetaGraphDX::convertToDrawing(Communicator *, std::string layerName,
+bool MetaGraphDM::convertToDrawing(Communicator *, std::string layerName,
                                    bool fromDisplayedDataMap) {
     bool converted = false;
 
@@ -1172,7 +1171,7 @@ bool MetaGraphDX::convertToDrawing(Communicator *, std::string layerName,
     m_state &= ~DX_LINEDATA;
 
     try {
-        const ShapeMapDX *sourcemap;
+        const ShapeMapDM *sourcemap;
         if (fromDisplayedDataMap) {
             sourcemap = &(getDisplayedDataMap());
         } else {
@@ -1227,7 +1226,7 @@ bool MetaGraphDX::convertToDrawing(Communicator *, std::string layerName,
     return converted;
 }
 
-bool MetaGraphDX::convertAxialToSegment(Communicator *comm, std::string layerName,
+bool MetaGraphDM::convertAxialToSegment(Communicator *comm, std::string layerName,
                                         bool keeporiginal, bool pushvalues, double stubremoval) {
     if (!hasDisplayedShapeGraph()) {
         return false;
@@ -1271,7 +1270,7 @@ bool MetaGraphDX::convertAxialToSegment(Communicator *comm, std::string layerNam
     return converted;
 }
 
-int MetaGraphDX::loadMifMap(Communicator *comm, std::istream &miffile, std::istream &midfile) {
+int MetaGraphDM::loadMifMap(Communicator *comm, std::istream &miffile, std::istream &midfile) {
     int oldstate = m_state;
     m_state &= ~DX_DATAMAPS;
 
@@ -1306,7 +1305,7 @@ int MetaGraphDX::loadMifMap(Communicator *comm, std::istream &miffile, std::istr
     return mapLoaded;
 }
 
-bool MetaGraphDX::makeAllLineMap(Communicator *communicator, const Point2f &seed) {
+bool MetaGraphDM::makeAllLineMap(Communicator *communicator, const Point2f &seed) {
     int oldstate = m_state;
     m_state &= ~DX_SHAPEGRAPHS;   // Clear axial map data flag (stops accidental redraw
                                   // during reload)
@@ -1350,7 +1349,7 @@ bool MetaGraphDX::makeAllLineMap(Communicator *communicator, const Point2f &seed
     return mapMade;
 }
 
-bool MetaGraphDX::makeFewestLineMap(Communicator *communicator, int replace) {
+bool MetaGraphDM::makeFewestLineMap(Communicator *communicator, int replace) {
     int oldstate = m_state;
     m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
                                 // during reload)
@@ -1415,7 +1414,7 @@ bool MetaGraphDX::makeFewestLineMap(Communicator *communicator, int replace) {
     return mapMade;
 }
 
-bool MetaGraphDX::analyseAxial(Communicator *communicator, std::set<double> radiusSet,
+bool MetaGraphDM::analyseAxial(Communicator *communicator, std::set<double> radiusSet,
                                int weightedMeasureCol, bool choice, bool fulloutput,
                                bool localAnalysis, bool forceLegacyColumnOrder) {
     m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
@@ -1450,7 +1449,7 @@ bool MetaGraphDX::analyseAxial(Communicator *communicator, std::set<double> radi
     return analysisCompleted;
 }
 
-bool MetaGraphDX::analyseSegmentsTulip(Communicator *communicator, std::set<double> &radiusSet,
+bool MetaGraphDM::analyseSegmentsTulip(Communicator *communicator, std::set<double> &radiusSet,
                                        bool selOnly, int tulipBins, int weightedMeasureCol,
                                        RadiusType radiusType, bool choice, int weightedMeasureCol2,
                                        int routeweightCol, bool interactive,
@@ -1487,7 +1486,7 @@ bool MetaGraphDX::analyseSegmentsTulip(Communicator *communicator, std::set<doub
     return analysisCompleted;
 }
 
-bool MetaGraphDX::analyseSegmentsAngular(Communicator *communicator, std::set<double> radiusSet) {
+bool MetaGraphDM::analyseSegmentsAngular(Communicator *communicator, std::set<double> radiusSet) {
     m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
                                 // during reload)
 
@@ -1512,7 +1511,7 @@ bool MetaGraphDX::analyseSegmentsAngular(Communicator *communicator, std::set<do
     return analysisCompleted;
 }
 
-bool MetaGraphDX::analyseTopoMetMultipleRadii(Communicator *communicator,
+bool MetaGraphDM::analyseTopoMetMultipleRadii(Communicator *communicator,
                                               std::set<double> &radiusSet, AnalysisType outputType,
                                               double radius, bool selOnly) {
     m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
@@ -1563,7 +1562,7 @@ bool MetaGraphDX::analyseTopoMetMultipleRadii(Communicator *communicator,
     return analysisCompleted;
 }
 
-bool MetaGraphDX::analyseTopoMet(Communicator *communicator, AnalysisType outputType, double radius,
+bool MetaGraphDM::analyseTopoMet(Communicator *communicator, AnalysisType outputType, double radius,
                                  bool selOnly) {
     m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
                                 // during reload)
@@ -1610,25 +1609,25 @@ bool MetaGraphDX::analyseTopoMet(Communicator *communicator, AnalysisType output
     return analysisCompleted;
 }
 
-size_t MetaGraphDX::loadLineData(Communicator *communicator, const std::string &fileName,
+size_t MetaGraphDM::loadLineData(Communicator *communicator, const std::string &fileName,
                                  int loadType) {
 
-    depthmapX::ImportFileType importFileType = depthmapX::ImportFileType::DXF;
+    sala::ImportFileType importFileType = sala::ImportFileType::DXF;
     if (loadType & DX_DXF) {
-        importFileType = depthmapX::ImportFileType::DXF;
+        importFileType = sala::ImportFileType::DXF;
     }
     if (loadType & DX_CAT) {
-        importFileType = depthmapX::ImportFileType::CAT;
+        importFileType = sala::ImportFileType::CAT;
     } else if (loadType & DX_RT1) {
-        importFileType = depthmapX::ImportFileType::RT1;
+        importFileType = sala::ImportFileType::RT1;
     } else if (loadType & DX_NTF) {
-        importFileType = depthmapX::ImportFileType::NTF;
+        importFileType = sala::ImportFileType::NTF;
     }
     return loadLineData(communicator, fileName, importFileType, loadType & DX_REPLACE);
 }
 
-size_t MetaGraphDX::loadLineData(Communicator *communicator, const std::string &fileName,
-                                 depthmapX::ImportFileType importFileType, bool replace) {
+size_t MetaGraphDM::loadLineData(Communicator *communicator, const std::string &fileName,
+                                 sala::ImportFileType importFileType, bool replace) {
 
     // if bsp tree exists
     m_bspNodeTree.destroy();
@@ -1643,16 +1642,16 @@ size_t MetaGraphDX::loadLineData(Communicator *communicator, const std::string &
 
     std::ifstream fstream(fileName);
 
-    auto newDrawingFile = addDrawingFile(
-        fileName, depthmapX::importFile(fstream, communicator, fileName,
-                                        depthmapX::ImportType::DRAWINGMAP, importFileType));
+    auto newDrawingFile =
+        addDrawingFile(fileName, sala::importFile(fstream, communicator, fileName,
+                                                  sala::ImportType::DRAWINGMAP, importFileType));
 
     m_state |= DX_LINEDATA;
 
     return newDrawingFile;
 }
 
-size_t MetaGraphDX::addDrawingFile(std::string name, std::vector<ShapeMap> &&maps) {
+size_t MetaGraphDM::addDrawingFile(std::string name, std::vector<ShapeMap> &&maps) {
 
     m_drawingFiles.emplace_back(name);
 
@@ -1673,22 +1672,22 @@ size_t MetaGraphDX::addDrawingFile(std::string name, std::vector<ShapeMap> &&map
     return m_drawingFiles.size() - 1;
 }
 
-ShapeMapDX &MetaGraphDX::createNewShapeMap(depthmapX::ImportType mapType, std::string name) {
+ShapeMapDM &MetaGraphDM::createNewShapeMap(sala::ImportType mapType, std::string name) {
 
-    if (mapType == depthmapX::ImportType::DATAMAP) {
+    if (mapType == sala::ImportType::DATAMAP) {
         m_dataMaps.emplace_back(name, ShapeMap::DATAMAP);
         m_dataMaps.back().setDisplayedAttribute(0);
         return m_dataMaps.back();
     }
-    // depthmapX::ImportType::DRAWINGMAP
+    // sala::ImportType::DRAWINGMAP
     m_drawingFiles.back().maps.emplace_back(name, ShapeMap::DRAWINGMAP);
     return m_drawingFiles.back().maps.back();
 }
 
-void MetaGraphDX::deleteShapeMap(depthmapX::ImportType mapType, ShapeMapDX &shapeMap) {
+void MetaGraphDM::deleteShapeMap(sala::ImportType mapType, ShapeMapDM &shapeMap) {
 
     switch (mapType) {
-    case depthmapX::ImportType::DRAWINGMAP: {
+    case sala::ImportType::DRAWINGMAP: {
         // go through the files to find if the layer is in one of them
         // if it is, remove it and if the remaining file is empty then
         // remove that too
@@ -1712,7 +1711,7 @@ void MetaGraphDX::deleteShapeMap(depthmapX::ImportType mapType, ShapeMapDX &shap
         }
         break;
     }
-    case depthmapX::ImportType::DATAMAP: {
+    case sala::ImportType::DATAMAP: {
         for (size_t i = 0; i < m_dataMaps.size(); i++) {
             if (&m_dataMaps[i] == &shapeMap) {
                 m_dataMaps.erase(std::next(m_dataMaps.begin(), static_cast<int>(i)));
@@ -1723,7 +1722,7 @@ void MetaGraphDX::deleteShapeMap(depthmapX::ImportType mapType, ShapeMapDX &shap
     }
 }
 
-void MetaGraphDX::updateParentRegions(ShapeMap &shapeMap) {
+void MetaGraphDM::updateParentRegions(ShapeMap &shapeMap) {
     if (m_drawingFiles.back().groupData.getRegion().atZero()) {
         m_drawingFiles.back().groupData.setRegion(shapeMap.getRegion());
     } else {
@@ -1740,7 +1739,7 @@ void MetaGraphDX::updateParentRegions(ShapeMap &shapeMap) {
 // the tidy(ish) version: still needs to be at top level and switch between
 // layers
 
-bool MetaGraphDX::pushValuesToLayer(int desttype, size_t destlayer, PushValues::Func pushFunc,
+bool MetaGraphDM::pushValuesToLayer(int desttype, size_t destlayer, PushValues::Func pushFunc,
                                     bool countCol) {
     auto sourcetype = m_viewClass;
     auto sourcelayer = getDisplayedMapRef().value();
@@ -1772,7 +1771,7 @@ bool MetaGraphDX::pushValuesToLayer(int desttype, size_t destlayer, PushValues::
 
 // the full ubercontrol version:
 
-bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int desttype,
+bool MetaGraphDM::pushValuesToLayer(int sourcetype, size_t sourcelayer, int desttype,
                                     size_t destlayer, std::optional<size_t> colIn, size_t colOut,
                                     PushValues::Func pushFunc, bool createCountCol) {
     AttributeTable &tableOut = getAttributeTable(desttype, destlayer);
@@ -1885,14 +1884,14 @@ bool MetaGraphDX::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
 // Agent functionality: some of it still kept here with the metagraph
 // (to allow push value to layer and back again)
 
-void MetaGraphDX::runAgentEngine(Communicator *comm, std::unique_ptr<IAnalysis> &analysis) {
+void MetaGraphDM::runAgentEngine(Communicator *comm, std::unique_ptr<IAnalysis> &analysis) {
     if (!hasDisplayedPointMap()) {
-        throw(depthmapX::RuntimeException("No Pointmap on display"));
+        throw(genlib::RuntimeException("No Pointmap on display"));
     }
     auto &map = getDisplayedPointMap();
     auto agentAnalysis = dynamic_cast<AgentAnalysis *>(analysis.get());
     if (!agentAnalysis) {
-        throw(depthmapX::RuntimeException("No agent analysis provided to runAgentEngine function"));
+        throw(genlib::RuntimeException("No agent analysis provided to runAgentEngine function"));
     }
     agentAnalysis->run(comm);
 
@@ -1905,7 +1904,7 @@ void MetaGraphDX::runAgentEngine(Communicator *comm, std::unique_ptr<IAnalysis> 
 
 // Thru vision
 // TODO: Undocumented functionality
-bool MetaGraphDX::analyseThruVision(Communicator *comm, std::optional<size_t> gatelayer) {
+bool MetaGraphDM::analyseThruVision(Communicator *comm, std::optional<size_t> gatelayer) {
     bool analysisCompleted = false;
 
     auto &table = getDisplayedPointMap().getAttributeTable();
@@ -1947,7 +1946,7 @@ bool MetaGraphDX::analyseThruVision(Communicator *comm, std::optional<size_t> ga
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-std::optional<size_t> MetaGraphDX::getDisplayedMapRef() const {
+std::optional<size_t> MetaGraphDM::getDisplayedMapRef() const {
     std::optional<size_t> ref = std::nullopt;
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
@@ -1972,7 +1971,7 @@ std::optional<size_t> MetaGraphDX::getDisplayedMapRef() const {
 // I'd like to use this more often so that several classes other than data maps
 // and shape graphs can be used in the future
 
-int MetaGraphDX::getDisplayedMapType() {
+int MetaGraphDM::getDisplayedMapType() {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
         return ShapeMap::POINTMAP;
@@ -1986,7 +1985,7 @@ int MetaGraphDX::getDisplayedMapType() {
     return ShapeMap::EMPTYMAP;
 }
 
-AttributeTable &MetaGraphDX::getDisplayedMapAttributes() {
+AttributeTable &MetaGraphDM::getDisplayedMapAttributes() {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
         return getDisplayedPointMap().getAttributeTable();
@@ -1995,10 +1994,10 @@ AttributeTable &MetaGraphDX::getDisplayedMapAttributes() {
     case DX_VIEWDATA:
         return getDisplayedDataMap().getAttributeTable();
     }
-    throw depthmapX::RuntimeException("No map displayed to get attribute table from");
+    throw genlib::RuntimeException("No map displayed to get attribute table from");
 }
 
-bool MetaGraphDX::hasVisibleDrawingLayers() {
+bool MetaGraphDM::hasVisibleDrawingLayers() {
     if (!m_drawingFiles.empty()) {
         for (const auto &pixelGroup : m_drawingFiles) {
             for (const auto &pixel : pixelGroup.maps) {
@@ -2010,20 +2009,20 @@ bool MetaGraphDX::hasVisibleDrawingLayers() {
     return false;
 }
 
-Region4f MetaGraphDX::getBoundingBox() const {
+Region4f MetaGraphDM::getBoundingBox() const {
     Region4f bounds = m_metaGraph.region;
     if (bounds.atZero() &&
-        ((getState() & MetaGraphDX::DX_SHAPEGRAPHS) == MetaGraphDX::DX_SHAPEGRAPHS)) {
+        ((getState() & MetaGraphDM::DX_SHAPEGRAPHS) == MetaGraphDM::DX_SHAPEGRAPHS)) {
         bounds = getDisplayedShapeGraph().getRegion();
     }
-    if (bounds.atZero() && ((getState() & MetaGraphDX::DX_DATAMAPS) == MetaGraphDX::DX_DATAMAPS)) {
+    if (bounds.atZero() && ((getState() & MetaGraphDM::DX_DATAMAPS) == MetaGraphDM::DX_DATAMAPS)) {
         bounds = getDisplayedDataMap().getRegion();
     }
     return bounds;
 }
 
 // note: 0 is not at all editable, 1 is editable off and 2 is editable on
-int MetaGraphDX::isEditable() const {
+int MetaGraphDM::isEditable() const {
     int editable = 0;
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
@@ -2048,7 +2047,7 @@ int MetaGraphDX::isEditable() const {
     return editable;
 }
 
-bool MetaGraphDX::canUndo() const {
+bool MetaGraphDM::canUndo() const {
     bool canundo = false;
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
@@ -2064,7 +2063,7 @@ bool MetaGraphDX::canUndo() const {
     return canundo;
 }
 
-void MetaGraphDX::undo() {
+void MetaGraphDM::undo() {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
         getDisplayedPointMap().getInternalMap().undoPoints();
@@ -2080,7 +2079,7 @@ void MetaGraphDX::undo() {
 
 // Moving to global ways of doing things:
 
-std::optional<size_t> MetaGraphDX::addAttribute(const std::string &name) {
+std::optional<size_t> MetaGraphDM::addAttribute(const std::string &name) {
     std::optional<size_t> col = std::nullopt;
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
@@ -2096,7 +2095,7 @@ std::optional<size_t> MetaGraphDX::addAttribute(const std::string &name) {
     return col;
 }
 
-void MetaGraphDX::removeAttribute(size_t col) {
+void MetaGraphDM::removeAttribute(size_t col) {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
         getDisplayedPointMap().getInternalMap().removeAttribute(col);
@@ -2110,11 +2109,11 @@ void MetaGraphDX::removeAttribute(size_t col) {
     }
 }
 
-bool MetaGraphDX::isAttributeLocked(size_t col) {
+bool MetaGraphDM::isAttributeLocked(size_t col) {
     return getAttributeTable(m_viewClass).getColumn(col).isLocked();
 }
 
-int MetaGraphDX::getDisplayedAttribute() const {
+int MetaGraphDM::getDisplayedAttribute() const {
     int col = -1;
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
@@ -2131,7 +2130,7 @@ int MetaGraphDX::getDisplayedAttribute() const {
 }
 
 // this is coming from the front end, so force override:
-void MetaGraphDX::setDisplayedAttribute(int col) {
+void MetaGraphDM::setDisplayedAttribute(int col) {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
         getDisplayedPointMap().overrideDisplayedAttribute(-2);
@@ -2150,7 +2149,7 @@ void MetaGraphDX::setDisplayedAttribute(int col) {
 
 // const and non-const versions:
 
-AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
+AttributeTable &MetaGraphDM::getAttributeTable(std::optional<size_t> type,
                                                std::optional<size_t> layer) {
     AttributeTable *tab = nullptr;
     if (!type.has_value()) {
@@ -2173,7 +2172,7 @@ AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
     return *tab;
 }
 
-const AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
+const AttributeTable &MetaGraphDM::getAttributeTable(std::optional<size_t> type,
                                                      std::optional<size_t> layer) const {
     const AttributeTable *tab = nullptr;
     if (!type.has_value()) {
@@ -2196,7 +2195,7 @@ const AttributeTable &MetaGraphDX::getAttributeTable(std::optional<size_t> type,
     return *tab;
 }
 
-MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromFile(const std::string &filename) {
+MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::readFromFile(const std::string &filename) {
 
     if (filename.empty()) {
         return MetaGraphReadWrite::ReadWriteStatus::NOT_A_GRAPH;
@@ -2212,7 +2211,7 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromFile(const std::string 
     return result;
 }
 
-MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromStream(std::istream &stream,
+MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::readFromStream(std::istream &stream,
                                                                 const std::string &) {
     m_state = 0; // <- clear the state out
 
@@ -2235,10 +2234,10 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromStream(std::istream &st
                 for (auto &&map : mapGroup.second) {
                     m_drawingFiles.back().maps.emplace_back(
                         std::make_unique<ShapeMap>(std::move(map)));
-                    auto &newMapDX = m_drawingFiles.back().maps.back();
-                    newMapDX.setEditable(std::get<0>(*ddIt));
-                    newMapDX.setShow(std::get<1>(*ddIt));
-                    newMapDX.setDisplayedAttribute(std::get<2>(*ddIt));
+                    auto &newMapDM = m_drawingFiles.back().maps.back();
+                    newMapDM.setEditable(std::get<0>(*ddIt));
+                    newMapDM.setShow(std::get<1>(*ddIt));
+                    newMapDM.setDisplayedAttribute(std::get<2>(*ddIt));
                     ddIt++;
                 }
                 gddIt++;
@@ -2249,8 +2248,8 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromStream(std::istream &st
             auto ddIt = dd.perPointMap.begin();
             for (auto &&map : mgd.pointMaps) {
                 m_pointMaps.emplace_back(std::make_unique<PointMap>(std::move(map)));
-                auto &newMapDX = m_pointMaps.back();
-                newMapDX.setDisplayedAttribute(*ddIt);
+                auto &newMapDM = m_pointMaps.back();
+                newMapDM.setDisplayedAttribute(*ddIt);
                 ddIt++;
             }
         }
@@ -2258,10 +2257,10 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromStream(std::istream &st
             auto ddIt = dd.perDataMap.begin();
             for (auto &&map : mgd.dataMaps) {
                 m_dataMaps.emplace_back(std::make_unique<ShapeMap>(std::move(map)));
-                auto &newMapDX = m_dataMaps.back();
-                newMapDX.setEditable(std::get<0>(*ddIt));
-                newMapDX.setShow(std::get<1>(*ddIt));
-                newMapDX.setDisplayedAttribute(std::get<2>(*ddIt));
+                auto &newMapDM = m_dataMaps.back();
+                newMapDM.setEditable(std::get<0>(*ddIt));
+                newMapDM.setShow(std::get<1>(*ddIt));
+                newMapDM.setDisplayedAttribute(std::get<2>(*ddIt));
                 ddIt++;
             }
         }
@@ -2269,10 +2268,10 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromStream(std::istream &st
             auto ddIt = dd.perShapeGraph.begin();
             for (auto &&map : mgd.shapeGraphs) {
                 m_shapeGraphs.emplace_back(std::make_unique<ShapeGraph>(std::move(map)));
-                auto &newMapDX = m_shapeGraphs.back();
-                newMapDX.setEditable(std::get<0>(*ddIt));
-                newMapDX.setShow(std::get<1>(*ddIt));
-                newMapDX.setDisplayedAttribute(std::get<2>(*ddIt));
+                auto &newMapDM = m_shapeGraphs.back();
+                newMapDM.setEditable(std::get<0>(*ddIt));
+                newMapDM.setShow(std::get<1>(*ddIt));
+                newMapDM.setDisplayedAttribute(std::get<2>(*ddIt));
                 ddIt++;
             }
         }
@@ -2319,7 +2318,7 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::readFromStream(std::istream &st
     return MetaGraphReadWrite::ReadWriteStatus::OK;
 }
 
-MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::write(const std::string &filename, int version,
+MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::write(const std::string &filename, int version,
                                                        bool currentlayer, bool ignoreDisplayData) {
     std::ofstream stream;
 
@@ -2340,31 +2339,31 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::write(const std::string &filena
     std::vector<std::reference_wrapper<ShapeGraph>> shapeGraphs;
     std::vector<ShapeMapDisplayData> perShapeGraph;
 
-    for (auto &mapGroupDX : m_drawingFiles) {
-        drawingFiles.push_back(std::make_pair(mapGroupDX.groupData.getInternalData(),
+    for (auto &mapGroupDM : m_drawingFiles) {
+        drawingFiles.push_back(std::make_pair(mapGroupDM.groupData.getInternalData(),
                                               std::vector<std::reference_wrapper<ShapeMap>>()));
         perDrawingMap.emplace_back();
         auto &newMapGroup = drawingFiles.back();
         auto &newDisplayData = perDrawingMap.back();
-        for (auto &mapDX : mapGroupDX.maps) {
-            newMapGroup.second.push_back(mapDX.getInternalMap());
-            newDisplayData.push_back(std::make_tuple(mapDX.isEditable(), mapDX.isShown(),
-                                                     mapDX.getDisplayedAttribute()));
+        for (auto &mapDM : mapGroupDM.maps) {
+            newMapGroup.second.push_back(mapDM.getInternalMap());
+            newDisplayData.push_back(std::make_tuple(mapDM.isEditable(), mapDM.isShown(),
+                                                     mapDM.getDisplayedAttribute()));
         }
     }
-    for (auto &mapDX : m_pointMaps) {
-        pointMaps.push_back(mapDX.getInternalMap());
-        perPointMap.push_back(mapDX.getDisplayedAttribute());
+    for (auto &mapDM : m_pointMaps) {
+        pointMaps.push_back(mapDM.getInternalMap());
+        perPointMap.push_back(mapDM.getDisplayedAttribute());
     }
-    for (auto &mapDX : m_dataMaps) {
-        dataMaps.push_back(mapDX.getInternalMap());
+    for (auto &mapDM : m_dataMaps) {
+        dataMaps.push_back(mapDM.getInternalMap());
         perDataMap.push_back(
-            std::make_tuple(mapDX.isEditable(), mapDX.isShown(), mapDX.getDisplayedAttribute()));
+            std::make_tuple(mapDM.isEditable(), mapDM.isShown(), mapDM.getDisplayedAttribute()));
     }
-    for (auto &mapDX : m_shapeGraphs) {
-        shapeGraphs.push_back(mapDX.getInternalMap());
+    for (auto &mapDM : m_shapeGraphs) {
+        shapeGraphs.push_back(mapDM.getInternalMap());
         perShapeGraph.push_back(
-            std::make_tuple(mapDX.isEditable(), mapDX.isShown(), mapDX.getDisplayedAttribute()));
+            std::make_tuple(mapDM.isEditable(), mapDM.isShown(), mapDM.getDisplayedAttribute()));
     }
 
     if (!ignoreDisplayData) {
@@ -2414,7 +2413,7 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDX::write(const std::string &filena
     return MetaGraphReadWrite::ReadWriteStatus::OK;
 }
 
-std::streampos MetaGraphDX::skipVirtualMem(std::istream &stream) {
+std::streampos MetaGraphDM::skipVirtualMem(std::istream &stream) {
     // it's graph virtual memory: skip it
     int nodes = -1;
     stream.read(reinterpret_cast<char *>(&nodes), sizeof(nodes));
@@ -2430,7 +2429,7 @@ std::streampos MetaGraphDX::skipVirtualMem(std::istream &stream) {
     return (stream.tellg());
 }
 
-std::vector<SimpleLine> MetaGraphDX::getVisibleDrawingLines() {
+std::vector<SimpleLine> MetaGraphDM::getVisibleDrawingLines() {
 
     std::vector<SimpleLine> lines;
 
@@ -2443,7 +2442,7 @@ std::vector<SimpleLine> MetaGraphDX::getVisibleDrawingLines() {
     return lines;
 }
 
-size_t MetaGraphDX::addNewPointMap(const std::string &name) {
+size_t MetaGraphDM::addNewPointMap(const std::string &name) {
     std::string myname = name;
     int counter = 1;
     bool duplicate = true;
@@ -2462,7 +2461,7 @@ size_t MetaGraphDX::addNewPointMap(const std::string &name) {
     return m_pointMaps.size() - 1;
 }
 
-void MetaGraphDX::makeViewportShapes(const Region4f &viewport) const {
+void MetaGraphDM::makeViewportShapes(const Region4f &viewport) const {
     currentLayer = -1;
     size_t di = m_drawingFiles.size() - 1;
     for (auto iter = m_drawingFiles.rbegin(); iter != m_drawingFiles.rend(); iter++) {
@@ -2485,7 +2484,7 @@ void MetaGraphDX::makeViewportShapes(const Region4f &viewport) const {
     }
 }
 
-bool MetaGraphDX::findNextShape(const ShapeMapGroup &spf, bool &nextlayer) const {
+bool MetaGraphDM::findNextShape(const ShapeMapGroup &spf, bool &nextlayer) const {
     if (!spf.groupData.hasCurrentLayer())
         return false;
 
@@ -2505,7 +2504,7 @@ bool MetaGraphDX::findNextShape(const ShapeMapGroup &spf, bool &nextlayer) const
     return true;
 }
 
-bool MetaGraphDX::findNextShape(bool &nextlayer) const {
+bool MetaGraphDM::findNextShape(bool &nextlayer) const {
     if (!currentLayer.has_value())
         return false;
     while (!findNextShape(m_drawingFiles[currentLayer.value()], nextlayer)) {

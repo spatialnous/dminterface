@@ -2,20 +2,20 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-target_sources(${dxproject}
+target_sources(${dminterface}
     PRIVATE
-        metagraphdx.cpp
-        pointmapdx.cpp
-        shapemapdx.cpp
-        shapegraphdx.cpp
+        metagraphdm.cpp
+        pointmapdm.cpp
+        shapemapdm.cpp
+        shapegraphdm.cpp
         options.hpp
     PUBLIC
         comm.hpp
-        metagraphdx.hpp
-        pointmapdx.hpp
-        shapemapdx.hpp
-        shapegraphdx.hpp
-        shapemapgroupdatadx.hpp
-        attributemapdx.hpp
+        metagraphdm.hpp
+        pointmapdm.hpp
+        shapemapdm.hpp
+        shapegraphdm.hpp
+        shapemapgroupdatadm.hpp
+        attributemapdm.hpp
 )
 

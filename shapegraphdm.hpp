@@ -4,18 +4,18 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// A representation of a sala ShapeGraph in depthmapX
+// A representation of a sala ShapeGraph in the Qt gui
 
 #pragma once
 
-#include "shapemapdx.hpp"
+#include "shapemapdm.hpp"
 
 #include "salalib/shapegraph.hpp"
 
-class ShapeGraphDX : public ShapeMapDX {
+class ShapeGraphDM : public ShapeMapDM {
 
   public:
-    ShapeGraphDX(std::unique_ptr<ShapeGraph> &&map) : ShapeMapDX(std::move(map)) {}
+    ShapeGraphDM(std::unique_ptr<ShapeGraph> &&map) : ShapeMapDM(std::move(map)) {}
 
     ShapeGraph &getInternalMap() override { return *static_cast<ShapeGraph *>(m_map.get()); }
     const ShapeGraph &getInternalMap() const override {

@@ -4,36 +4,35 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "shapemapdx.hpp"
+#include "shapemapdm.hpp"
 #include "salalib/tolerances.hpp"
-#include <numeric>
 
-void ShapeMapDX::init(size_t size, const Region4f &r) {
+void ShapeMapDM::init(size_t size, const Region4f &r) {
     m_displayShapes.clear();
     getInternalMap().init(size, r);
 }
 
-double ShapeMapDX::getDisplayMinValue() const {
+double ShapeMapDM::getDisplayMinValue() const {
     return (m_displayedAttribute != -1)
                ? getInternalMap().getDisplayMinValue(static_cast<size_t>(m_displayedAttribute))
                : 0;
 }
 
-double ShapeMapDX::getDisplayMaxValue() const {
+double ShapeMapDM::getDisplayMaxValue() const {
     return (m_displayedAttribute != -1)
                ? getInternalMap().getDisplayMaxValue(static_cast<size_t>(m_displayedAttribute))
                : getInternalMap().getDefaultMaxValue();
 }
 
-const DisplayParams &ShapeMapDX::getDisplayParams() const {
+const DisplayParams &ShapeMapDM::getDisplayParams() const {
     return getInternalMap().getDisplayParams(static_cast<size_t>(m_displayedAttribute));
 }
 
-void ShapeMapDX::setDisplayParams(const DisplayParams &dp, bool applyToAll) {
+void ShapeMapDM::setDisplayParams(const DisplayParams &dp, bool applyToAll) {
     getInternalMap().setDisplayParams(dp, static_cast<size_t>(m_displayedAttribute), applyToAll);
 }
 
-void ShapeMapDX::setDisplayedAttribute(int col) {
+void ShapeMapDM::setDisplayedAttribute(int col) {
     if (!m_invalidate && m_displayedAttribute == col) {
         return;
     }
@@ -46,12 +45,12 @@ void ShapeMapDX::setDisplayedAttribute(int col) {
     m_invalidate = false;
 }
 
-void ShapeMapDX::setDisplayedAttribute(const std::string &col) {
+void ShapeMapDM::setDisplayedAttribute(const std::string &col) {
     setDisplayedAttribute(
         static_cast<int>(getInternalMap().getAttributeTable().getColumnIndex(col)));
 }
 
-int ShapeMapDX::getDisplayedAttribute() const {
+int ShapeMapDM::getDisplayedAttribute() const {
     if (m_displayedAttribute == getInternalMap().getAttributeTableHandle().getDisplayColIndex())
         return m_displayedAttribute;
     if (getInternalMap().getAttributeTableHandle().getDisplayColIndex() != -2) {
@@ -60,26 +59,26 @@ int ShapeMapDX::getDisplayedAttribute() const {
     return m_displayedAttribute;
 }
 
-float ShapeMapDX::getDisplayedAverage() {
+float ShapeMapDM::getDisplayedAverage() {
     return (static_cast<float>(
         getInternalMap().getDisplayedAverage(static_cast<size_t>(m_displayedAttribute))));
 }
 
-void ShapeMapDX::invalidateDisplayedAttribute() { m_invalidate = true; }
+void ShapeMapDM::invalidateDisplayedAttribute() { m_invalidate = true; }
 
-void ShapeMapDX::clearAll() {
+void ShapeMapDM::clearAll() {
     m_displayShapes.clear();
     getInternalMap().clearAll();
     m_displayedAttribute = -1;
 }
 
-int ShapeMapDX::makePointShape(const Point2f &point, bool tempshape,
+int ShapeMapDM::makePointShape(const Point2f &point, bool tempshape,
                                const std::map<size_t, float> &extraAttributes) {
     return makePointShapeWithRef(point, getInternalMap().getNextShapeKey(), tempshape,
                                  extraAttributes);
 }
 
-bool ShapeMapDX::read(std::istream &stream) {
+bool ShapeMapDM::read(std::istream &stream) {
 
     m_displayShapes.clear();
 
@@ -92,7 +91,7 @@ bool ShapeMapDX::read(std::istream &stream) {
     return true;
 }
 
-bool ShapeMapDX::write(std::ostream &stream) {
+bool ShapeMapDM::write(std::ostream &stream) {
     bool written = getInternalMap().writeNameType(stream);
 
     stream.write(reinterpret_cast<const char *>(&m_show), sizeof(m_show));
@@ -110,7 +109,7 @@ bool ShapeMapDX::write(std::ostream &stream) {
     return written;
 }
 
-bool ShapeMapDX::findNextShape(bool &nextlayer) const {
+bool ShapeMapDM::findNextShape(bool &nextlayer) const {
     // note: will not work immediately after a new poly has been added:
     // makeViewportShapes first
     if (m_newshape) {
@@ -131,16 +130,16 @@ bool ShapeMapDX::findNextShape(bool &nextlayer) const {
     }
 }
 
-const SalaShape &ShapeMapDX::getNextShape() const {
+const SalaShape &ShapeMapDM::getNextShape() const {
     auto x = m_displayShapes[static_cast<size_t>(m_currentShape)]; // x has display order in it
     m_displayShapes[static_cast<size_t>(m_currentShape)] =
         static_cast<size_t>(-1); // you've drawn it
-    return depthmapX::getMapAtIndex(getInternalMap().getAllShapes(), x)->second;
+    return genlib::getMapAtIndex(getInternalMap().getAllShapes(), x)->second;
 }
 
 // this is all very similar to spacepixel, apart from a few minor details
 
-void ShapeMapDX::makeViewportShapes(const Region4f &viewport) const {
+void ShapeMapDM::makeViewportShapes(const Region4f &viewport) const {
 
     auto &shapes = getInternalMap().getAllShapes();
     if (m_displayShapes.empty() || m_newshape) {
@@ -156,7 +155,7 @@ void ShapeMapDX::makeViewportShapes(const Region4f &viewport) const {
     m_curunlinkpoint = -1;
 }
 
-int ShapeMapDX::makePointShapeWithRef(const Point2f &point, int shapeRef, bool tempshape,
+int ShapeMapDM::makePointShapeWithRef(const Point2f &point, int shapeRef, bool tempshape,
                                       const std::map<size_t, float> &extraAttributes) {
     int newShapeRef =
         getInternalMap().makePointShapeWithRef(point, shapeRef, tempshape, extraAttributes);
@@ -166,13 +165,13 @@ int ShapeMapDX::makePointShapeWithRef(const Point2f &point, int shapeRef, bool t
     return newShapeRef;
 }
 
-int ShapeMapDX::makeLineShape(const Line4f &line, bool throughUi, bool tempshape,
+int ShapeMapDM::makeLineShape(const Line4f &line, bool throughUi, bool tempshape,
                               const std::map<size_t, float> &extraAttributes) {
     return makeLineShapeWithRef(line, getInternalMap().getNextShapeKey(), throughUi, tempshape,
                                 extraAttributes);
 }
 
-int ShapeMapDX::makeLineShapeWithRef(const Line4f &line, int shapeRef, bool throughUi,
+int ShapeMapDM::makeLineShapeWithRef(const Line4f &line, int shapeRef, bool throughUi,
                                      bool tempshape,
                                      const std::map<size_t, float> &extraAttributes) {
     // note, map must have editable flag on if we are to make a shape through the
@@ -195,13 +194,13 @@ int ShapeMapDX::makeLineShapeWithRef(const Line4f &line, int shapeRef, bool thro
     return newShapeRef;
 }
 
-int ShapeMapDX::makePolyShape(const std::vector<Point2f> &points, bool open, bool tempshape,
+int ShapeMapDM::makePolyShape(const std::vector<Point2f> &points, bool open, bool tempshape,
                               const std::map<size_t, float> &extraAttributes) {
     return makePolyShapeWithRef(points, getInternalMap().getNextShapeKey(), open, tempshape,
                                 extraAttributes);
 }
 
-int ShapeMapDX::makePolyShapeWithRef(const std::vector<Point2f> &points, bool open, int shapeRef,
+int ShapeMapDM::makePolyShapeWithRef(const std::vector<Point2f> &points, bool open, int shapeRef,
                                      bool tempshape,
                                      const std::map<size_t, float> &extraAttributes) {
     int newShapeRef =
@@ -212,7 +211,7 @@ int ShapeMapDX::makePolyShapeWithRef(const std::vector<Point2f> &points, bool op
     return newShapeRef;
 }
 
-int ShapeMapDX::makeShape(const SalaShape &poly, int overrideShapeRef,
+int ShapeMapDM::makeShape(const SalaShape &poly, int overrideShapeRef,
                           const std::map<size_t, float> &extraAttributes) {
     int shapeRef = getInternalMap().makeShape(poly, overrideShapeRef, extraAttributes);
     m_newshape = true;
@@ -221,14 +220,14 @@ int ShapeMapDX::makeShape(const SalaShape &poly, int overrideShapeRef,
 
 // n.b., only works from current selection (and uses point selected attribute)
 
-int ShapeMapDX::makeShapeFromPointSet(const PointMapDX &pointmap) {
+int ShapeMapDM::makeShapeFromPointSet(const PointMapDM &pointmap) {
     int shapeRef =
         getInternalMap().makeShapeFromPointSet(pointmap.getInternalMap(), pointmap.getSelSet());
     m_newshape = true;
     return shapeRef;
 }
 
-bool ShapeMapDX::moveShape(int shaperef, const Line4f &line, bool undoing) {
+bool ShapeMapDM::moveShape(int shaperef, const Line4f &line, bool undoing) {
     bool moved = getInternalMap().moveShape(shaperef, line, undoing);
 
     if (getInternalMap().hasGraph()) {
@@ -239,7 +238,7 @@ bool ShapeMapDX::moveShape(int shaperef, const Line4f &line, bool undoing) {
     return moved;
 }
 
-int ShapeMapDX::polyBegin(const Line4f &line) {
+int ShapeMapDM::polyBegin(const Line4f &line) {
     auto newShapeRef = getInternalMap().polyBegin(line);
 
     // update displayed attribute
@@ -252,12 +251,12 @@ int ShapeMapDX::polyBegin(const Line4f &line) {
     return newShapeRef;
 }
 
-bool ShapeMapDX::polyAppend(int shapeRef, const Point2f &point) {
+bool ShapeMapDM::polyAppend(int shapeRef, const Point2f &point) {
     return getInternalMap().polyAppend(shapeRef, point);
 }
-bool ShapeMapDX::polyClose(int shapeRef) { return getInternalMap().polyClose(shapeRef); }
+bool ShapeMapDM::polyClose(int shapeRef) { return getInternalMap().polyClose(shapeRef); }
 
-bool ShapeMapDX::polyCancel(int shapeRef) {
+bool ShapeMapDM::polyCancel(int shapeRef) {
     bool polyCancelled = getInternalMap().polyCancel(shapeRef);
 
     // update displayed attribute
@@ -266,7 +265,7 @@ bool ShapeMapDX::polyCancel(int shapeRef) {
     return polyCancelled;
 }
 
-bool ShapeMapDX::removeSelected() {
+bool ShapeMapDM::removeSelected() {
     // note, map must have editable flag on if we are to remove shape:
     if (m_editable) {
         // m_selectionSet selection set is in order!
@@ -284,21 +283,21 @@ bool ShapeMapDX::removeSelected() {
     return false;
 }
 
-void ShapeMapDX::removeShape(int shaperef, bool undoing) {
+void ShapeMapDM::removeShape(int shaperef, bool undoing) {
     getInternalMap().removeShape(shaperef, undoing);
 
     m_invalidate = true;
     m_newshape = true;
 }
 
-void ShapeMapDX::undo() {
+void ShapeMapDM::undo() {
     getInternalMap().undo();
     invalidateDisplayedAttribute();
     setDisplayedAttribute(m_displayedAttribute);
     m_newshape = true;
 }
 
-void ShapeMapDX::makeShapeConnections() {
+void ShapeMapDM::makeShapeConnections() {
     getInternalMap().makeShapeConnections();
 
     m_displayedAttribute = -1; // <- override if it's already showing
@@ -307,33 +306,33 @@ void ShapeMapDX::makeShapeConnections() {
     setDisplayedAttribute(static_cast<int>(connCol));
 }
 
-double ShapeMapDX::getLocationValue(const Point2f &point) const {
+double ShapeMapDM::getLocationValue(const Point2f &point) const {
     if (m_displayedAttribute == -1) {
         return getInternalMap().getLocationValue(point, std::nullopt);
     }
     return getInternalMap().getLocationValue(point, m_displayedAttribute);
 }
 
-const PafColor ShapeMapDX::getShapeColor() const {
+const PafColor ShapeMapDM::getShapeColor() const {
     AttributeKey key(static_cast<int>(m_displayShapes[static_cast<size_t>(m_currentShape)]));
     const AttributeRow &row = getInternalMap().getAttributeTable().getRow(key);
     return dXreimpl::getDisplayColor(key, row, getInternalMap().getAttributeTableHandle(),
                                      m_selectionSet, true);
 }
 
-bool ShapeMapDX::getShapeSelected() const {
+bool ShapeMapDM::getShapeSelected() const {
     return m_selectionSet.find(static_cast<int>(
                m_displayShapes[static_cast<size_t>(m_currentShape)])) != m_selectionSet.end();
 }
 
-bool ShapeMapDX::linkShapes(const Point2f &p) {
+bool ShapeMapDM::linkShapes(const Point2f &p) {
     if (m_selectionSet.size() != 1) {
         return false;
     }
     return getInternalMap().linkShapes(p, *m_selectionSet.begin());
 }
 
-bool ShapeMapDX::unlinkShapes(const Point2f &p) {
+bool ShapeMapDM::unlinkShapes(const Point2f &p) {
     if (m_selectionSet.size() != 1) {
         return false;
     }
@@ -341,43 +340,42 @@ bool ShapeMapDX::unlinkShapes(const Point2f &p) {
     return getInternalMap().unlinkShapes(p, *m_selectionSet.begin());
 }
 
-bool ShapeMapDX::findNextLinkLine() const {
+bool ShapeMapDM::findNextLinkLine() const {
     if (m_curlinkline < static_cast<int>(getInternalMap().getLinks().size())) {
         m_curlinkline++;
     }
     return (m_curlinkline < static_cast<int>(getInternalMap().getLinks().size()));
 }
 
-Line4f ShapeMapDX::getNextLinkLine() const {
+Line4f ShapeMapDM::getNextLinkLine() const {
     // note, links are stored directly by rowid, not by key:
     if (m_curlinkline < static_cast<int>(getInternalMap().getLinks().size())) {
-        return Line4f(depthmapX::getMapAtIndex(
-                          getInternalMap().getAllShapes(),
-                          getInternalMap().getLinks()[static_cast<size_t>(m_curlinkline)].a)
-                          ->second.getCentroid(),
-                      depthmapX::getMapAtIndex(
-                          getInternalMap().getAllShapes(),
-                          getInternalMap().getLinks()[static_cast<size_t>(m_curlinkline)].b)
-                          ->second.getCentroid());
+        return Line4f(
+            genlib::getMapAtIndex(getInternalMap().getAllShapes(),
+                                  getInternalMap().getLinks()[static_cast<size_t>(m_curlinkline)].a)
+                ->second.getCentroid(),
+            genlib::getMapAtIndex(getInternalMap().getAllShapes(),
+                                  getInternalMap().getLinks()[static_cast<size_t>(m_curlinkline)].b)
+                ->second.getCentroid());
     }
     return Line4f();
 }
-bool ShapeMapDX::findNextUnlinkPoint() const {
+bool ShapeMapDM::findNextUnlinkPoint() const {
     if (m_curunlinkpoint < static_cast<int>(getInternalMap().getUnlinks().size())) {
         m_curunlinkpoint++;
     }
     return (m_curunlinkpoint < static_cast<int>(getInternalMap().getUnlinks().size()));
 }
 
-Point2f ShapeMapDX::getNextUnlinkPoint() const {
+Point2f ShapeMapDM::getNextUnlinkPoint() const {
     // note, links are stored directly by rowid, not by key:
     if (m_curunlinkpoint < static_cast<int>(getInternalMap().getUnlinks().size())) {
-        return depthmapX::getMapAtIndex(
+        return genlib::getMapAtIndex(
                    getInternalMap().getAllShapes(),
                    getInternalMap().getUnlinks()[static_cast<size_t>(m_curunlinkpoint)].a)
             ->second.getLine()
             .intersection_point(
-                depthmapX::getMapAtIndex(
+                genlib::getMapAtIndex(
                     getInternalMap().getAllShapes(),
                     getInternalMap().getUnlinks()[static_cast<size_t>(m_curunlinkpoint)].b)
                     ->second.getLine(),
@@ -386,38 +384,38 @@ Point2f ShapeMapDX::getNextUnlinkPoint() const {
     return Point2f();
 }
 
-void ShapeMapDX::getPolygonDisplay(bool &showLines, bool &showFill, bool &showCentroids) {
+void ShapeMapDM::getPolygonDisplay(bool &showLines, bool &showFill, bool &showCentroids) {
     showLines = m_showLines;
     showFill = m_showFill;
     showCentroids = m_showCentroids;
 }
 
-void ShapeMapDX::setPolygonDisplay(bool showLines, bool showFill, bool showCentroids) {
+void ShapeMapDM::setPolygonDisplay(bool showLines, bool showFill, bool showCentroids) {
     m_showLines = showLines;
     m_showFill = showFill;
     m_showCentroids = showCentroids;
 }
 
 std::vector<std::pair<SimpleLine, PafColor>>
-ShapeMapDX::getAllLinesWithColour(const std::set<int> &selSet) {
+ShapeMapDM::getAllLinesWithColour(const std::set<int> &selSet) {
     return getInternalMap().getAllSimpleLinesWithColour(selSet);
 }
 
 std::vector<std::pair<std::vector<Point2f>, PafColor>>
-ShapeMapDX::getAllPolygonsWithColour(const std::set<int> &selSet) {
+ShapeMapDM::getAllPolygonsWithColour(const std::set<int> &selSet) {
     return getInternalMap().getAllPolygonsWithColour(selSet);
 }
 
 std::vector<std::pair<Point2f, PafColor>>
-ShapeMapDX::getAllPointsWithColour(const std::set<int> &selSet) {
+ShapeMapDM::getAllPointsWithColour(const std::set<int> &selSet) {
     return getInternalMap().getAllPointsWithColour(selSet);
 }
 
-std::vector<Point2f> ShapeMapDX::getAllUnlinkPoints() {
+std::vector<Point2f> ShapeMapDM::getAllUnlinkPoints() {
     return getInternalMap().getAllUnlinkPoints();
 }
 
-bool ShapeMapDX::setCurSel(const std::vector<int> &selset, bool add) {
+bool ShapeMapDM::setCurSel(const std::vector<int> &selset, bool add) {
     if (add == false) {
         clearSel();
     }
@@ -429,7 +427,7 @@ bool ShapeMapDX::setCurSel(const std::vector<int> &selset, bool add) {
     return !m_selectionSet.empty();
 }
 
-bool ShapeMapDX::setCurSel(Region4f &r, bool add) {
+bool ShapeMapDM::setCurSel(Region4f &r, bool add) {
     if (add == false) {
         clearSel();
     }
@@ -442,11 +440,11 @@ bool ShapeMapDX::setCurSel(Region4f &r, bool add) {
     return !shapesInRegion.empty();
 }
 
-float ShapeMapDX::getSelectedAvg(size_t attributeIdx) {
+float ShapeMapDM::getSelectedAvg(size_t attributeIdx) {
     return getInternalMap().getAttributeTable().getSelAvg(attributeIdx, m_selectionSet);
 }
 
-bool ShapeMapDX::clearSel() {
+bool ShapeMapDM::clearSel() {
     // note, only clear if need be, as m_attributes->deselectAll is slow
     if (!m_selectionSet.empty()) {
         m_selectionSet.clear();
@@ -454,7 +452,7 @@ bool ShapeMapDX::clearSel() {
     return true;
 }
 
-Region4f ShapeMapDX::getSelBounds() {
+Region4f ShapeMapDM::getSelBounds() {
     Region4f r;
     if (!m_selectionSet.empty()) {
         for (auto &shapeRef : m_selectionSet) {
@@ -464,7 +462,7 @@ Region4f ShapeMapDX::getSelBounds() {
     return r;
 }
 
-bool ShapeMapDX::selectionToLayer(const std::string &name) {
+bool ShapeMapDM::selectionToLayer(const std::string &name) {
     bool retvar = false;
     if (m_selectionSet.size()) {
         dXreimpl::pushSelectionToLayer(getInternalMap().getAttributeTable(),

@@ -4,15 +4,15 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// A representation of a sala PointMap in depthmapX
+// A representation of a sala PointMap in the Qt gui
 
 #pragma once
 
-#include "attributemapdx.hpp"
+#include "attributemapdm.hpp"
 
 #include "salalib/pointmap.hpp"
 
-class PointMapDX : public AttributeMapDX {
+class PointMapDM : public AttributeMapDM {
 
     enum {
         NO_SELECTION = 0,
@@ -48,18 +48,18 @@ class PointMapDX : public AttributeMapDX {
     mutable int m_displayedAttribute;
 
   public: // ctor
-    PointMapDX(std::unique_ptr<PointMap> &&map)
-        : AttributeMapDX(std::move(map)), m_selection(NO_SELECTION), m_pinnedSelection(false),
+    PointMapDM(std::unique_ptr<PointMap> &&map)
+        : AttributeMapDM(std::move(map)), m_selection(NO_SELECTION), m_pinnedSelection(false),
           m_sBl(NoPixel), m_sTr(NoPixel), m_curmergeline(-1), m_viewingDeprecated(-1),
           m_drawStep(1), m_displayedAttribute(-2) {
         // -2 follows axial map convention, where -1 is the reference number
         // screen
     }
-    ~PointMapDX() override {}
-    PointMapDX() = delete;
-    PointMapDX(const PointMapDX &other) = delete;
-    PointMapDX(PointMapDX &&other) = default;
-    PointMapDX &operator=(PointMapDX &&other) = default;
+    ~PointMapDM() override {}
+    PointMapDM() = delete;
+    PointMapDM(const PointMapDM &other) = delete;
+    PointMapDM(PointMapDM &&other) = default;
+    PointMapDM &operator=(PointMapDM &&other) = default;
 
   public: // methods
     PointMap &getInternalMap() override { return *static_cast<PointMap *>(m_map.get()); }
@@ -111,7 +111,7 @@ class PointMapDX : public AttributeMapDX {
 
     bool write(std::ostream &stream);
     bool read(std::istream &stream);
-    void copy(const PointMapDX &sourcemap, bool copypoints, bool copyattributes);
+    void copy(const PointMapDM &sourcemap, bool copypoints, bool copyattributes);
 
     double getLocationValue(const Point2f &point);
 

@@ -7,25 +7,22 @@
 #pragma once
 
 // Interface: the meta graph loads and holds all sorts of arbitrary data...
-#include "pointmapdx.hpp"
+#include "pointmapdm.hpp"
 #include "salalib/analysistype.hpp"
 #include "salalib/radiustype.hpp"
-#include "shapegraphdx.hpp"
-#include "shapemapdx.hpp"
-#include "shapemapgroupdatadx.hpp"
+#include "shapegraphdm.hpp"
+#include "shapemapdm.hpp"
+#include "shapemapgroupdatadm.hpp"
 
 #include "salalib/bspnodetree.hpp"
-#include "salalib/connector.hpp"
 #include "salalib/ianalysis.hpp"
 #include "salalib/importtypedefs.hpp"
 #include "salalib/isovist.hpp"
 #include "salalib/metagraph.hpp"
 #include "salalib/metagraphreadwrite.hpp"
 #include "salalib/pushvalues.hpp"
-#include "salalib/spacepixel.hpp"
 
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <vector>
 
@@ -35,7 +32,7 @@ class Communicator;
 
 // A meta graph is precisely what it says it is
 
-class MetaGraphDX {
+class MetaGraphDM {
     MetaGraph m_metaGraph;
 
     MetaGraphReadWrite::ReadWriteStatus m_readStatus = MetaGraphReadWrite::ReadWriteStatus::OK;
@@ -45,8 +42,8 @@ class MetaGraphDX {
     bool m_showText;
 
     struct ShapeMapGroup {
-        ShapeMapGroupDataDX groupData;
-        std::vector<ShapeMapDX> maps;
+        ShapeMapGroupDataDM groupData;
+        std::vector<ShapeMapDM> maps;
         ShapeMapGroup(const std::string &groupName) : groupData(groupName) {}
         ShapeMapGroup(ShapeMapGroup &&other)
             : groupData(std::move(other.groupData)), maps(std::move(other.maps)) {}
@@ -62,25 +59,25 @@ class MetaGraphDX {
         }
     };
     std::vector<ShapeMapGroup> m_drawingFiles;
-    std::vector<ShapeMapDX> m_dataMaps;
-    std::vector<ShapeGraphDX> m_shapeGraphs;
-    std::vector<PointMapDX> m_pointMaps;
-    std::optional<decltype(MetaGraphDX::m_dataMaps)::size_type> m_displayedDatamap = std::nullopt;
-    std::optional<decltype(MetaGraphDX::m_pointMaps)::size_type> m_displayedPointmap = std::nullopt;
-    std::optional<decltype(MetaGraphDX::m_shapeGraphs)::size_type> m_displayedShapegraph =
+    std::vector<ShapeMapDM> m_dataMaps;
+    std::vector<ShapeGraphDM> m_shapeGraphs;
+    std::vector<PointMapDM> m_pointMaps;
+    std::optional<decltype(MetaGraphDM::m_dataMaps)::size_type> m_displayedDatamap = std::nullopt;
+    std::optional<decltype(MetaGraphDM::m_pointMaps)::size_type> m_displayedPointmap = std::nullopt;
+    std::optional<decltype(MetaGraphDM::m_shapeGraphs)::size_type> m_displayedShapegraph =
         std::nullopt;
 
     BSPNodeTree m_bspNodeTree;
 
   public:
-    MetaGraphDX(std::string name = "");
-    MetaGraphDX(MetaGraphDX &&other)
+    MetaGraphDM(std::string name = "");
+    MetaGraphDM(MetaGraphDM &&other)
         : m_state(), m_viewClass(), m_showGrid(), m_showText(),
           m_drawingFiles(std::move(other.m_drawingFiles)), m_dataMaps(std::move(other.m_dataMaps)),
           m_shapeGraphs(std::move(other.m_shapeGraphs)), m_pointMaps(std::move(other.m_pointMaps)),
           currentLayer(std::nullopt) {}
-    MetaGraphDX &operator=(MetaGraphDX &&other) = default;
-    ~MetaGraphDX() {}
+    MetaGraphDM &operator=(MetaGraphDM &&other) = default;
+    ~MetaGraphDM() {}
 
   public:
     enum {
@@ -142,7 +139,7 @@ class MetaGraphDX {
     // P.K. The MetaGraph file format does not really store enough information
     // about the ShapeMap groups (drawing files with their layers as ShapeMaps)
     // so we resort to just checking if all the group maps are visible. Perhaps
-    // ShapeMapGroupDataDX should also have an m_show variable
+    // ShapeMapGroupDataDM should also have an m_show variable
     bool isShown(const ShapeMapGroup &spf) const {
         for (auto &pixel : spf.maps)
             if (pixel.isShown())
@@ -156,13 +153,13 @@ class MetaGraphDX {
     bool findNextShape(bool &nextlayer) const;
     const SalaShape &getNextShape() const {
         if (!currentLayer.has_value()) {
-            throw new depthmapX::RuntimeException("No current layer selected");
+            throw new genlib::RuntimeException("No current layer selected");
         }
         auto &currentDrawingFile = m_drawingFiles[currentLayer.value()];
         if (!currentDrawingFile.groupData.getCurrentLayer().has_value()) {
-            throw new depthmapX::RuntimeException("Current drawing file (" +
-                                                  currentDrawingFile.groupData.getName() +
-                                                  ") has no layer to match to a map");
+            throw new genlib::RuntimeException("Current drawing file (" +
+                                               currentDrawingFile.groupData.getName() +
+                                               ") has no layer to match to a map");
         }
         return currentDrawingFile.maps[currentDrawingFile.groupData.getCurrentLayer().value()]
             .getNextShape();
@@ -175,13 +172,13 @@ class MetaGraphDX {
         return m_metaGraph.version;
     }
 
-    std::vector<PointMapDX> &getPointMaps() { return m_pointMaps; }
+    std::vector<PointMapDM> &getPointMaps() { return m_pointMaps; }
     bool hasDisplayedPointMap() const { return m_displayedPointmap.has_value(); }
-    PointMapDX &getDisplayedPointMap() { return m_pointMaps[m_displayedPointmap.value()]; }
-    const PointMapDX &getDisplayedPointMap() const {
+    PointMapDM &getDisplayedPointMap() { return m_pointMaps[m_displayedPointmap.value()]; }
+    const PointMapDM &getDisplayedPointMap() const {
         return m_pointMaps[m_displayedPointmap.value()];
     }
-    void setDisplayedPointMapRef(decltype(MetaGraphDX::m_pointMaps)::size_type map) {
+    void setDisplayedPointMapRef(decltype(MetaGraphDM::m_pointMaps)::size_type map) {
         if (m_displayedPointmap.has_value() && m_displayedPointmap != map)
             getDisplayedPointMap().clearSel();
         m_displayedPointmap = map;
@@ -216,10 +213,10 @@ class MetaGraphDX {
     void setState(int state) { m_state = state; }
     size_t loadLineData(Communicator *communicator, const std::string &fileName, int loadType);
     size_t loadLineData(Communicator *communicator, const std::string &fileName,
-                        depthmapX::ImportFileType importFileType, bool replace);
+                        sala::ImportFileType importFileType, bool replace);
     size_t addDrawingFile(std::string name, std::vector<ShapeMap> &&maps);
-    ShapeMapDX &createNewShapeMap(depthmapX::ImportType mapType, std::string name);
-    void deleteShapeMap(depthmapX::ImportType mapType, ShapeMapDX &shapeMap);
+    ShapeMapDM &createNewShapeMap(sala::ImportType mapType, std::string name);
+    void deleteShapeMap(sala::ImportType mapType, ShapeMapDM &shapeMap);
     void updateParentRegions(ShapeMap &shapeMap);
     bool clearPoints();
     bool setGrid(double spacing, const Point2f &offset = Point2f()); // override of PointMap
@@ -230,9 +227,9 @@ class MetaGraphDX {
     bool makePoints(const Point2f &p, int semifilled,
                     Communicator *communicator = nullptr); // override of PointMap
     bool hasVisibleDrawingShapes();
-    std::vector<std::pair<std::reference_wrapper<const ShapeMapDX>, int>> getShownDrawingMaps();
+    std::vector<std::pair<std::reference_wrapper<const ShapeMapDM>, int>> getShownDrawingMaps();
     std::vector<std::pair<std::reference_wrapper<const ShapeMap>, int>>
-    getAsInternalMaps(std::vector<std::pair<std::reference_wrapper<const ShapeMapDX>, int>> maps);
+    getAsInternalMaps(std::vector<std::pair<std::reference_wrapper<const ShapeMapDM>, int>> maps);
     std::vector<Line4f> getShownDrawingFilesAsLines();
     std::vector<SalaShape> getShownDrawingFilesAsShapes();
     bool makeGraph(Communicator *communicator, int algorithm, double maxdist);
@@ -242,7 +239,7 @@ class MetaGraphDX {
     //
     // helpers for editing maps
     bool isEditableMap();
-    ShapeMapDX &getEditableMap();
+    ShapeMapDM &getEditableMap();
     // currently only making / moving lines, but should be able to extend this to polys fairly
     // easily:
     bool makeShape(const Line4f &line);
@@ -253,7 +250,7 @@ class MetaGraphDX {
     bool polyClose(int shapeRef);
     bool polyCancel(int shapeRef);
     //
-    size_t addShapeGraph(ShapeGraphDX &&shapeGraph);
+    size_t addShapeGraph(ShapeGraphDM &&shapeGraph);
     size_t addShapeGraph(ShapeGraph &&shapeGraph);
     size_t addShapeGraph(const std::string &name, int type);
     size_t addShapeMap(const std::string &name);
@@ -316,8 +313,8 @@ class MetaGraphDX {
     void undo();
 
     bool hasDisplayedDataMap() const { return m_displayedDatamap.has_value(); }
-    ShapeMapDX &getDisplayedDataMap() { return m_dataMaps[m_displayedDatamap.value()]; }
-    const ShapeMapDX &getDisplayedDataMap() const { return m_dataMaps[m_displayedDatamap.value()]; }
+    ShapeMapDM &getDisplayedDataMap() { return m_dataMaps[m_displayedDatamap.value()]; }
+    const ShapeMapDM &getDisplayedDataMap() const { return m_dataMaps[m_displayedDatamap.value()]; }
     auto getDisplayedDataMapRef() const { return m_displayedDatamap.value(); }
 
     void removeDataMap(size_t i) {
@@ -330,7 +327,7 @@ class MetaGraphDX {
         m_dataMaps.erase(std::next(m_dataMaps.begin(), static_cast<int>(i)));
     }
 
-    void setDisplayedDataMapRef(decltype(MetaGraphDX::m_dataMaps)::size_type map) {
+    void setDisplayedDataMapRef(decltype(MetaGraphDM::m_dataMaps)::size_type map) {
         if (m_displayedDatamap.has_value() && m_displayedDatamap != map)
             getDisplayedDataMap().clearSel();
         m_displayedDatamap = map;
@@ -346,14 +343,14 @@ class MetaGraphDX {
         return std::nullopt;
     }
 
-    std::vector<ShapeGraphDX> &getShapeGraphs() { return m_shapeGraphs; }
+    std::vector<ShapeGraphDM> &getShapeGraphs() { return m_shapeGraphs; }
     bool hasDisplayedShapeGraph() const { return m_displayedShapegraph.has_value(); }
-    ShapeGraphDX &getDisplayedShapeGraph() { return m_shapeGraphs[m_displayedShapegraph.value()]; }
-    const ShapeGraphDX &getDisplayedShapeGraph() const {
+    ShapeGraphDM &getDisplayedShapeGraph() { return m_shapeGraphs[m_displayedShapegraph.value()]; }
+    const ShapeGraphDM &getDisplayedShapeGraph() const {
         return m_shapeGraphs[m_displayedShapegraph.value()];
     }
     void unsetDisplayedShapeGraphRef() { m_displayedShapegraph = std::nullopt; }
-    void setDisplayedShapeGraphRef(decltype(MetaGraphDX::m_shapeGraphs)::size_type map) {
+    void setDisplayedShapeGraphRef(decltype(MetaGraphDM::m_shapeGraphs)::size_type map) {
         if (m_displayedShapegraph.has_value() && m_displayedShapegraph != map)
             getDisplayedShapeGraph().clearSel();
         m_displayedShapegraph = map;
@@ -370,7 +367,7 @@ class MetaGraphDX {
         m_shapeGraphs.erase(std::next(m_shapeGraphs.begin(), static_cast<int>(i)));
     }
 
-    std::vector<ShapeMapDX> &getDataMaps() { return m_dataMaps; }
+    std::vector<ShapeMapDM> &getDataMaps() { return m_dataMaps; }
 
     //
     int getDisplayedMapType();
@@ -395,10 +392,10 @@ class MetaGraphDX {
     }
     size_t getLineLayerCount(size_t fileIdx) const { return m_drawingFiles[fileIdx].maps.size(); }
 
-    ShapeMapDX &getLineLayer(size_t fileIdx, size_t layerIdx) {
+    ShapeMapDM &getLineLayer(size_t fileIdx, size_t layerIdx) {
         return m_drawingFiles[fileIdx].maps[layerIdx];
     }
-    const ShapeMapDX &getLineLayer(size_t fileIdx, size_t layerIdx) const {
+    const ShapeMapDM &getLineLayer(size_t fileIdx, size_t layerIdx) const {
         return m_drawingFiles[fileIdx].maps[layerIdx];
     }
     int getViewClass() { return m_viewClass; }
