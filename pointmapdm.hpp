@@ -53,7 +53,7 @@ class PointMapDM : public AttributeMapDM {
     PointMapDM(std::unique_ptr<PointMap> &&map)
         : AttributeMapDM(std::move(map)), m_selection(NO_SELECTION), m_pinnedSelection(false),
           m_sBl(NoPixel), m_sTr(NoPixel), m_curmergeline(-1), m_viewingDeprecated(-1),
-          m_drawStep(1), m_displayedAttribute(-2) {
+          m_drawStep(1), m_undocounter(0), m_displayedAttribute(-2) {
         // -2 follows axial map convention, where -1 is the reference number
         // screen
     }
