@@ -69,17 +69,18 @@ bool PointMapDM::undoPoints() {
         return false;
     }
     for (auto &p : getInternalMap().getPoints()) {
-        if (p.undoCounter == m_undocounter) {
+        auto &ucount = m_pointUndoCounter[getInternalMap().pixelate(p.getLocation())];
+        if (ucount == m_undocounter) {
             if (p.getState() & Point::FILLED) {
                 getInternalMap().setPointState(p, p.getState() & ~Point::FILLED);
                 getInternalMap().setPointState(p, p.getState() | Point::EMPTY);
-                p.undoCounter = 0; // probably shouldn't set to 0 (can't undo)  Eventually
-                                   // will implement 'redo' counter as well
+                ucount = 0; // probably shouldn't set to 0 (can't undo)  Eventually
+                            // will implement 'redo' counter as well
             } else if (p.getState() & Point::EMPTY) {
                 getInternalMap().setPointState(p, p.getState() | Point::FILLED);
                 getInternalMap().setPointState(p, p.getState() & ~Point::EMPTY);
-                p.undoCounter = 0; // probably shouldn't set to 0 (can't undo)  Eventually
-                                   // will implement 'redo' counter as well
+                ucount = 0; // probably shouldn't set to 0 (can't undo)  Eventually
+                            // will implement 'redo' counter as well
             }
         }
     }
