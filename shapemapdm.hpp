@@ -32,6 +32,8 @@ class ShapeMapDM : public AttributeMapDM {
 
     std::set<int> m_selectionSet; // note: uses keys
 
+    std::vector<SalaEvent> m_undobuffer;
+
   private:
     void moveData(ShapeMapDM &other) {
         getInternalMap().moveData(other.getInternalMap());
@@ -48,7 +50,8 @@ class ShapeMapDM : public AttributeMapDM {
   public: // ctor
     ShapeMapDM(std::unique_ptr<ShapeMap> &&map)
         : AttributeMapDM(std::move(map)), m_show(true), m_editable(false), m_showLines(true),
-          m_showFill(true), m_showCentroids(false), m_displayedAttribute(-1), m_invalidate(false) {
+          m_showFill(true), m_showCentroids(false), m_undobuffer(), m_displayedAttribute(-1),
+          m_invalidate(false) {
         // -1 is the shape ref column (which will be shown by default)
 
         // for polygons:
@@ -195,6 +198,8 @@ class ShapeMapDM : public AttributeMapDM {
 
     bool read(std::istream &stream);
     bool write(std::ostream &stream);
+
+    bool canUndo() const { return m_undobuffer.size() != 0; }
 
     // Simple wrappers
     auto &getName() { return getInternalMap().getName(); }

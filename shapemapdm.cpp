@@ -68,6 +68,7 @@ void ShapeMapDM::invalidateDisplayedAttribute() { m_invalidate = true; }
 
 void ShapeMapDM::clearAll() {
     m_displayShapes.clear();
+    m_undobuffer.clear();
     getInternalMap().clearAll();
     m_displayedAttribute = -1;
 }
@@ -84,6 +85,8 @@ bool ShapeMapDM::read(std::istream &stream) {
 
     bool read = false;
     std::tie(read, m_editable, m_show, m_displayedAttribute) = getInternalMap().read(stream);
+
+    m_undobuffer.clear();
 
     invalidateDisplayedAttribute();
     setDisplayedAttribute(m_displayedAttribute);
@@ -190,6 +193,8 @@ int ShapeMapDM::makeLineShapeWithRef(const Line4f &line, int shapeRef, bool thro
         // update displayed attribute if through ui:
         invalidateDisplayedAttribute();
         setDisplayedAttribute(m_displayedAttribute);
+        // if through ui, set undo counter:
+        m_undobuffer.push_back(SalaEvent(SalaEvent::SALA_CREATED, shapeRef));
     }
     return newShapeRef;
 }
@@ -228,7 +233,18 @@ int ShapeMapDM::makeShapeFromPointSet(const PointMapDM &pointmap) {
 }
 
 bool ShapeMapDM::moveShape(int shaperef, const Line4f &line, bool undoing) {
-    bool moved = getInternalMap().moveShape(shaperef, line, undoing);
+
+    if (!undoing) {
+        auto shapeIter = getInternalMap().getAllShapes().find(shaperef);
+        if (shapeIter == getInternalMap().getAllShapes().end()) {
+            return false;
+        }
+        // set undo counter, but only if this is not an undo itself:
+        m_undobuffer.push_back(SalaEvent(SalaEvent::SALA_MOVED, shaperef));
+        m_undobuffer.back().geometry = shapeIter->second;
+    }
+
+    bool moved = getInternalMap().moveShape(shaperef, line);
 
     if (getInternalMap().hasGraph()) {
         // update displayed attribute for any changes:
@@ -245,6 +261,9 @@ int ShapeMapDM::polyBegin(const Line4f &line) {
     invalidateDisplayedAttribute();
     setDisplayedAttribute(m_displayedAttribute);
 
+    // set undo counter:
+    m_undobuffer.push_back(SalaEvent(SalaEvent::SALA_CREATED, newShapeRef));
+
     // flag new shape
     m_newshape = true;
 
@@ -259,6 +278,7 @@ bool ShapeMapDM::polyClose(int shapeRef) { return getInternalMap().polyClose(sha
 bool ShapeMapDM::polyCancel(int shapeRef) {
     bool polyCancelled = getInternalMap().polyCancel(shapeRef);
 
+    m_undobuffer.pop_back();
     // update displayed attribute
     invalidateDisplayedAttribute();
     setDisplayedAttribute(m_displayedAttribute);
@@ -284,14 +304,118 @@ bool ShapeMapDM::removeSelected() {
 }
 
 void ShapeMapDM::removeShape(int shaperef, bool undoing) {
-    getInternalMap().removeShape(shaperef, undoing);
+
+    auto shapeIter = getInternalMap().getAllShapes().find(shaperef);
+    if (shapeIter == getInternalMap().getAllShapes().end()) {
+        throw genlib::RuntimeException("Shape with ref " + std::to_string(shaperef) +
+                                       " not found when trying to remove it");
+    }
+    if (!undoing) { // <- if not currently undoing another event, then add to the
+                    // undo buffer:
+        m_undobuffer.push_back(SalaEvent(SalaEvent::SALA_DELETED, shaperef));
+        m_undobuffer.back().geometry = shapeIter->second;
+    }
+
+    getInternalMap().removeShape(shaperef);
 
     m_invalidate = true;
     m_newshape = true;
 }
 
 void ShapeMapDM::undo() {
-    getInternalMap().undo();
+
+    if (m_undobuffer.size() == 0) {
+        return;
+    }
+
+    SalaEvent &event = m_undobuffer.back();
+
+    if (event.action == SalaEvent::SALA_CREATED) {
+
+        removeShape(event.shapeRef,
+                    true); // <- note, must tell remove shape it's an undo, or it
+                           // will add this remove to the undo stack!
+
+    } else if (event.action == SalaEvent::SALA_DELETED) {
+
+        makeShape(event.geometry, event.shapeRef);
+        auto &shapes = getInternalMap().getAllShapes();
+        auto &connectors = getInternalMap().getConnections();
+        auto &attributes = getInternalMap().getAttributeTable();
+        auto &links = getInternalMap().getLinks();
+        auto &unlinks = getInternalMap().getUnlinks();
+        auto &region = getInternalMap().getRegion();
+        auto rowIt = shapes.find(event.shapeRef);
+
+        if (rowIt != shapes.end() && getInternalMap().hasGraph()) {
+            auto rowid = static_cast<size_t>(std::distance(shapes.begin(), rowIt));
+            auto &row = attributes.getRow(AttributeKey(event.shapeRef));
+            // redo connections... n.b. TO DO this is intended to use the slower "any
+            // connection" method, so it can handle any sort of graph
+            // ...but that doesn't exist yet, so for the moment do lines:
+            //
+            // insert new connector at the row:
+            connectors[rowid] = Connector();
+            //
+            // now go through all connectors, ensuring they're reindexed above this
+            // one: Argh!  ...but, remember the reason we're doing this is for fast
+            // processing elsewhere
+            // -- this is a user triggered *undo*, they'll just have to wait:
+            for (size_t i = 0; i < connectors.size(); i++) {
+                for (size_t j = 0; j < connectors[i].connections.size(); j++) {
+                    if (connectors[i].connections[j] >= rowid) {
+                        connectors[i].connections[j] += 1;
+                    }
+                }
+            }
+            // it gets worse, the links and unlinks will also be all over the shop due
+            // to the inserted row:
+            size_t j;
+            for (j = 0; j < links.size(); j++) {
+                if (links[j].a >= rowid)
+                    links[j].a += 1;
+                if (links[j].b >= rowid)
+                    links[j].b += 1;
+            }
+            for (j = 0; j < unlinks.size(); j++) {
+                if (unlinks[j].a >= rowid)
+                    unlinks[j].a += 1;
+                if (unlinks[j].b >= rowid)
+                    unlinks[j].b += 1;
+            }
+            //
+            // calculate this line's connections
+            connectors[rowid].connections = getInternalMap().getLineConnections(
+                event.shapeRef, TOLERANCE_B * std::max(region.height(), region.width()));
+            // update:
+            auto connCol = attributes.getOrInsertLockedColumn("Connectivity");
+            row.setValue(connCol, static_cast<float>(connectors[rowid].connections.size()));
+            //
+            if (event.geometry.isLine()) {
+                auto lengCol = attributes.getOrInsertLockedColumn("Line Length");
+                row.setValue(
+                    lengCol,
+                    static_cast<float>(genlib::getMapAtIndex(shapes, rowid)->second.getLength()));
+            }
+            //
+            // now go through our connections, and add ourself:
+            const auto &connections = connectors[rowid].connections;
+            for (auto connection : connections) {
+                if (connection != rowid) { // <- exclude self!
+                    genlib::insert_sorted(connectors[connection].connections, rowid);
+                    getInternalMap().getAttributeRowFromShapeIndex(connection).incrValue(connCol);
+                }
+            }
+        }
+    } else if (event.action == SalaEvent::SALA_MOVED) {
+
+        moveShape(event.shapeRef, event.geometry.getLine(),
+                  true); // <- note, must tell remove shape it's an undo, or it will
+                         // add this remove to the undo stack!
+    }
+
+    m_undobuffer.pop_back();
+
     invalidateDisplayedAttribute();
     setDisplayedAttribute(m_displayedAttribute);
     m_newshape = true;

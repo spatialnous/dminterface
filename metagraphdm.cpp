@@ -158,7 +158,7 @@ double MetaGraphDM::getLocationValue(const Point2f &point) {
 bool MetaGraphDM::setGrid(double spacing, const Point2f &offset) {
     m_state &= ~DX_POINTMAPS;
 
-    getDisplayedPointMap().getInternalMap().setGrid(spacing, offset);
+    getDisplayedPointMap().setGrid(spacing, offset);
     getDisplayedPointMap().setDisplayedAttribute(-2);
 
     m_state |= DX_POINTMAPS;
@@ -177,7 +177,7 @@ bool MetaGraphDM::makePoints(const Point2f &p, int fillType, Communicator *commu
     try {
         std::vector<Line4f> lines = getShownDrawingFilesAsLines();
         getDisplayedPointMap().getInternalMap().blockLines(lines);
-        getDisplayedPointMap().getInternalMap().makePoints(p, fillType, communicator);
+        getDisplayedPointMap().makePoints(p, fillType, communicator);
         getDisplayedPointMap().setDisplayedAttribute(-2);
     } catch (Communicator::CancelledException) {
 
@@ -2051,13 +2051,13 @@ bool MetaGraphDM::canUndo() const {
     bool canundo = false;
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        canundo = getDisplayedPointMap().getInternalMap().canUndo();
+        canundo = getDisplayedPointMap().canUndo();
         break;
     case DX_VIEWAXIAL:
-        canundo = getDisplayedShapeGraph().getInternalMap().canUndo();
+        canundo = getDisplayedShapeGraph().canUndo();
         break;
     case DX_VIEWDATA:
-        canundo = getDisplayedDataMap().getInternalMap().canUndo();
+        canundo = getDisplayedDataMap().canUndo();
         break;
     }
     return canundo;
@@ -2066,7 +2066,7 @@ bool MetaGraphDM::canUndo() const {
 void MetaGraphDM::undo() {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        getDisplayedPointMap().getInternalMap().undoPoints();
+        getDisplayedPointMap().undoPoints();
         break;
     case DX_VIEWAXIAL:
         getDisplayedShapeGraph().undo();

@@ -64,8 +64,34 @@ bool PointMapDM::write(std::ostream &stream) {
     return written;
 }
 
+bool PointMapDM::undoPoints() {
+    if (!m_undocounter) {
+        return false;
+    }
+    for (auto &p : getInternalMap().getPoints()) {
+        if (p.undoCounter == m_undocounter) {
+            if (p.getState() & Point::FILLED) {
+                getInternalMap().setPointState(p, p.getState() & ~Point::FILLED);
+                getInternalMap().setPointState(p, p.getState() | Point::EMPTY);
+                p.undoCounter = 0; // probably shouldn't set to 0 (can't undo)  Eventually
+                                   // will implement 'redo' counter as well
+            } else if (p.getState() & Point::EMPTY) {
+                getInternalMap().setPointState(p, p.getState() | Point::FILLED);
+                getInternalMap().setPointState(p, p.getState() & ~Point::EMPTY);
+                p.undoCounter = 0; // probably shouldn't set to 0 (can't undo)  Eventually
+                                   // will implement 'redo' counter as well
+            }
+        }
+    }
+    m_undocounter--; // reduce undo counter
+
+    return true;
+}
+
 void PointMapDM::copy(const PointMapDM &sourcemap, bool copypoints, bool copyattributes) {
     getInternalMap().copy(sourcemap.getInternalMap(), copypoints, copyattributes);
+
+    m_undocounter = sourcemap.m_undocounter;
 
     // -2 follows axial map convention, where -1 is the reference number
     m_displayedAttribute = sourcemap.m_displayedAttribute;
