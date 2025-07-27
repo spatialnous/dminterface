@@ -7,7 +7,7 @@
 #pragma once
 
 // Interface: the meta graph loads and holds all sorts of arbitrary data...
-#include "pointmapdm.hpp"
+#include "latticemapdm.hpp"
 #include "salalib/analysistype.hpp"
 #include "salalib/radiustype.hpp"
 #include "shapegraphdm.hpp"
@@ -61,9 +61,10 @@ class MetaGraphDM {
     std::vector<ShapeMapGroup> m_drawingFiles;
     std::vector<ShapeMapDM> m_dataMaps;
     std::vector<ShapeGraphDM> m_shapeGraphs;
-    std::vector<PointMapDM> m_pointMaps;
+    std::vector<LatticeMapDM> m_latticeMaps;
     std::optional<decltype(MetaGraphDM::m_dataMaps)::size_type> m_displayedDatamap = std::nullopt;
-    std::optional<decltype(MetaGraphDM::m_pointMaps)::size_type> m_displayedPointmap = std::nullopt;
+    std::optional<decltype(MetaGraphDM::m_latticeMaps)::size_type> m_displayedLatticeMap =
+        std::nullopt;
     std::optional<decltype(MetaGraphDM::m_shapeGraphs)::size_type> m_displayedShapegraph =
         std::nullopt;
 
@@ -74,8 +75,8 @@ class MetaGraphDM {
     MetaGraphDM(MetaGraphDM &&other)
         : m_state(), m_viewClass(), m_showGrid(), m_showText(),
           m_drawingFiles(std::move(other.m_drawingFiles)), m_dataMaps(std::move(other.m_dataMaps)),
-          m_shapeGraphs(std::move(other.m_shapeGraphs)), m_pointMaps(std::move(other.m_pointMaps)),
-          currentLayer(std::nullopt) {}
+          m_shapeGraphs(std::move(other.m_shapeGraphs)),
+          m_latticeMaps(std::move(other.m_latticeMaps)), currentLayer(std::nullopt) {}
     MetaGraphDM &operator=(MetaGraphDM &&other) = default;
     ~MetaGraphDM() {}
 
@@ -109,7 +110,7 @@ class MetaGraphDM {
     };
     enum {
         DX_NONE = 0x0000,
-        DX_POINTMAPS = 0x0002,
+        DX_LATTICEMAPS = 0x0002,
         DX_LINEDATA = 0x0004,
         DX_ANGULARGRAPH = 0x0010,
         DX_DATAMAPS = 0x0020,
@@ -172,39 +173,39 @@ class MetaGraphDM {
         return m_metaGraph.version;
     }
 
-    std::vector<PointMapDM> &getPointMaps() { return m_pointMaps; }
-    bool hasDisplayedPointMap() const { return m_displayedPointmap.has_value(); }
-    PointMapDM &getDisplayedPointMap() { return m_pointMaps[m_displayedPointmap.value()]; }
-    const PointMapDM &getDisplayedPointMap() const {
-        return m_pointMaps[m_displayedPointmap.value()];
+    std::vector<LatticeMapDM> &getLatticeMaps() { return m_latticeMaps; }
+    bool hasDisplayedLatticeMap() const { return m_displayedLatticeMap.has_value(); }
+    LatticeMapDM &getDisplayedLatticeMap() { return m_latticeMaps[m_displayedLatticeMap.value()]; }
+    const LatticeMapDM &getDisplayedLatticeMap() const {
+        return m_latticeMaps[m_displayedLatticeMap.value()];
     }
-    void setDisplayedPointMapRef(decltype(MetaGraphDM::m_pointMaps)::size_type map) {
-        if (m_displayedPointmap.has_value() && m_displayedPointmap != map)
-            getDisplayedPointMap().clearSel();
-        m_displayedPointmap = map;
+    void setDisplayedLatticeMapRef(decltype(MetaGraphDM::m_latticeMaps)::size_type map) {
+        if (m_displayedLatticeMap.has_value() && m_displayedLatticeMap != map)
+            getDisplayedLatticeMap().clearSel();
+        m_displayedLatticeMap = map;
     }
-    auto getDisplayedPointMapRef() const { return m_displayedPointmap.value(); }
-    void redoPointMapBlockLines() // (flags blockedlines, but also flags that you need to rebuild a
-                                  // bsp tree if you have one)
+    auto getDisplayedLatticeMapRef() const { return m_displayedLatticeMap.value(); }
+    void redoLatticeMapBlockLines() // (flags blockedlines, but also flags that you need to rebuild
+                                    // a bsp tree if you have one)
     {
-        for (auto &pointMap : m_pointMaps) {
-            pointMap.getInternalMap().resetBlockedLines();
+        for (auto &latticeMap : m_latticeMaps) {
+            latticeMap.getInternalMap().resetBlockedLines();
         }
     }
-    size_t addNewPointMap(const std::string &name = std::string("VGA Map"));
+    size_t addNewLatticeMap(const std::string &name = std::string("VGA Map"));
 
   private:
     // helpful to know this for creating fewest line maps, although has to be reread at input
     std::optional<AllLine::MapData> m_allLineMapData = std::nullopt;
 
-    void removePointMap(size_t i) {
-        if (m_displayedPointmap.has_value()) {
-            if (m_pointMaps.size() == 1)
-                m_displayedPointmap = std::nullopt;
-            else if (m_displayedPointmap.value() != 0 && m_displayedPointmap.value() >= i)
-                m_displayedPointmap.value()--;
+    void removeLatticeMap(size_t i) {
+        if (m_displayedLatticeMap.has_value()) {
+            if (m_latticeMaps.size() == 1)
+                m_displayedLatticeMap = std::nullopt;
+            else if (m_displayedLatticeMap.value() != 0 && m_displayedLatticeMap.value() >= i)
+                m_displayedLatticeMap.value()--;
         }
-        m_pointMaps.erase(std::next(m_pointMaps.begin(), static_cast<int>(i)));
+        m_latticeMaps.erase(std::next(m_latticeMaps.begin(), static_cast<int>(i)));
     }
 
   public:
@@ -219,13 +220,13 @@ class MetaGraphDM {
     void deleteShapeMap(sala::ImportType mapType, ShapeMapDM &shapeMap);
     void updateParentRegions(ShapeMap &shapeMap);
     bool clearPoints();
-    bool setGrid(double spacing, const Point2f &offset = Point2f()); // override of PointMap
+    bool setGrid(double spacing, const Point2f &offset = Point2f()); // override of LatticeMap
     void setShowGrid(bool showGrid) { m_showGrid = showGrid; }
     bool getShowGrid() const { return m_showGrid; }
     void setShowText(bool showText) { m_showText = showText; }
     bool getShowText() const { return m_showText; }
     bool makePoints(const Point2f &p, int semifilled,
-                    Communicator *communicator = nullptr); // override of PointMap
+                    Communicator *communicator = nullptr); // override of LatticeMap
     bool hasVisibleDrawingShapes();
     std::vector<std::pair<std::reference_wrapper<const ShapeMapDM>, int>> getShownDrawingMaps();
     std::vector<std::pair<std::reference_wrapper<const ShapeMap>, int>>
@@ -404,18 +405,18 @@ class MetaGraphDM {
     bool viewingProcessed() {
         return (
             (m_viewClass & (DX_VIEWAXIAL | DX_VIEWDATA)) ||
-            (m_viewClass & DX_VIEWVGA && getDisplayedPointMap().getInternalMap().isProcessed()));
+            (m_viewClass & DX_VIEWVGA && getDisplayedLatticeMap().getInternalMap().isProcessed()));
     }
     bool viewingShapes() { return (m_viewClass & (DX_VIEWAXIAL | DX_VIEWDATA)) != 0; }
     bool viewingProcessedLines() { return ((m_viewClass & DX_VIEWAXIAL) == DX_VIEWAXIAL); }
     bool viewingProcessedShapes() { return ((m_viewClass & DX_VIEWDATA) == DX_VIEWDATA); }
     bool viewingProcessedPoints() {
         return ((m_viewClass & DX_VIEWVGA) &&
-                getDisplayedPointMap().getInternalMap().isProcessed());
+                getDisplayedLatticeMap().getInternalMap().isProcessed());
     }
     bool viewingUnprocessedPoints() {
         return ((m_viewClass & DX_VIEWVGA) &&
-                !getDisplayedPointMap().getInternalMap().isProcessed());
+                !getDisplayedLatticeMap().getInternalMap().isProcessed());
     }
     //
     bool setViewClass(int command);
@@ -427,7 +428,7 @@ class MetaGraphDM {
     bool isSelected() // does a selection exist
     {
         if (m_viewClass & DX_VIEWVGA)
-            return getDisplayedPointMap().isSelected();
+            return getDisplayedLatticeMap().isSelected();
         else if (m_viewClass & DX_VIEWAXIAL)
             return getDisplayedShapeGraph().hasSelectedElements();
         else if (m_viewClass & DX_VIEWDATA)
@@ -442,12 +443,12 @@ class MetaGraphDM {
         else if (m_viewClass & DX_VIEWDATA)
             return getDisplayedDataMap().setCurSel(r, add);
         else if (m_viewClass & DX_VIEWVGA)
-            return getDisplayedPointMap().setCurSel(r, add);
-        else if (m_state & DX_POINTMAPS &&
-                 !getDisplayedPointMap()
+            return getDisplayedLatticeMap().setCurSel(r, add);
+        else if (m_state & DX_LATTICEMAPS &&
+                 !getDisplayedLatticeMap()
                       .getInternalMap()
                       .isProcessed()) // this is a default select application
-            return getDisplayedPointMap().setCurSel(r, add);
+            return getDisplayedLatticeMap().setCurSel(r, add);
         else if (m_state & DX_DATAMAPS) // I'm not sure why this is a possibility, but it appears
                                         // you might have state & DATAMAPS without VIEWDATA...
             return getDisplayedDataMap().setCurSel(r, add);
@@ -456,9 +457,9 @@ class MetaGraphDM {
     }
     bool clearSel() {
         // really needs a separate clearSel for the datalayers... at the moment this is handled
-        // in PointMap
+        // in LatticeMap
         if (m_viewClass & DX_VIEWVGA)
-            return getDisplayedPointMap().clearSel();
+            return getDisplayedLatticeMap().clearSel();
         else if (m_viewClass & DX_VIEWAXIAL)
             return getDisplayedShapeGraph().clearSel();
         else if (m_viewClass & DX_VIEWDATA)
@@ -468,7 +469,7 @@ class MetaGraphDM {
     }
     size_t getSelCount() {
         if (m_viewClass & DX_VIEWVGA)
-            return getDisplayedPointMap().getSelCount();
+            return getDisplayedLatticeMap().getSelCount();
         else if (m_viewClass & DX_VIEWAXIAL)
             return getDisplayedShapeGraph().getSelCount();
         else if (m_viewClass & DX_VIEWDATA)
@@ -478,7 +479,7 @@ class MetaGraphDM {
     }
     float getSelAvg() {
         if (m_viewClass & DX_VIEWVGA)
-            return static_cast<float>(getDisplayedPointMap().getDisplayedSelectedAvg());
+            return static_cast<float>(getDisplayedLatticeMap().getDisplayedSelectedAvg());
         else if (m_viewClass & DX_VIEWAXIAL)
             return static_cast<float>(getDisplayedShapeGraph().getDisplayedSelectedAvg());
         else if (m_viewClass & DX_VIEWDATA)
@@ -488,7 +489,7 @@ class MetaGraphDM {
     }
     Region4f getSelBounds() {
         if (m_viewClass & DX_VIEWVGA)
-            return getDisplayedPointMap().getSelBounds();
+            return getDisplayedLatticeMap().getSelBounds();
         else if (m_viewClass & DX_VIEWAXIAL)
             return getDisplayedShapeGraph().getSelBounds();
         else if (m_viewClass & DX_VIEWDATA)
@@ -498,24 +499,24 @@ class MetaGraphDM {
     }
     // setSelSet expects a set of ref ids:
     void setSelSet(const std::vector<int> &selset, bool add = false) {
-        if (m_viewClass & DX_VIEWVGA && m_state & DX_POINTMAPS)
-            getDisplayedPointMap().setCurSel(selset, add);
+        if (m_viewClass & DX_VIEWVGA && m_state & DX_LATTICEMAPS)
+            getDisplayedLatticeMap().setCurSel(selset, add);
         else if (m_viewClass & DX_VIEWAXIAL)
             getDisplayedShapeGraph().setCurSel(selset, add);
         else // if (m_viewClass & VIEWDATA)
             getDisplayedDataMap().setCurSel(selset, add);
     }
     std::set<int> &getSelSet() {
-        if (m_viewClass & DX_VIEWVGA && m_state & DX_POINTMAPS)
-            return getDisplayedPointMap().getSelSet();
+        if (m_viewClass & DX_VIEWVGA && m_state & DX_LATTICEMAPS)
+            return getDisplayedLatticeMap().getSelSet();
         else if (m_viewClass & DX_VIEWAXIAL)
             return getDisplayedShapeGraph().getSelSet();
         else // if (m_viewClass & VIEWDATA)
             return getDisplayedDataMap().getSelSet();
     }
     const std::set<int> &getSelSet() const {
-        if (m_viewClass & DX_VIEWVGA && m_state & DX_POINTMAPS)
-            return getDisplayedPointMap().getSelSet();
+        if (m_viewClass & DX_VIEWVGA && m_state & DX_LATTICEMAPS)
+            return getDisplayedLatticeMap().getSelSet();
         else if (m_viewClass & DX_VIEWAXIAL)
             return getDisplayedShapeGraph().getSelSet();
         else // if (m_viewClass & VIEWDATA)

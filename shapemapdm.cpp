@@ -225,9 +225,8 @@ int ShapeMapDM::makeShape(const SalaShape &poly, int overrideShapeRef,
 
 // n.b., only works from current selection (and uses point selected attribute)
 
-int ShapeMapDM::makeShapeFromPointSet(const PointMapDM &pointmap) {
-    int shapeRef =
-        getInternalMap().makeShapeFromPointSet(pointmap.getInternalMap(), pointmap.getSelSet());
+int ShapeMapDM::makeShapeFromPointSet(const LatticeMapDM &map) {
+    int shapeRef = getInternalMap().makeShapeFromPointSet(map.getInternalMap(), map.getSelSet());
     m_newshape = true;
     return shapeRef;
 }

@@ -4,15 +4,15 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// A representation of a sala PointMap in the Qt gui
+// A representation of a sala LatticeMap in the Qt gui
 
 #pragma once
 
 #include "attributemapdm.hpp"
 
-#include "salalib/pointmap.hpp"
+#include "salalib/latticemap.hpp"
 
-class PointMapDM : public AttributeMapDM {
+class LatticeMapDM : public AttributeMapDM {
 
     enum {
         NO_SELECTION = 0,
@@ -50,23 +50,23 @@ class PointMapDM : public AttributeMapDM {
     mutable int m_displayedAttribute;
 
   public: // ctor
-    PointMapDM(std::unique_ptr<PointMap> &&map)
+    LatticeMapDM(std::unique_ptr<LatticeMap> &&map)
         : AttributeMapDM(std::move(map)), m_selection(NO_SELECTION), m_pinnedSelection(false),
           m_sBl(NoPixel), m_sTr(NoPixel), m_curmergeline(-1), m_viewingDeprecated(-1),
           m_drawStep(1), m_undocounter(0), m_displayedAttribute(-2) {
         // -2 follows axial map convention, where -1 is the reference number
         // screen
     }
-    ~PointMapDM() override {}
-    PointMapDM() = delete;
-    PointMapDM(const PointMapDM &other) = delete;
-    PointMapDM(PointMapDM &&other) = default;
-    PointMapDM &operator=(PointMapDM &&other) = default;
+    ~LatticeMapDM() override {}
+    LatticeMapDM() = delete;
+    LatticeMapDM(const LatticeMapDM &other) = delete;
+    LatticeMapDM(LatticeMapDM &&other) = default;
+    LatticeMapDM &operator=(LatticeMapDM &&other) = default;
 
   public: // methods
-    PointMap &getInternalMap() override { return *static_cast<PointMap *>(m_map.get()); }
-    const PointMap &getInternalMap() const override {
-        return *static_cast<PointMap *>(m_map.get());
+    LatticeMap &getInternalMap() override { return *static_cast<LatticeMap *>(m_map.get()); }
+    const LatticeMap &getInternalMap() const override {
+        return *static_cast<LatticeMap *>(m_map.get());
     }
 
     double getDisplayMinValue() const {
@@ -116,7 +116,7 @@ class PointMapDM : public AttributeMapDM {
 
     bool write(std::ostream &stream);
     bool read(std::istream &stream);
-    void copy(const PointMapDM &sourcemap, bool copypoints, bool copyattributes);
+    void copy(const LatticeMapDM &sourcemap, bool copypoints, bool copyattributes);
 
     bool setGrid(double spacing, const Point2f &offset) {
         auto result = getInternalMap().setGrid(spacing, offset);

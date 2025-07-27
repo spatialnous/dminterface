@@ -5,14 +5,14 @@
 target_sources(${dminterface}
     PRIVATE
         metagraphdm.cpp
-        pointmapdm.cpp
+        latticemapdm.cpp
         shapemapdm.cpp
         shapegraphdm.cpp
         options.hpp
     PUBLIC
         comm.hpp
         metagraphdm.hpp
-        pointmapdm.hpp
+        latticemapdm.hpp
         shapemapdm.hpp
         shapegraphdm.hpp
         shapemapgroupdatadm.hpp

@@ -4,12 +4,12 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// A representation of a sala PointMap in the Qt gui
+// A representation of a sala LatticeMap in the Qt gui
 
 #pragma once
 
 #include "attributemapdm.hpp"
-#include "pointmapdm.hpp"
+#include "latticemapdm.hpp"
 
 #include "salalib/shapemap.hpp"
 
@@ -122,7 +122,7 @@ class ShapeMapDM : public AttributeMapDM {
                       const std::map<size_t, float> &extraAttributes = std::map<size_t, float>());
     int makeShape(const SalaShape &poly, int overrideShapeRef = -1,
                   const std::map<size_t, float> &extraAttributes = std::map<size_t, float>());
-    int makeShapeFromPointSet(const PointMapDM &pointmap);
+    int makeShapeFromPointSet(const LatticeMapDM &map);
 
     bool moveShape(int shaperef, const Line4f &line, bool undoing = false);
 

@@ -56,7 +56,7 @@ bool MetaGraphDM::setViewClass(int command) {
     if (command < 0x10) {
         throw("Use with a show command, not a view class type");
     }
-    if ((command & (DX_SHOWHIDEVGA | DX_SHOWVGATOP)) && (~m_state & DX_POINTMAPS))
+    if ((command & (DX_SHOWHIDEVGA | DX_SHOWVGATOP)) && (~m_state & DX_LATTICEMAPS))
         return false;
     if ((command & (DX_SHOWHIDEAXIAL | DX_SHOWAXIALTOP)) && (~m_state & DX_SHAPEGRAPHS))
         return false;
@@ -145,7 +145,7 @@ double MetaGraphDM::getLocationValue(const Point2f &point) {
     double val = -2;
 
     if (viewingProcessedPoints()) {
-        val = getDisplayedPointMap().getLocationValue(point);
+        val = getDisplayedLatticeMap().getLocationValue(point);
     } else if (viewingProcessedLines()) {
         val = getDisplayedShapeGraph().getLocationValue(point);
     } else if (viewingProcessedShapes()) {
@@ -156,12 +156,12 @@ double MetaGraphDM::getLocationValue(const Point2f &point) {
 }
 
 bool MetaGraphDM::setGrid(double spacing, const Point2f &offset) {
-    m_state &= ~DX_POINTMAPS;
+    m_state &= ~DX_LATTICEMAPS;
 
-    getDisplayedPointMap().setGrid(spacing, offset);
-    getDisplayedPointMap().setDisplayedAttribute(-2);
+    getDisplayedLatticeMap().setGrid(spacing, offset);
+    getDisplayedLatticeMap().setDisplayedAttribute(-2);
 
-    m_state |= DX_POINTMAPS;
+    m_state |= DX_LATTICEMAPS;
 
     // just reassert that we should be viewing this (since set grid is essentially
     // a "new point map")
@@ -176,14 +176,14 @@ bool MetaGraphDM::makePoints(const Point2f &p, int fillType, Communicator *commu
 
     try {
         std::vector<Line4f> lines = getShownDrawingFilesAsLines();
-        getDisplayedPointMap().getInternalMap().blockLines(lines);
-        getDisplayedPointMap().makePoints(p, fillType, communicator);
-        getDisplayedPointMap().setDisplayedAttribute(-2);
+        getDisplayedLatticeMap().getInternalMap().blockLines(lines);
+        getDisplayedLatticeMap().makePoints(p, fillType, communicator);
+        getDisplayedLatticeMap().setDisplayedAttribute(-2);
     } catch (Communicator::CancelledException) {
 
         // By this stage points almost certainly exist,
         // To avoid problems, just say points exist:
-        m_state |= DX_POINTMAPS;
+        m_state |= DX_LATTICEMAPS;
 
         return false;
     }
@@ -194,7 +194,7 @@ bool MetaGraphDM::makePoints(const Point2f &p, int fillType, Communicator *commu
 }
 
 bool MetaGraphDM::clearPoints() {
-    bool bReturn = getDisplayedPointMap().clearPoints();
+    bool bReturn = getDisplayedLatticeMap().clearPoints();
     return bReturn;
 }
 
@@ -272,11 +272,11 @@ bool MetaGraphDM::makeGraph(Communicator *communicator, int algorithm, double ma
 
     try {
         std::vector<Line4f> lines = getShownDrawingFilesAsLines();
-        getDisplayedPointMap().getInternalMap().blockLines(lines);
+        getDisplayedLatticeMap().getInternalMap().blockLines(lines);
         // algorithm is now used for boundary graph option (as a simple boolean)
-        graphMade = getDisplayedPointMap().getInternalMap().sparkGraph2(communicator,
-                                                                        (algorithm != 0), maxdist);
-        getDisplayedPointMap().setDisplayedAttribute(PointMap::Column::CONNECTIVITY);
+        graphMade = getDisplayedLatticeMap().getInternalMap().sparkGraph2(
+            communicator, (algorithm != 0), maxdist);
+        getDisplayedLatticeMap().setDisplayedAttribute(LatticeMap::Column::CONNECTIVITY);
     } catch (Communicator::CancelledException) {
         graphMade = false;
     }
@@ -289,9 +289,9 @@ bool MetaGraphDM::makeGraph(Communicator *communicator, int algorithm, double ma
 }
 
 bool MetaGraphDM::unmakeGraph(bool removeLinks) {
-    bool graphUnmade = getDisplayedPointMap().getInternalMap().unmake(removeLinks);
+    bool graphUnmade = getDisplayedLatticeMap().getInternalMap().unmake(removeLinks);
 
-    getDisplayedPointMap().setDisplayedAttribute(-2);
+    getDisplayedLatticeMap().setDisplayedAttribute(-2);
 
     if (graphUnmade) {
         setViewClass(DX_SHOWVGATOP);
@@ -306,7 +306,7 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
     bool analysisCompleted = false;
 
     if (pointDepthSelection) {
-        if (m_viewClass & DX_VIEWVGA && !getDisplayedPointMap().isSelected()) {
+        if (m_viewClass & DX_VIEWVGA && !getDisplayedLatticeMap().isSelected()) {
             return false;
         } else if (m_viewClass & DX_VIEWAXIAL && !getDisplayedShapeGraph().hasSelectedElements()) {
             return false;
@@ -317,7 +317,7 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
         analysisCompleted = true;
         if (pointDepthSelection == 1) {
             if (m_viewClass & DX_VIEWVGA) {
-                auto &map = getDisplayedPointMap();
+                auto &map = getDisplayedLatticeMap();
                 std::set<PixelRef> origins;
                 for (auto &sel : map.getSelSet())
                     origins.insert(sel);
@@ -353,7 +353,7 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
             // Graph::calculate_point_depth_matrix( communicator );
         } else if (pointDepthSelection == 2) {
             if (m_viewClass & DX_VIEWVGA) {
-                auto &map = getDisplayedPointMap();
+                auto &map = getDisplayedLatticeMap();
                 std::set<PixelRef> origins;
                 for (auto &sel : map.getSelSet())
                     origins.insert(sel);
@@ -381,7 +381,7 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
                 map.setDisplayedAttribute(SegmentMetricPD::Column::METRIC_STEP_DEPTH);
             }
         } else if (pointDepthSelection == 3) {
-            auto &map = getDisplayedPointMap();
+            auto &map = getDisplayedLatticeMap();
             std::set<PixelRef> origins;
             for (auto &sel : map.getSelSet()) {
                 origins.insert(sel);
@@ -396,7 +396,7 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
             map.setDisplayedAttribute(VGAAngularDepth::Column::ANGULAR_STEP_DEPTH);
         } else if (pointDepthSelection == 4) {
             if (m_viewClass & DX_VIEWVGA) {
-                auto &map = getDisplayedPointMap();
+                auto &map = getDisplayedLatticeMap();
                 map.getInternalMap().binDisplay(communicator, map.getSelSet());
             } else if (m_viewClass & DX_VIEWAXIAL &&
                        getDisplayedShapeGraph().getInternalMap().isSegmentMap()) {
@@ -410,7 +410,7 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
             }
         } else if (outputType == AnalysisType::ISOVIST) {
             auto shapes = getShownDrawingFilesAsShapes();
-            auto &map = getDisplayedPointMap();
+            auto &map = getDisplayedLatticeMap();
             auto analysis = VGAIsovist(map.getInternalMap(), shapes);
             analysis.setSimpleVersion(simpleVersion);
             AnalysisResult analysisResult = analysis.run(communicator);
@@ -424,7 +424,7 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
             bool localResult = true;
             bool globalResult = true;
             if (local) {
-                auto &map = getDisplayedPointMap();
+                auto &map = getDisplayedLatticeMap();
                 auto analysis = VGAVisualLocal(map.getInternalMap(), gatesOnly);
                 auto analysisResult = analysis.run(communicator);
                 analysis.copyResultToMap(analysisResult.getAttributes(),
@@ -435,7 +435,7 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
                 map.setDisplayedAttribute(VGAVisualLocal::Column::VISUAL_CLUSTERING_COEFFICIENT);
             }
             if (global) {
-                auto &map = getDisplayedPointMap();
+                auto &map = getDisplayedLatticeMap();
                 auto analysis = VGAVisualGlobal(map.getInternalMap(), radius, gatesOnly);
                 analysis.setSimpleVersion(simpleVersion);
                 analysis.setLegacyWriteMiscs(true);
@@ -450,7 +450,7 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
             }
             analysisCompleted = globalResult & localResult;
         } else if (outputType == AnalysisType::METRIC) {
-            auto &map = getDisplayedPointMap();
+            auto &map = getDisplayedLatticeMap();
             auto analysis = VGAMetric(map.getInternalMap(), radius, gatesOnly);
             auto analysisResult = analysis.run(communicator);
             analysis.copyResultToMap(analysisResult.getAttributes(),
@@ -462,7 +462,7 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
                 VGAMetric::Column::METRIC_MEAN_SHORTEST_PATH_DISTANCE, radius,
                 map.getInternalMap().getRegion()));
         } else if (outputType == AnalysisType::ANGULAR) {
-            auto &map = getDisplayedPointMap();
+            auto &map = getDisplayedLatticeMap();
             auto analysis = VGAAngular(map.getInternalMap(), radius, gatesOnly);
             auto analysisResult = analysis.run(communicator);
             analysis.copyResultToMap(analysisResult.getAttributes(),
@@ -473,7 +473,7 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
             map.setDisplayedAttribute(VGAAngular::getColumnWithRadius(
                 VGAAngular::Column::ANGULAR_MEAN_DEPTH, radius, map.getInternalMap().getRegion()));
         } else if (outputType == AnalysisType::THRU_VISION) {
-            auto &map = getDisplayedPointMap();
+            auto &map = getDisplayedLatticeMap();
             auto analysis = VGAThroughVision(map.getInternalMap());
             auto analysisResult = analysis.run(communicator);
             analysis.copyResultToMap(analysisResult.getAttributes(),
@@ -839,12 +839,12 @@ size_t MetaGraphDM::addShapeMap(const std::string &name) {
 void MetaGraphDM::removeDisplayedMap() {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA: {
-        if (!hasDisplayedPointMap())
+        if (!hasDisplayedLatticeMap())
             return;
-        removePointMap(getDisplayedPointMapRef());
-        if (m_pointMaps.empty()) {
+        removeLatticeMap(getDisplayedLatticeMapRef());
+        if (m_latticeMaps.empty()) {
             setViewClass(DX_SHOWHIDEVGA);
-            m_state &= ~DX_POINTMAPS;
+            m_state &= ~DX_LATTICEMAPS;
         }
         break;
     }
@@ -1747,7 +1747,7 @@ bool MetaGraphDM::pushValuesToLayer(int desttype, size_t destlayer, PushValues::
 
     // temporarily turn off everything to prevent redraw during sensitive time:
     int oldstate = m_state;
-    m_state &= ~(DX_DATAMAPS | DX_AXIALLINES | DX_POINTMAPS);
+    m_state &= ~(DX_DATAMAPS | DX_AXIALLINES | DX_LATTICEMAPS);
 
     AttributeTable &tableIn = getAttributeTable(sourcetype, sourcelayer);
     AttributeTable &tableOut = getAttributeTable(desttype, destlayer);
@@ -1786,7 +1786,7 @@ bool MetaGraphDM::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
         ((sourcetype & DX_VIEWDATA) || (sourcetype & DX_VIEWAXIAL))) {
         auto &sourceMap =
             sourcetype & DX_VIEWDATA ? m_dataMaps[sourcelayer] : m_shapeGraphs[sourcelayer];
-        auto &destMap = m_pointMaps[destlayer];
+        auto &destMap = m_latticeMaps[destlayer];
         const auto &colInName = sourceMap.getAttributeTable().getColumnName(*colIn);
         const auto &colOutName = destMap.getAttributeTable().getColumnName(colOut);
         PushValues::shapeToPoint(sourceMap.getInternalMap(), colInName, destMap.getInternalMap(),
@@ -1821,7 +1821,7 @@ bool MetaGraphDM::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
 
         if (sourcetype & DX_VIEWVGA) {
             if (desttype == DX_VIEWDATA) {
-                auto &sourceMap = m_pointMaps[sourcelayer];
+                auto &sourceMap = m_latticeMaps[sourcelayer];
                 auto &destMap = m_dataMaps[destlayer];
                 const auto &colInName =
                     colIn.has_value()
@@ -1831,7 +1831,7 @@ bool MetaGraphDM::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
                 PushValues::pointToShape(sourceMap.getInternalMap(), colInName,
                                          destMap.getInternalMap(), colOutName, pushFunc);
             } else if (desttype == DX_VIEWAXIAL) {
-                auto &sourceMap = m_pointMaps[sourcelayer];
+                auto &sourceMap = m_latticeMaps[sourcelayer];
                 auto &destMap = m_shapeGraphs[destlayer];
                 const auto &colInName =
                     colIn.has_value()
@@ -1868,8 +1868,8 @@ bool MetaGraphDM::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
 
     // display new data in the relevant layer
     if (desttype == DX_VIEWVGA) {
-        m_pointMaps[destlayer].overrideDisplayedAttribute(-2);
-        m_pointMaps[destlayer].setDisplayedAttribute(static_cast<int>(colOut));
+        m_latticeMaps[destlayer].overrideDisplayedAttribute(-2);
+        m_latticeMaps[destlayer].setDisplayedAttribute(static_cast<int>(colOut));
     } else if (desttype == DX_VIEWAXIAL) {
         m_shapeGraphs[destlayer].overrideDisplayedAttribute(-2);
         m_shapeGraphs[destlayer].setDisplayedAttribute(static_cast<int>(colOut));
@@ -1885,10 +1885,10 @@ bool MetaGraphDM::pushValuesToLayer(int sourcetype, size_t sourcelayer, int dest
 // (to allow push value to layer and back again)
 
 void MetaGraphDM::runAgentEngine(Communicator *comm, std::unique_ptr<IAnalysis> &analysis) {
-    if (!hasDisplayedPointMap()) {
-        throw(genlib::RuntimeException("No Pointmap on display"));
+    if (!hasDisplayedLatticeMap()) {
+        throw(genlib::RuntimeException("No Lattice map on display"));
     }
-    auto &map = getDisplayedPointMap();
+    auto &map = getDisplayedLatticeMap();
     auto agentAnalysis = dynamic_cast<AgentAnalysis *>(analysis.get());
     if (!agentAnalysis) {
         throw(genlib::RuntimeException("No agent analysis provided to runAgentEngine function"));
@@ -1907,7 +1907,7 @@ void MetaGraphDM::runAgentEngine(Communicator *comm, std::unique_ptr<IAnalysis> 
 bool MetaGraphDM::analyseThruVision(Communicator *comm, std::optional<size_t> gatelayer) {
     bool analysisCompleted = false;
 
-    auto &table = getDisplayedPointMap().getAttributeTable();
+    auto &table = getDisplayedLatticeMap().getAttributeTable();
 
     // always have temporary gate counting layers -- makes it easier to code
     auto colgates = table.insertOrResetColumn(AgentAnalysis::Column::INTERNAL_GATE);
@@ -1915,13 +1915,13 @@ bool MetaGraphDM::analyseThruVision(Communicator *comm, std::optional<size_t> ga
 
     if (gatelayer.has_value()) {
         // switch the reference numbers from the gates layer to the vga layer
-        pushValuesToLayer(DX_VIEWDATA, gatelayer.value(), DX_VIEWVGA, getDisplayedPointMapRef(),
+        pushValuesToLayer(DX_VIEWDATA, gatelayer.value(), DX_VIEWVGA, getDisplayedLatticeMapRef(),
                           std::nullopt, colgates, PushValues::Func::TOT);
     }
 
     try {
         analysisCompleted =
-            VGAThroughVision(getDisplayedPointMap().getInternalMap()).run(comm).completed;
+            VGAThroughVision(getDisplayedLatticeMap().getInternalMap()).run(comm).completed;
     } catch (Communicator::CancelledException) {
         analysisCompleted = false;
     }
@@ -1933,7 +1933,7 @@ bool MetaGraphDM::analyseThruVision(Communicator *comm, std::optional<size_t> ga
     if (analysisCompleted && gatelayer.has_value()) {
         AttributeTable &tableout = m_dataMaps[gatelayer.value()].getAttributeTable();
         auto targetcol = tableout.insertOrResetColumn("Thru Vision Counts");
-        pushValuesToLayer(DX_VIEWVGA, getDisplayedPointMapRef(), DX_VIEWDATA, gatelayer.value(),
+        pushValuesToLayer(DX_VIEWVGA, getDisplayedLatticeMapRef(), DX_VIEWDATA, gatelayer.value(),
                           colcounts, targetcol, PushValues::Func::TOT);
     }
 
@@ -1950,9 +1950,9 @@ std::optional<size_t> MetaGraphDM::getDisplayedMapRef() const {
     std::optional<size_t> ref = std::nullopt;
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        if (!hasDisplayedPointMap())
+        if (!hasDisplayedLatticeMap())
             return std::nullopt;
-        ref = getDisplayedPointMapRef();
+        ref = getDisplayedLatticeMapRef();
         break;
     case DX_VIEWAXIAL:
         if (!hasDisplayedShapeGraph())
@@ -1974,7 +1974,7 @@ std::optional<size_t> MetaGraphDM::getDisplayedMapRef() const {
 int MetaGraphDM::getDisplayedMapType() {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        return ShapeMap::POINTMAP;
+        return ShapeMap::LATTICEMAP;
     case DX_VIEWAXIAL:
         return hasDisplayedShapeGraph() && getDisplayedShapeGraphRef() != static_cast<size_t>(-1)
                    ? getDisplayedShapeGraph().getMapType()
@@ -1988,7 +1988,7 @@ int MetaGraphDM::getDisplayedMapType() {
 AttributeTable &MetaGraphDM::getDisplayedMapAttributes() {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        return getDisplayedPointMap().getAttributeTable();
+        return getDisplayedLatticeMap().getAttributeTable();
     case DX_VIEWAXIAL:
         return getDisplayedShapeGraph().getAttributeTable();
     case DX_VIEWDATA:
@@ -2026,7 +2026,7 @@ int MetaGraphDM::isEditable() const {
     int editable = 0;
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        if (getDisplayedPointMap().getInternalMap().isProcessed()) {
+        if (getDisplayedLatticeMap().getInternalMap().isProcessed()) {
             editable = DX_NOT_EDITABLE;
         } else {
             editable = DX_EDITABLE_ON;
@@ -2051,7 +2051,7 @@ bool MetaGraphDM::canUndo() const {
     bool canundo = false;
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        canundo = getDisplayedPointMap().canUndo();
+        canundo = getDisplayedLatticeMap().canUndo();
         break;
     case DX_VIEWAXIAL:
         canundo = getDisplayedShapeGraph().canUndo();
@@ -2066,7 +2066,7 @@ bool MetaGraphDM::canUndo() const {
 void MetaGraphDM::undo() {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        getDisplayedPointMap().undoPoints();
+        getDisplayedLatticeMap().undoPoints();
         break;
     case DX_VIEWAXIAL:
         getDisplayedShapeGraph().undo();
@@ -2083,7 +2083,7 @@ std::optional<size_t> MetaGraphDM::addAttribute(const std::string &name) {
     std::optional<size_t> col = std::nullopt;
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        col = getDisplayedPointMap().getInternalMap().addAttribute(name);
+        col = getDisplayedLatticeMap().getInternalMap().addAttribute(name);
         break;
     case DX_VIEWAXIAL:
         col = getDisplayedShapeGraph().getInternalMap().addAttribute(name);
@@ -2098,7 +2098,7 @@ std::optional<size_t> MetaGraphDM::addAttribute(const std::string &name) {
 void MetaGraphDM::removeAttribute(size_t col) {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        getDisplayedPointMap().getInternalMap().removeAttribute(col);
+        getDisplayedLatticeMap().getInternalMap().removeAttribute(col);
         break;
     case DX_VIEWAXIAL:
         getDisplayedShapeGraph().getInternalMap().removeAttribute(col);
@@ -2117,7 +2117,7 @@ int MetaGraphDM::getDisplayedAttribute() const {
     int col = -1;
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        col = getDisplayedPointMap().getDisplayedAttribute();
+        col = getDisplayedLatticeMap().getDisplayedAttribute();
         break;
     case DX_VIEWAXIAL:
         col = getDisplayedShapeGraph().getDisplayedAttribute();
@@ -2133,8 +2133,8 @@ int MetaGraphDM::getDisplayedAttribute() const {
 void MetaGraphDM::setDisplayedAttribute(int col) {
     switch (m_viewClass & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        getDisplayedPointMap().overrideDisplayedAttribute(-2);
-        getDisplayedPointMap().setDisplayedAttribute(col);
+        getDisplayedLatticeMap().overrideDisplayedAttribute(-2);
+        getDisplayedLatticeMap().setDisplayedAttribute(col);
         break;
     case DX_VIEWAXIAL:
         getDisplayedShapeGraph().overrideDisplayedAttribute(-2);
@@ -2157,8 +2157,8 @@ AttributeTable &MetaGraphDM::getAttributeTable(std::optional<size_t> type,
     }
     switch (type.value() & DX_VIEWFRONT) {
     case DX_VIEWVGA:
-        tab = (!layer.has_value()) ? &(getDisplayedPointMap().getAttributeTable())
-                                   : &(m_pointMaps[layer.value()].getAttributeTable());
+        tab = (!layer.has_value()) ? &(getDisplayedLatticeMap().getAttributeTable())
+                                   : &(m_latticeMaps[layer.value()].getAttributeTable());
         break;
     case DX_VIEWAXIAL:
         tab = (!layer.has_value()) ? &(getDisplayedShapeGraph().getAttributeTable())
@@ -2180,8 +2180,8 @@ const AttributeTable &MetaGraphDM::getAttributeTable(std::optional<size_t> type,
     }
     switch (type.value()) {
     case DX_VIEWVGA:
-        tab = (!layer.has_value()) ? &(getDisplayedPointMap().getAttributeTable())
-                                   : &(m_pointMaps[layer.value()].getAttributeTable());
+        tab = (!layer.has_value()) ? &(getDisplayedLatticeMap().getAttributeTable())
+                                   : &(m_latticeMaps[layer.value()].getAttributeTable());
         break;
     case DX_VIEWAXIAL:
         tab = (!layer.has_value()) ? &(getDisplayedShapeGraph().getAttributeTable())
@@ -2245,10 +2245,10 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::readFromStream(std::istream &st
             gddIt++;
         }
         {
-            auto ddIt = dd.perPointMap.begin();
-            for (auto &&map : mgd.pointMaps) {
-                m_pointMaps.emplace_back(std::make_unique<PointMap>(std::move(map)));
-                auto &newMapDM = m_pointMaps.back();
+            auto ddIt = dd.perLatticeMap.begin();
+            for (auto &&map : mgd.latticeMaps) {
+                m_latticeMaps.emplace_back(std::make_unique<LatticeMap>(std::move(map)));
+                auto &newMapDM = m_latticeMaps.back();
                 newMapDM.setDisplayedAttribute(*ddIt);
                 ddIt++;
             }
@@ -2281,15 +2281,15 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::readFromStream(std::istream &st
         m_viewClass = dd.viewClass;
         m_showGrid = dd.showGrid;
         m_showText = dd.showText;
-        if (!dd.displayedPointMap.has_value()) {
+        if (!dd.displayedLatticeMap.has_value()) {
             if (!mgd.dataMaps.empty()) {
                 setViewClass(DX_SHOWVGATOP);
-                m_displayedPointmap = 0;
+                m_displayedLatticeMap = 0;
             } else {
-                m_displayedPointmap = std::nullopt;
+                m_displayedLatticeMap = std::nullopt;
             }
         } else {
-            m_displayedPointmap = dd.displayedPointMap;
+            m_displayedLatticeMap = dd.displayedLatticeMap;
         }
         if (!dd.displayedDataMap.has_value()) {
             if (!mgd.dataMaps.empty()) {
@@ -2332,8 +2332,8 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::write(const std::string &filena
     std::vector<std::pair<ShapeMapGroupData, std::vector<std::reference_wrapper<ShapeMap>>>>
         drawingFiles;
     std::vector<std::vector<ShapeMapDisplayData>> perDrawingMap;
-    std::vector<std::reference_wrapper<PointMap>> pointMaps;
-    std::vector<int> perPointMap;
+    std::vector<std::reference_wrapper<LatticeMap>> latticeMaps;
+    std::vector<int> perLatticeMap;
     std::vector<std::reference_wrapper<ShapeMap>> dataMaps;
     std::vector<ShapeMapDisplayData> perDataMap;
     std::vector<std::reference_wrapper<ShapeGraph>> shapeGraphs;
@@ -2351,9 +2351,9 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::write(const std::string &filena
                                                      mapDM.getDisplayedAttribute()));
         }
     }
-    for (auto &mapDM : m_pointMaps) {
-        pointMaps.push_back(mapDM.getInternalMap());
-        perPointMap.push_back(mapDM.getDisplayedAttribute());
+    for (auto &mapDM : m_latticeMaps) {
+        latticeMaps.push_back(mapDM.getInternalMap());
+        perLatticeMap.push_back(mapDM.getDisplayedAttribute());
     }
     for (auto &mapDM : m_dataMaps) {
         dataMaps.push_back(mapDM.getInternalMap());
@@ -2371,7 +2371,7 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::write(const std::string &filena
         int tempState = 0, tempViewClass = 0;
         if (currentlayer) {
             if (m_viewClass & DX_VIEWVGA) {
-                tempState = DX_POINTMAPS;
+                tempState = DX_LATTICEMAPS;
                 tempViewClass = DX_VIEWVGA;
             } else if (m_viewClass & DX_VIEWAXIAL) {
                 tempState = DX_SHAPEGRAPHS;
@@ -2388,13 +2388,13 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::write(const std::string &filena
         MetaGraphReadWrite::writeToFile(
             filename, // MetaGraph Data
             version, m_metaGraph.name, m_metaGraph.region, m_metaGraph.fileProperties, drawingFiles,
-            pointMaps, dataMaps, shapeGraphs, m_allLineMapData,
+            latticeMaps, dataMaps, shapeGraphs, m_allLineMapData,
             // display data
             tempState, tempViewClass, m_showGrid, m_showText, perDrawingMap,
-            m_displayedPointmap.has_value()
-                ? std::make_optional(static_cast<unsigned int>(*m_displayedPointmap))
+            m_displayedLatticeMap.has_value()
+                ? std::make_optional(static_cast<unsigned int>(*m_displayedLatticeMap))
                 : std::nullopt,
-            perPointMap,
+            perLatticeMap,
             m_displayedDatamap.has_value()
                 ? std::make_optional(static_cast<unsigned int>(*m_displayedDatamap))
                 : std::nullopt,
@@ -2406,7 +2406,7 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::write(const std::string &filena
     } else {
         MetaGraphReadWrite::writeToFile(filename, // MetaGraph Data
                                         version, m_metaGraph.name, m_metaGraph.region,
-                                        m_metaGraph.fileProperties, drawingFiles, pointMaps,
+                                        m_metaGraph.fileProperties, drawingFiles, latticeMaps,
                                         dataMaps, shapeGraphs, m_allLineMapData);
     }
     m_state = oldstate;
@@ -2442,23 +2442,23 @@ std::vector<SimpleLine> MetaGraphDM::getVisibleDrawingLines() {
     return lines;
 }
 
-size_t MetaGraphDM::addNewPointMap(const std::string &name) {
+size_t MetaGraphDM::addNewLatticeMap(const std::string &name) {
     std::string myname = name;
     int counter = 1;
     bool duplicate = true;
     while (duplicate) {
         duplicate = false;
-        for (auto &pointMap : m_pointMaps) {
-            if (pointMap.getName() == myname) {
+        for (auto &latticeMap : m_latticeMaps) {
+            if (latticeMap.getName() == myname) {
                 duplicate = true;
                 myname = dXstring::formatString(counter++, name + " %d");
                 break;
             }
         }
     }
-    m_pointMaps.push_back(std::make_unique<PointMap>(m_metaGraph.region, myname));
-    setDisplayedPointMapRef(m_pointMaps.size() - 1);
-    return m_pointMaps.size() - 1;
+    m_latticeMaps.push_back(std::make_unique<LatticeMap>(m_metaGraph.region, myname));
+    setDisplayedLatticeMapRef(m_latticeMaps.size() - 1);
+    return m_latticeMaps.size() - 1;
 }
 
 void MetaGraphDM::makeViewportShapes(const Region4f &viewport) const {

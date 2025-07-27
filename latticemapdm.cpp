@@ -4,9 +4,9 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "pointmapdm.hpp"
+#include "latticemapdm.hpp"
 
-void PointMapDM::setDisplayedAttribute(int col) {
+void LatticeMapDM::setDisplayedAttribute(int col) {
     if (m_displayedAttribute == col) {
         if (getInternalMap().getAttributeTableHandle().getDisplayColIndex() !=
             m_displayedAttribute) {
@@ -20,12 +20,12 @@ void PointMapDM::setDisplayedAttribute(int col) {
     getInternalMap().getAttributeTableHandle().setDisplayColIndex(m_displayedAttribute);
 }
 
-void PointMapDM::setDisplayedAttribute(const std::string &col) {
+void LatticeMapDM::setDisplayedAttribute(const std::string &col) {
     setDisplayedAttribute(
         static_cast<int>(getInternalMap().getAttributeTable().getColumnIndex(col)));
 }
 
-bool PointMapDM::read(std::istream &stream) {
+bool LatticeMapDM::read(std::istream &stream) {
     bool read = getInternalMap().readMetadata(stream);
 
     // NOTE: You MUST set m_spacepix manually!
@@ -49,7 +49,7 @@ bool PointMapDM::read(std::istream &stream) {
     return read;
 }
 
-bool PointMapDM::write(std::ostream &stream) {
+bool LatticeMapDM::write(std::ostream &stream) {
     bool written = getInternalMap().writeMetadata(stream);
 
     // TODO: Compatibility. The attribute columns will be stored sorted
@@ -64,7 +64,7 @@ bool PointMapDM::write(std::ostream &stream) {
     return written;
 }
 
-bool PointMapDM::undoPoints() {
+bool LatticeMapDM::undoPoints() {
     if (!m_undocounter) {
         return false;
     }
@@ -89,7 +89,7 @@ bool PointMapDM::undoPoints() {
     return true;
 }
 
-void PointMapDM::copy(const PointMapDM &sourcemap, bool copypoints, bool copyattributes) {
+void LatticeMapDM::copy(const LatticeMapDM &sourcemap, bool copypoints, bool copyattributes) {
     getInternalMap().copy(sourcemap.getInternalMap(), copypoints, copyattributes);
 
     m_undocounter = sourcemap.m_undocounter;
@@ -111,7 +111,7 @@ void PointMapDM::copy(const PointMapDM &sourcemap, bool copypoints, bool copyatt
 }
 
 // -2 for point not in visibility graph, -1 for point has no data
-double PointMapDM::getLocationValue(const Point2f &point) {
+double LatticeMapDM::getLocationValue(const Point2f &point) {
     if (m_displayedAttribute == -1) {
         return getInternalMap().getLocationValue(point, std::nullopt);
     }
@@ -122,7 +122,7 @@ double PointMapDM::getLocationValue(const Point2f &point) {
 
 // eventually we will use returned info to draw the selected point quickly
 
-bool PointMapDM::clearSel() {
+bool LatticeMapDM::clearSel() {
     if (m_selection == NO_SELECTION) {
         return false;
     }
@@ -131,7 +131,7 @@ bool PointMapDM::clearSel() {
     return true;
 }
 
-bool PointMapDM::setCurSel(Region4f &r, bool add) {
+bool LatticeMapDM::setCurSel(Region4f &r, bool add) {
     if (m_selection == NO_SELECTION) {
         add = false;
     } else if (!add) {
@@ -174,7 +174,7 @@ bool PointMapDM::setCurSel(Region4f &r, bool add) {
     return true;
 }
 
-bool PointMapDM::setCurSel(const std::vector<int> &selset, bool add) {
+bool LatticeMapDM::setCurSel(const std::vector<int> &selset, bool add) {
     // note: override cursel, can only be used with analysed pointdata:
     if (!add) {
         clearSel();
@@ -190,7 +190,7 @@ bool PointMapDM::setCurSel(const std::vector<int> &selset, bool add) {
     return true;
 }
 
-void PointMapDM::setScreenPixel(double unit) {
+void LatticeMapDM::setScreenPixel(double unit) {
     if (unit / getInternalMap().getSpacing() > 1) {
         m_drawStep = static_cast<int>(unit / getInternalMap().getSpacing());
     } else {
@@ -198,7 +198,7 @@ void PointMapDM::setScreenPixel(double unit) {
     }
 }
 
-void PointMapDM::makeViewportPoints(const Region4f &viewport) const {
+void LatticeMapDM::makeViewportPoints(const Region4f &viewport) const {
     // n.b., relies on "constrain" being set to true
     m_bl = pixelate(viewport.bottomLeft, true);
     m_cur = m_bl; // cursor for points
@@ -214,7 +214,7 @@ void PointMapDM::makeViewportPoints(const Region4f &viewport) const {
     m_finished = false;
 }
 
-bool PointMapDM::findNextPoint() const {
+bool LatticeMapDM::findNextPoint() const {
     if (m_finished) {
         return false;
     }
@@ -233,59 +233,59 @@ bool PointMapDM::findNextPoint() const {
     return true;
 }
 
-bool PointMapDM::findNextRow() const {
+bool LatticeMapDM::findNextRow() const {
     m_rc.y += 1;
     if (m_rc.y > m_tr.y)
         return false;
     return true;
 }
-Line4f PointMapDM::getNextRow() const {
+Line4f LatticeMapDM::getNextRow() const {
     Point2f offset(getSpacing() / 2.0, getSpacing() / 2.0);
     return Line4f(depixelate(PixelRef(m_bl.x, m_rc.y)) - offset,
                   depixelate(PixelRef(m_tr.x + 1, m_rc.y)) - offset);
 }
-bool PointMapDM::findNextPointRow() const {
+bool LatticeMapDM::findNextPointRow() const {
     m_prc.y += 1;
     if (m_prc.y > m_tr.y)
         return false;
     return true;
 }
-Line4f PointMapDM::getNextPointRow() const {
+Line4f LatticeMapDM::getNextPointRow() const {
     Point2f offset(getSpacing() / 2.0, 0);
     return Line4f(depixelate(PixelRef(m_bl.x, m_prc.y)) - offset,
                   depixelate(PixelRef(m_tr.x + 1, m_prc.y)) - offset);
 }
-bool PointMapDM::findNextCol() const {
+bool LatticeMapDM::findNextCol() const {
     m_rc.x += 1;
     if (m_rc.x > m_tr.x)
         return false;
     return true;
 }
-Line4f PointMapDM::getNextCol() const {
+Line4f LatticeMapDM::getNextCol() const {
     Point2f offset(getSpacing() / 2.0, getSpacing() / 2.0);
     return Line4f(depixelate(PixelRef(m_rc.x, m_bl.y)) - offset,
                   depixelate(PixelRef(m_rc.x, m_tr.y + 1)) - offset);
 }
-bool PointMapDM::findNextPointCol() const {
+bool LatticeMapDM::findNextPointCol() const {
     m_prc.x += 1;
     if (m_prc.x > m_tr.x)
         return false;
     return true;
 }
-Line4f PointMapDM::getNextPointCol() const {
+Line4f LatticeMapDM::getNextPointCol() const {
     Point2f offset(0.0, getSpacing() / 2.0);
     return Line4f(depixelate(PixelRef(m_prc.x, m_bl.y)) - offset,
                   depixelate(PixelRef(m_prc.x, m_tr.y + 1)) - offset);
 }
 
-bool PointMapDM::findNextMergeLine() const {
+bool LatticeMapDM::findNextMergeLine() const {
     if (m_curmergeline < static_cast<int>(getInternalMap().getMergeLines().size())) {
         m_curmergeline++;
     }
     return (m_curmergeline < static_cast<int>(getInternalMap().getMergeLines().size()));
 }
 
-Line4f PointMapDM::getNextMergeLine() const {
+Line4f LatticeMapDM::getNextMergeLine() const {
     if (m_curmergeline < static_cast<int>(getInternalMap().getMergeLines().size())) {
         return Line4f(
             depixelate(getInternalMap().getMergeLines()[static_cast<size_t>(m_curmergeline)].a),
@@ -294,13 +294,13 @@ Line4f PointMapDM::getNextMergeLine() const {
     return Line4f();
 }
 
-bool PointMapDM::refInSelectedSet(const PixelRef &ref) const {
+bool LatticeMapDM::refInSelectedSet(const PixelRef &ref) const {
     return m_selectionSet.find(ref) != m_selectionSet.end();
 }
 
-bool PointMapDM::getPointSelected() const { return refInSelectedSet(m_cur); }
+bool LatticeMapDM::getPointSelected() const { return refInSelectedSet(m_cur); }
 
-PafColor PointMapDM::getPointColor(PixelRef pixelRef) const {
+PafColor LatticeMapDM::getPointColor(PixelRef pixelRef) const {
     PafColor color;
     int state = getInternalMap().pointState(pixelRef);
     if (state & Point::HIGHLIGHT) {
@@ -326,4 +326,4 @@ PafColor PointMapDM::getPointColor(PixelRef pixelRef) const {
     }
 }
 
-PafColor PointMapDM::getCurrentPointColor() const { return getPointColor(m_cur); }
+PafColor LatticeMapDM::getCurrentPointColor() const { return getPointColor(m_cur); }
