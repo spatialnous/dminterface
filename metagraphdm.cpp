@@ -2237,6 +2237,7 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::readFromStream(std::istream &st
                     auto &newMapDM = m_drawingFiles.back().maps.back();
                     newMapDM.setEditable(std::get<0>(*ddIt));
                     newMapDM.setShow(std::get<1>(*ddIt));
+                    newMapDM.invalidateDisplayedAttribute();
                     newMapDM.setDisplayedAttribute(std::get<2>(*ddIt));
                     ddIt++;
                 }
@@ -2260,6 +2261,7 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::readFromStream(std::istream &st
                 auto &newMapDM = m_dataMaps.back();
                 newMapDM.setEditable(std::get<0>(*ddIt));
                 newMapDM.setShow(std::get<1>(*ddIt));
+                newMapDM.invalidateDisplayedAttribute();
                 newMapDM.setDisplayedAttribute(std::get<2>(*ddIt));
                 ddIt++;
             }
@@ -2271,6 +2273,7 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::readFromStream(std::istream &st
                 auto &newMapDM = m_shapeGraphs.back();
                 newMapDM.setEditable(std::get<0>(*ddIt));
                 newMapDM.setShow(std::get<1>(*ddIt));
+                newMapDM.invalidateDisplayedAttribute();
                 newMapDM.setDisplayedAttribute(std::get<2>(*ddIt));
                 ddIt++;
             }
