@@ -25,6 +25,7 @@
 #include "salalib/segmmodules/segmtopologicalpd.hpp"
 #include "salalib/segmmodules/segmtulip.hpp"
 #include "salalib/segmmodules/segmtulipdepth.hpp"
+#include "salalib/segmmodules/segmtulipleafchoice.hpp"
 #include "salalib/vgamodules/vgaangular.hpp"
 #include "salalib/vgamodules/vgaangulardepth.hpp"
 #include "salalib/vgamodules/vgaisovist.hpp"
@@ -1477,6 +1478,37 @@ bool MetaGraphDM::analyseSegmentsTulip(Communicator *communicator, std::set<doub
                 map.getInternalMap().getAttributeTable(), SegmentTulip::Column::TOTAL_DEPTH,
                 tulipBins, radiusType, static_cast<int>(*radiusSet.begin()))));
         }
+    } catch (Communicator::CancelledException) {
+        analysisCompleted = false;
+    }
+
+    m_state |= DX_SHAPEGRAPHS;
+
+    return analysisCompleted;
+}
+
+bool MetaGraphDM::analyseSegmentsTulipLeafChoice(Communicator *communicator,
+                                                 std::set<double> &radiusSet, bool selOnly,
+                                                 int tulipBins, int weightedMeasureCol,
+                                                 RadiusType radiusType, int weightedMeasureCol2,
+                                                 int routeweightCol, bool interactive,
+                                                 bool forceLegacyColumnOrder) {
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
+                                // during reload)
+
+    bool analysisCompleted = false;
+
+    try {
+        auto &map = getDisplayedShapeGraph();
+        SegmentTulipLeafChoice analysis(
+            radiusSet, selOnly ? std::make_optional(map.getSelSet()) : std::nullopt, tulipBins,
+            weightedMeasureCol, radiusType, weightedMeasureCol2, routeweightCol, interactive);
+        analysis.setForceLegacyColumnOrder(forceLegacyColumnOrder);
+        analysisCompleted = analysis.run(communicator, map.getInternalMap(), false).completed;
+        map.setDisplayedAttribute(-2); // <- override if it's already showing
+        map.setDisplayedAttribute(static_cast<int>(SegmentTulipLeafChoice::getFormattedColumnIdx(
+            map.getInternalMap().getAttributeTable(), SegmentTulipLeafChoice::Column::LEAF_CHOICE,
+            tulipBins, radiusType, static_cast<int>(*radiusSet.begin()))));
     } catch (Communicator::CancelledException) {
         analysisCompleted = false;
     }
