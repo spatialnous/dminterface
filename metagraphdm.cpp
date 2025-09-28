@@ -1454,7 +1454,7 @@ bool MetaGraphDM::analyseSegmentsTulip(Communicator *communicator, std::set<doub
                                        bool selOnly, int tulipBins, int weightedMeasureCol,
                                        RadiusType radiusType, bool choice, int weightedMeasureCol2,
                                        int routeweightCol, bool interactive,
-                                       bool forceLegacyColumnOrder) {
+                                       bool forceLegacyColumnOrder, bool forceLeafChoice) {
     m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental
                                 // redraw during reload)
 
@@ -1467,6 +1467,7 @@ bool MetaGraphDM::analyseSegmentsTulip(Communicator *communicator, std::set<doub
                               tulipBins, weightedMeasureCol, radiusType, choice,
                               weightedMeasureCol2, routeweightCol, interactive);
         analysis.setForceLegacyColumnOrder(forceLegacyColumnOrder);
+        analysis.setForceLeafChoice(forceLeafChoice);
         analysisCompleted = analysis.run(communicator, map.getInternalMap(), false).completed;
         if (analysisCompleted) {
             map.setDisplayedAttribute(-2); // <- override if it's already showing
