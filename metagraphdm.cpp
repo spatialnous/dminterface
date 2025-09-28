@@ -1308,8 +1308,8 @@ int MetaGraphDM::loadMifMap(Communicator *comm, std::istream &miffile, std::istr
 
 bool MetaGraphDM::makeAllLineMap(Communicator *communicator, const Point2f &seed) {
     int oldstate = m_state;
-    m_state &= ~DX_SHAPEGRAPHS;   // Clear axial map data flag (stops accidental redraw
-                                  // during reload)
+    m_state &= ~DX_SHAPEGRAPHS;   // Clear axial map data flag (stops accidental
+                                  // redraw during reload)
     m_viewClass &= ~DX_VIEWAXIAL; // Also clear the view_class flag
 
     bool mapMade = true;
@@ -1352,8 +1352,8 @@ bool MetaGraphDM::makeAllLineMap(Communicator *communicator, const Point2f &seed
 
 bool MetaGraphDM::makeFewestLineMap(Communicator *communicator, int replace) {
     int oldstate = m_state;
-    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                                // during reload)
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental
+                                // redraw during reload)
 
     bool mapMade = true;
 
@@ -1418,8 +1418,8 @@ bool MetaGraphDM::makeFewestLineMap(Communicator *communicator, int replace) {
 bool MetaGraphDM::analyseAxial(Communicator *communicator, std::set<double> radiusSet,
                                int weightedMeasureCol, bool choice, bool fulloutput,
                                bool localAnalysis, bool forceLegacyColumnOrder) {
-    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                                // during reload)
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental
+                                // redraw during reload)
 
     bool analysisCompleted = false;
 
@@ -1455,8 +1455,8 @@ bool MetaGraphDM::analyseSegmentsTulip(Communicator *communicator, std::set<doub
                                        RadiusType radiusType, bool choice, int weightedMeasureCol2,
                                        int routeweightCol, bool interactive,
                                        bool forceLegacyColumnOrder) {
-    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                                // during reload)
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental
+                                // redraw during reload)
 
     bool analysisCompleted = false;
 
@@ -1468,15 +1468,18 @@ bool MetaGraphDM::analyseSegmentsTulip(Communicator *communicator, std::set<doub
                               weightedMeasureCol2, routeweightCol, interactive);
         analysis.setForceLegacyColumnOrder(forceLegacyColumnOrder);
         analysisCompleted = analysis.run(communicator, map.getInternalMap(), false).completed;
-        map.setDisplayedAttribute(-2); // <- override if it's already showing
-        if (choice) {
-            map.setDisplayedAttribute(static_cast<int>(SegmentTulip::getFormattedColumnIdx(
-                map.getInternalMap().getAttributeTable(), SegmentTulip::Column::CHOICE, tulipBins,
-                radiusType, static_cast<int>(*radiusSet.begin()))));
-        } else {
-            map.setDisplayedAttribute(static_cast<int>(SegmentTulip::getFormattedColumnIdx(
-                map.getInternalMap().getAttributeTable(), SegmentTulip::Column::TOTAL_DEPTH,
-                tulipBins, radiusType, static_cast<int>(*radiusSet.begin()))));
+        if (analysisCompleted) {
+            map.setDisplayedAttribute(-2); // <- override if it's already showing
+            if (choice) {
+
+                map.setDisplayedAttribute(static_cast<int>(SegmentTulip::getFormattedColumnIdx(
+                    map.getInternalMap().getAttributeTable(), SegmentTulip::Column::CHOICE,
+                    tulipBins, radiusType, static_cast<int>(*radiusSet.begin()), selOnly)));
+            } else {
+                map.setDisplayedAttribute(static_cast<int>(SegmentTulip::getFormattedColumnIdx(
+                    map.getInternalMap().getAttributeTable(), SegmentTulip::Column::TOTAL_DEPTH,
+                    tulipBins, radiusType, static_cast<int>(*radiusSet.begin()), selOnly)));
+            }
         }
     } catch (Communicator::CancelledException) {
         analysisCompleted = false;
@@ -1491,10 +1494,10 @@ bool MetaGraphDM::analyseSegmentsTulipLeafChoice(Communicator *communicator,
                                                  std::set<double> &radiusSet, bool selOnly,
                                                  int tulipBins, int weightedMeasureCol,
                                                  RadiusType radiusType, int weightedMeasureCol2,
-                                                 int routeweightCol, bool interactive,
-                                                 bool forceLegacyColumnOrder) {
-    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                                // during reload)
+                                                 int routeweightCol, bool recordSelLeafs,
+                                                 bool interactive, bool forceLegacyColumnOrder) {
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental
+                                // redraw during reload)
 
     bool analysisCompleted = false;
 
@@ -1502,13 +1505,14 @@ bool MetaGraphDM::analyseSegmentsTulipLeafChoice(Communicator *communicator,
         auto &map = getDisplayedShapeGraph();
         SegmentTulipLeafChoice analysis(
             radiusSet, selOnly ? std::make_optional(map.getSelSet()) : std::nullopt, tulipBins,
-            weightedMeasureCol, radiusType, weightedMeasureCol2, routeweightCol, interactive);
+            weightedMeasureCol, radiusType, weightedMeasureCol2, routeweightCol, recordSelLeafs,
+            interactive);
         analysis.setForceLegacyColumnOrder(forceLegacyColumnOrder);
         analysisCompleted = analysis.run(communicator, map.getInternalMap(), false).completed;
         map.setDisplayedAttribute(-2); // <- override if it's already showing
         map.setDisplayedAttribute(static_cast<int>(SegmentTulipLeafChoice::getFormattedColumnIdx(
             map.getInternalMap().getAttributeTable(), SegmentTulipLeafChoice::Column::LEAF_CHOICE,
-            tulipBins, radiusType, static_cast<int>(*radiusSet.begin()))));
+            tulipBins, radiusType, static_cast<int>(*radiusSet.begin()), selOnly)));
     } catch (Communicator::CancelledException) {
         analysisCompleted = false;
     }
@@ -1519,8 +1523,8 @@ bool MetaGraphDM::analyseSegmentsTulipLeafChoice(Communicator *communicator,
 }
 
 bool MetaGraphDM::analyseSegmentsAngular(Communicator *communicator, std::set<double> radiusSet) {
-    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                                // during reload)
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental
+                                // redraw during reload)
 
     bool analysisCompleted = false;
 
@@ -1546,8 +1550,8 @@ bool MetaGraphDM::analyseSegmentsAngular(Communicator *communicator, std::set<do
 bool MetaGraphDM::analyseTopoMetMultipleRadii(Communicator *communicator,
                                               std::set<double> &radiusSet, AnalysisType outputType,
                                               double radius, bool selOnly) {
-    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                                // during reload)
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental
+                                // redraw during reload)
 
     bool analysisCompleted = true;
 
@@ -1596,8 +1600,8 @@ bool MetaGraphDM::analyseTopoMetMultipleRadii(Communicator *communicator,
 
 bool MetaGraphDM::analyseTopoMet(Communicator *communicator, AnalysisType outputType, double radius,
                                  bool selOnly) {
-    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental redraw
-                                // during reload)
+    m_state &= ~DX_SHAPEGRAPHS; // Clear axial map data flag (stops accidental
+                                // redraw during reload)
 
     bool analysisCompleted = false;
 
@@ -1664,7 +1668,8 @@ size_t MetaGraphDM::loadLineData(Communicator *communicator, const std::string &
     // if bsp tree exists
     m_bspNodeTree.destroy();
 
-    m_state &= ~DX_LINEDATA; // Clear line data flag (stops accidental redraw during reload)
+    m_state &= ~DX_LINEDATA; // Clear line data flag (stops accidental redraw
+                             // during reload)
 
     if (replace) {
         m_drawingFiles.clear();

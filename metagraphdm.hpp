@@ -285,7 +285,8 @@ class MetaGraphDM {
     bool analyseSegmentsTulipLeafChoice(Communicator *communicator, std::set<double> &radiusSet,
                                         bool selOnly, int tulipBins, int weightedMeasureCol,
                                         RadiusType radiusType, int weightedMeasureCol2 = -1,
-                                        int routeweightCol = -1, bool interactive = false,
+                                        int routeweightCol = -1, bool recordSelLeafs = true,
+                                        bool interactive = false,
                                         bool forceLegacyColumnOrder = false);
     bool analyseSegmentsAngular(Communicator *communicator, std::set<double> radiusSet);
     bool analyseTopoMetMultipleRadii(Communicator *communicator, std::set<double> &radiusSet,
