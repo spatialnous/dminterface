@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2000-2010 University College London, Alasdair Turner
 // SPDX-FileCopyrightText: 2011-2012 Tasos Varoudis
-// SPDX-FileCopyrightText: 2024 Petros Koutsolampros
+// SPDX-FileCopyrightText: 2024-2026 Petros Koutsolampros
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -2378,8 +2378,6 @@ MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::readFromStream(std::istream &st
 
 MetaGraphReadWrite::ReadWriteStatus MetaGraphDM::write(const std::string &filename, int version,
                                                        bool currentlayer, bool ignoreDisplayData) {
-    std::ofstream stream;
-
     int oldstate = m_state;
     m_state = 0; // <- temporarily clear out state, avoids any potential read /
                  // write errors
