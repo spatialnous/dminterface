@@ -12,6 +12,12 @@
 
 #include "salalib/shapegraph.hpp"
 
+#include <istream>
+#include <memory>
+#include <ostream>
+#include <utility>
+#include <vector>
+
 class ShapeGraphDM : public ShapeMapDM {
 
   public:

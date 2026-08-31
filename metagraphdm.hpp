@@ -22,8 +22,17 @@
 #include "salalib/metagraphreadwrite.hpp"
 #include "salalib/pushvalues.hpp"
 
+#include <cstddef>
+#include <functional>
+#include <iosfwd>
+#include <istream>
+#include <iterator>
+#include <math.h>
 #include <memory>
 #include <optional>
+#include <set>
+#include <string>
+#include <utility>
 #include <vector>
 
 ///////////////////////////////////////////////////////////////////////////////////

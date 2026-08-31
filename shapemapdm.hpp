@@ -13,6 +13,16 @@
 
 #include "salalib/shapemap.hpp"
 
+#include <cstddef>
+#include <istream>
+#include <map>
+#include <memory>
+#include <ostream>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 class ShapeMapDM : public AttributeMapDM {
 
     mutable bool m_show; // used when shape map is a drawing layer

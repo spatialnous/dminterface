@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "latticemapdm.hpp"
+
 #include <cstddef>
 #include <istream>
 #include <optional>

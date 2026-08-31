@@ -6,6 +6,10 @@
 
 #include "salalib/genlib/comm.hpp"
 
+#include <cstddef>
+#include <iostream>
+#include <string>
+
 // this is a simple version of the Communicator which can be used for
 // an interface
 

@@ -49,6 +49,7 @@
 #include <iostream>
 #include <istream>
 #include <iterator>
+#include <math.h>
 #include <memory>
 #include <optional>
 #include <ostream>

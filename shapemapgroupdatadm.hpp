@@ -7,7 +7,10 @@
 
 #include "salalib/shapemapgroupdata.hpp"
 
-#include <deque>
+#include <cstddef>
+#include <fstream>
+#include <istream>
+#include <optional>
 #include <string>
 
 class ShapeMapGroupDataDM {

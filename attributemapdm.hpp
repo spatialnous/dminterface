@@ -8,6 +8,9 @@
 
 #include "salalib/attributemap.hpp"
 
+#include <memory>
+#include <utility>
+
 class AttributeMapDM {
 
   protected:

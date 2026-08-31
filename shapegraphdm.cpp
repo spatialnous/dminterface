@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "shapegraphdm.hpp"
+
 #include <istream>
 #include <ostream>
 #include <vector>

@@ -6,6 +6,7 @@
 
 #include "shapemapdm.hpp"
 #include "salalib/tolerances.hpp"
+
 #include <algorithm>
 #include <cstddef>
 #include <istream>

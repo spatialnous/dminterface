@@ -12,6 +12,16 @@
 
 #include "salalib/latticemap.hpp"
 
+#include <cstddef>
+#include <istream>
+#include <map>
+#include <memory>
+#include <ostream>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 class LatticeMapDM : public AttributeMapDM {
 
     enum {
@@ -44,6 +54,8 @@ class LatticeMapDM : public AttributeMapDM {
     mutable PixelRef m_rc;  // cursor for grid lines
     mutable PixelRef m_prc; // cursor for point lines
     mutable PixelRef m_tr;
+
+    std::map<PixelRef, int> m_pointUndoCounter;
 
   protected:
     // which attribute is currently displayed:
@@ -140,8 +152,6 @@ class LatticeMapDM : public AttributeMapDM {
 
     size_t getSelCount() { return m_selectionSet.size(); }
     const Region4f &getSelBounds() const { return m_selBounds; }
-
-    std::map<PixelRef, int> m_pointUndoCounter;
 
     void setUndoCounter(PixelRef &p, int newUndoCountValue) {
         m_pointUndoCounter[p] = newUndoCountValue;
