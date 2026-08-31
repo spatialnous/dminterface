@@ -39,7 +39,24 @@
 
 #include "salalib/genlib/comm.hpp"
 
+#include <algorithm>
+#include <cstddef>
+#include <ctime>
+#include <fstream>
+#include <functional>
+#include <ios>
+#include <iosfwd>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <ostream>
+#include <set>
+#include <string>
 #include <tuple>
+#include <utility>
+#include <vector>
 
 MetaGraphDM::MetaGraphDM(std::string name)
     : m_state(0), m_viewClass(DX_VIEWNONE), m_showGrid(false), m_showText(false),

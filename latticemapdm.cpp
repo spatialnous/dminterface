@@ -5,6 +5,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "latticemapdm.hpp"
+#include <cstddef>
+#include <istream>
+#include <optional>
+#include <ostream>
+#include <string>
+#include <vector>
 
 void LatticeMapDM::setDisplayedAttribute(int col) {
     if (m_displayedAttribute == col) {

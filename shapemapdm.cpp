@@ -6,6 +6,18 @@
 
 #include "shapemapdm.hpp"
 #include "salalib/tolerances.hpp"
+#include <algorithm>
+#include <cstddef>
+#include <istream>
+#include <iterator>
+#include <map>
+#include <optional>
+#include <ostream>
+#include <set>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 void ShapeMapDM::init(size_t size, const Region4f &r) {
     m_displayShapes.clear();
