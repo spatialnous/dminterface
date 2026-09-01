@@ -1,0 +1,19 @@
+version = 1
+SPDX-PackageName = "dminterface"
+SPDX-PackageSupplier = "Petros Koutsolampros <commits@pklampros.io>"
+SPDX-PackageDownloadLocation = "https://github.com/spatialnous/dminterface"
+
+[[annotations]]
+path = [
+    ".gitignore",
+    ".gitattributes",
+    "README.md",
+    ".clang-format",
+    ".clang-tidy",
+    ".gitmodules",
+    ".mailmap",
+    "REUSE.toml"
+    ]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Petros Koutsolampros <commits@pklampros.io>"
+SPDX-License-Identifier = "GPL-3.0-or-later"

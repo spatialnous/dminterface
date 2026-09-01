@@ -1,10 +1,38 @@
 #!/bin/bash
-# SPDX-FileCopyrightText: 2024 Petros Koutsolampros
+#
+# SPDX-FileCopyrightText: 2024-2026 Petros Koutsolampros
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-
 set -e
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+# The tooling must actually be able to perform the checks below, otherwise they
+# pass without running. misc-include-cleaner only exists in clang-tidy >= 17 and
+# silently matches nothing on older versions; LineEnding: needs clang-format >= 16;
+# REUSE.toml is ignored by reuse < 4.0.
+command -v clang-tidy >/dev/null 2>&1 || { echo "clang-tidy not found"; exit 1; }
+command -v clang-format >/dev/null 2>&1 || { echo "clang-format not found"; exit 1; }
+command -v reuse >/dev/null 2>&1 || { echo "reuse not found"; exit 1; }
+
+clang-tidy -checks='-*,misc-include-cleaner' --list-checks 2>/dev/null \
+    | grep -q misc-include-cleaner \
+    || { echo "clang-tidy lacks misc-include-cleaner (needs clang-tidy >= 17)"; exit 1; }
+
+CF_MAJOR=$(clang-format --version | sed -n 's/[^0-9]*\([0-9][0-9]*\).*/\1/p' | head -1)
+[ -n "$CF_MAJOR" ] && [ "$CF_MAJOR" -ge 16 ] \
+    || { echo "clang-format $CF_MAJOR is too old for LineEnding: (needs >= 16)"; exit 1; }
+
+REUSE_MAJOR=$(reuse --version | head -1 | sed -n 's/[^0-9]*\([0-9][0-9]*\).*/\1/p' | head -1)
+[ -n "$REUSE_MAJOR" ] && [ "$REUSE_MAJOR" -ge 4 ] \
+    || { echo "reuse $REUSE_MAJOR is too old for REUSE.toml (needs >= 4.0): pipx install reuse"; exit 1; }
+
+reuse lint
+
+echo "Checking copyright years..."
+source "$SCRIPT_DIR/year-check.sh"
+echo "Copyright years correct"
 
 echo "Running clang-format..."
 for FILE in $(git diff --cached --name-only --diff-filter=d | grep -E '.*\.(c|cpp|h|hpp)$')
@@ -13,3 +41,29 @@ do
     clang-format --dry-run --Werror -style=file:.clang-format $FILE
 done
 echo "clang-format satisfied"
+
+echo "Running clang-tidy (include-cleaner)..."
+CPP_FILES=$(git diff --cached --name-only --diff-filter=d | grep -E '\.cpp$' || true)
+if [ -n "$CPP_FILES" ]; then
+    TIDY_OUTPUT=$(clang-tidy --quiet \
+        -checks='-*,misc-include-cleaner' \
+        $CPP_FILES -- -std=c++17 -I. 2>&1 || true)
+
+    # A file that fails to parse produces no include-cleaner findings, so a
+    # broken parse would otherwise be indistinguishable from a clean one.
+    if printf '%s\n' "$TIDY_OUTPUT" | grep -q 'clang-diagnostic-error'; then
+        echo "clang-tidy could not parse some files:"
+        printf '%s\n' "$TIDY_OUTPUT" | grep 'clang-diagnostic-error'
+        exit 1
+    fi
+
+    ISSUE_COUNT=$(printf '%s\n' "$TIDY_OUTPUT" | grep -c 'no header providing|not used directly' || true)
+
+    if [ "$ISSUE_COUNT" -gt 0 ]; then
+        echo "clang-tidy found $ISSUE_COUNT missing-include issue(s):"
+        printf '%s\n' "$TIDY_OUTPUT" | grep 'no header providing|not used directly'
+        echo "Run the clang-tidy --fix command manually, review, then re-stage."
+        exit 1
+    fi
+fi
+echo "clang-tidy satisfied"
