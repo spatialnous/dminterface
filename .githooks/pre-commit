@@ -43,11 +43,20 @@ done
 echo "clang-format satisfied"
 
 echo "Running clang-tidy (include-cleaner)..."
+# dminterface sources include "salalib/..." paths that resolve from the
+# superproject root, not from here. Ask git where that is rather than hardcoding
+# a depth: this repo sits at dmcli/dminterface in salatest but qtgui/dminterface
+# in depthmapQ, and may also be checked out standalone.
+TIDY_INC="-I."
+SUPERPROJECT=$(git rev-parse --show-superproject-working-tree 2>/dev/null || true)
+if [ -n "$SUPERPROJECT" ]; then
+    TIDY_INC="$TIDY_INC -I$SUPERPROJECT"
+fi
 CPP_FILES=$(git diff --cached --name-only --diff-filter=d | grep -E '\.cpp$' || true)
 if [ -n "$CPP_FILES" ]; then
     TIDY_OUTPUT=$(clang-tidy --quiet \
         -checks='-*,misc-include-cleaner' \
-        $CPP_FILES -- -std=c++17 -I. -I../../ 2>&1 || true)
+        $CPP_FILES -- -std=c++17 $TIDY_INC 2>&1 || true)
 
     # A file that fails to parse produces no include-cleaner findings, so a
     # broken parse would otherwise be indistinguishable from a clean one.
@@ -57,11 +66,11 @@ if [ -n "$CPP_FILES" ]; then
         exit 1
     fi
 
-    ISSUE_COUNT=$(printf '%s\n' "$TIDY_OUTPUT" | grep -c 'no header providing|not used directly' || true)
+    ISSUE_COUNT=$(printf '%s\n' "$TIDY_OUTPUT" | grep -cE 'no header providing|not used directly' || true)
 
     if [ "$ISSUE_COUNT" -gt 0 ]; then
         echo "clang-tidy found $ISSUE_COUNT missing-include issue(s):"
-        printf '%s\n' "$TIDY_OUTPUT" | grep 'no header providing|not used directly'
+        printf '%s\n' "$TIDY_OUTPUT" | grep -E 'no header providing|not used directly'
         echo "Run the clang-tidy --fix command manually, review, then re-stage."
         exit 1
     fi
