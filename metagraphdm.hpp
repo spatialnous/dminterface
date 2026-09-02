@@ -8,12 +8,11 @@
 
 // Interface: the meta graph loads and holds all sorts of arbitrary data...
 #include "latticemapdm.hpp"
-#include "salalib/analysistype.hpp"
-#include "salalib/radiustype.hpp"
 #include "shapegraphdm.hpp"
 #include "shapemapdm.hpp"
 #include "shapemapgroupdatadm.hpp"
 
+#include "salalib/analysistype.hpp"
 #include "salalib/bspnodetree.hpp"
 #include "salalib/ianalysis.hpp"
 #include "salalib/importtypedefs.hpp"
@@ -21,6 +20,7 @@
 #include "salalib/metagraph.hpp"
 #include "salalib/metagraphreadwrite.hpp"
 #include "salalib/pushvalues.hpp"
+#include "salalib/radiustype.hpp"
 
 #include <cstddef>
 #include <functional>

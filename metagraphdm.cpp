@@ -13,6 +13,7 @@
 #include "salalib/axialmodules/axialintegration.hpp"
 #include "salalib/axialmodules/axiallocal.hpp"
 #include "salalib/axialmodules/axialstepdepth.hpp"
+#include "salalib/genlib/comm.hpp"
 #include "salalib/importutils.hpp"
 #include "salalib/isovist.hpp"
 #include "salalib/isovistutils.hpp"
@@ -36,8 +37,6 @@
 #include "salalib/vgamodules/vgavisualglobal.hpp"
 #include "salalib/vgamodules/vgavisualglobaldepth.hpp"
 #include "salalib/vgamodules/vgavisuallocal.hpp"
-
-#include "salalib/genlib/comm.hpp"
 
 #include <algorithm>
 #include <cstddef>
