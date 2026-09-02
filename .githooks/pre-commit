@@ -31,7 +31,23 @@ REUSE_MAJOR=$(reuse --version | head -1 | sed -n 's/[^0-9]*\([0-9][0-9]*\).*/\1/
 reuse lint
 
 echo "Checking copyright years..."
-source "$SCRIPT_DIR/year-check.sh"
+# Sourced from salalib rather than kept as a copy here: two copies drift, and
+# this one has already had to be hand-synced. $SUPERPROJECT is set below for the
+# include path; compute it here since the year check needs it first.
+SUPERPROJECT=$(git rev-parse --show-superproject-working-tree 2>/dev/null || true)
+if [ -z "$SUPERPROJECT" ]; then
+    echo "not inside a superproject, so salalib cannot be located"
+    echo "dminterface takes the year check from salalib - commit from within"
+    echo "salatest or depthmapQ rather than a standalone clone"
+    exit 1
+fi
+CHECK="$SUPERPROJECT/salalib/.githooks/year-check.sh"
+[ -f "$CHECK" ] || {
+    echo "cannot find $CHECK"
+    echo "run: git submodule update --init"
+    exit 1
+}
+source "$CHECK"
 echo "Copyright years correct"
 
 echo "Running clang-format..."
@@ -48,7 +64,6 @@ echo "Running clang-tidy (include-cleaner)..."
 # a depth: this repo sits at dmcli/dminterface in salatest but qtgui/dminterface
 # in depthmapQ, and may also be checked out standalone.
 TIDY_INC="-I."
-SUPERPROJECT=$(git rev-parse --show-superproject-working-tree 2>/dev/null || true)
 if [ -n "$SUPERPROJECT" ]; then
     TIDY_INC="$TIDY_INC -I$SUPERPROJECT"
 fi
