@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2000-2010 University College London, Alasdair Turner
 // SPDX-FileCopyrightText: 2011-2012 Tasos Varoudis
-// SPDX-FileCopyrightText: 2024 Petros Koutsolampros
+// SPDX-FileCopyrightText: 2024-2026 Petros Koutsolampros
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -17,6 +17,7 @@
 #include <ostream>
 #include <set>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -59,7 +60,7 @@ void ShapeMapDM::setDisplayedAttribute(int col) {
     m_invalidate = false;
 }
 
-void ShapeMapDM::setDisplayedAttribute(const std::string &col) {
+void ShapeMapDM::setDisplayedAttribute(const std::string_view col) {
     setDisplayedAttribute(
         static_cast<int>(getInternalMap().getAttributeTable().getColumnIndex(col)));
 }

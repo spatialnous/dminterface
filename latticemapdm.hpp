@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2000-2010 University College London, Alasdair Turner
 // SPDX-FileCopyrightText: 2011-2012 Tasos Varoudis
-// SPDX-FileCopyrightText: 2024 Petros Koutsolampros
+// SPDX-FileCopyrightText: 2024-2026 Petros Koutsolampros
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -18,7 +18,7 @@
 #include <memory>
 #include <ostream>
 #include <set>
-#include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -103,7 +103,7 @@ class LatticeMapDM : public AttributeMapDM {
     }
 
     void setDisplayedAttribute(int col);
-    void setDisplayedAttribute(const std::string &col);
+    void setDisplayedAttribute(const std::string_view col);
     // use set displayed attribute instead unless you are deliberately changing the column order:
     void overrideDisplayedAttribute(int attribute) { m_displayedAttribute = attribute; }
     // now, there is a slightly odd thing here: the displayed attribute can go out of step with the

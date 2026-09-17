@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2000-2010 University College London, Alasdair Turner
 // SPDX-FileCopyrightText: 2011-2012 Tasos Varoudis
-// SPDX-FileCopyrightText: 2024 Petros Koutsolampros
+// SPDX-FileCopyrightText: 2024-2026 Petros Koutsolampros
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -10,7 +10,7 @@
 #include <istream>
 #include <optional>
 #include <ostream>
-#include <string>
+#include <string_view>
 #include <vector>
 
 void LatticeMapDM::setDisplayedAttribute(int col) {
@@ -27,7 +27,7 @@ void LatticeMapDM::setDisplayedAttribute(int col) {
     getInternalMap().getAttributeTableHandle().setDisplayColIndex(m_displayedAttribute);
 }
 
-void LatticeMapDM::setDisplayedAttribute(const std::string &col) {
+void LatticeMapDM::setDisplayedAttribute(const std::string_view col) {
     setDisplayedAttribute(
         static_cast<int>(getInternalMap().getAttributeTable().getColumnIndex(col)));
 }
