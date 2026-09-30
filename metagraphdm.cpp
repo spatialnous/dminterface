@@ -360,9 +360,10 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
                     map.setDisplayedAttribute(AxialStepDepth::Column::STEP_DEPTH);
                 } else {
                     auto &map = getDisplayedShapeGraph();
-                    analysisCompleted = SegmentTulipDepth(1024, map.getSelSet())
-                                            .run(communicator, map.getInternalMap(), false)
-                                            .completed;
+                    analysisCompleted =
+                        SegmentTulipDepth(1024, map.getSelSet(), pafmath::defaultSeed)
+                            .run(communicator, map.getInternalMap(), false)
+                            .completed;
                     map.setDisplayedAttribute(-2); // <- override if it's already showing
                     map.setDisplayedAttribute(SegmentTulipDepth::Column::ANGULAR_STEP_DEPTH);
                 }
@@ -1383,7 +1384,7 @@ bool MetaGraphDM::makeFewestLineMap(Communicator *communicator, int replace) {
         auto &alllinemap = m_shapeGraphs[m_allLineMapData->index];
 
         auto [fewestlinemap_subsets, fewestlinemap_minimal] = AllLine::extractFewestLineMaps(
-            communicator, alllinemap.getInternalMap(), *m_allLineMapData, 0);
+            communicator, alllinemap.getInternalMap(), *m_allLineMapData);
 
         if (replace != 0) {
             std::optional<size_t> index = std::nullopt;
@@ -1442,7 +1443,8 @@ bool MetaGraphDM::analyseAxial(Communicator *communicator, std::set<double> radi
 
     try {
         auto &map = getDisplayedShapeGraph();
-        AxialIntegration analysis(radiusSet, weightedMeasureCol, choice, fulloutput);
+        AxialIntegration analysis(radiusSet, weightedMeasureCol, choice, fulloutput,
+                                  pafmath::defaultSeed);
         analysis.setForceLegacyColumnOrder(forceLegacyColumnOrder);
         analysisCompleted = analysis.run(communicator, map.getInternalMap(), false).completed;
 
