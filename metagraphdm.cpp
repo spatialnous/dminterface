@@ -197,7 +197,7 @@ bool MetaGraphDM::makePoints(const Point2f &p, int fillType, Communicator *commu
         getDisplayedLatticeMap().getInternalMap().blockLines(lines);
         getDisplayedLatticeMap().makePoints(p, fillType, communicator);
         getDisplayedLatticeMap().setDisplayedAttribute(-2);
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
 
         // By this stage points almost certainly exist,
         // To avoid problems, just say points exist:
@@ -295,7 +295,7 @@ bool MetaGraphDM::makeGraph(Communicator *communicator, int algorithm, double ma
         graphMade = getDisplayedLatticeMap().getInternalMap().sparkGraph2(
             communicator, (algorithm != 0), maxdist);
         getDisplayedLatticeMap().setDisplayedAttribute(LatticeMap::Column::CONNECTIVITY);
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         graphMade = false;
     }
 
@@ -502,7 +502,7 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
             map.overrideDisplayedAttribute(-2);
             map.setDisplayedAttribute(VGAThroughVision::Column::THROUGH_VISION);
         }
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         analysisCompleted = false;
     }
 
@@ -812,7 +812,7 @@ bool MetaGraphDM::makeBSPtree(BSPNodeTree &bspNodeTree, Communicator *communicat
         try {
             BSPTree::make(communicator, atime, partitionlines, m_bspNodeTree.getRoot());
             m_bspNodeTree.setBuilt(true);
-        } catch (Communicator::CancelledException) {
+        } catch (Communicator::CancelledException &) {
             m_bspNodeTree.setBuilt(false);
             // probably best to delete the half made bastard of a tree:
             m_bspNodeTree.destroy();
@@ -909,7 +909,7 @@ bool MetaGraphDM::convertDrawingToAxial(Communicator *comm, std::string layerNam
         m_shapeGraphs[mapref].setDisplayedAttribute(ShapeGraph::Column::CONNECTIVITY);
 
         setDisplayedShapeGraphRef(mapref);
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         converted = false;
     }
 
@@ -944,7 +944,7 @@ bool MetaGraphDM::convertDataToAxial(Communicator *comm, std::string layerName, 
             setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
         else
             unsetDisplayedShapeGraphRef();
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         converted = false;
     }
 
@@ -998,7 +998,7 @@ bool MetaGraphDM::convertToConvex(Communicator *comm, std::string layerName, boo
         else
             unsetDisplayedShapeGraphRef();
 
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         converted = false;
     }
 
@@ -1043,7 +1043,7 @@ bool MetaGraphDM::convertDrawingToSegment(Communicator *comm, std::string layerN
             setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
         else
             unsetDisplayedShapeGraphRef();
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         converted = false;
     }
 
@@ -1076,7 +1076,7 @@ bool MetaGraphDM::convertDataToSegment(Communicator *comm, std::string layerName
             setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
         else
             unsetDisplayedShapeGraphRef();
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         converted = false;
     }
 
@@ -1160,7 +1160,7 @@ bool MetaGraphDM::convertToData(Communicator *, std::string layerName, bool keep
             destmap.setDisplayedAttribute(-1);
             converted = true;
         }
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         converted = false;
     }
 
@@ -1232,7 +1232,7 @@ bool MetaGraphDM::convertToDrawing(Communicator *, std::string layerName,
             converted = true;
         }
         converted = true;
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         converted = false;
     }
 
@@ -1272,7 +1272,7 @@ bool MetaGraphDM::convertAxialToSegment(Communicator *comm, std::string layerNam
             setDisplayedShapeGraphRef(m_shapeGraphs.size() - 1);
         else
             unsetDisplayedShapeGraphRef();
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         converted = false;
     }
 
@@ -1309,7 +1309,7 @@ int MetaGraphDM::loadMifMap(Communicator *comm, std::istream &miffile, std::istr
         } else { // error: undo!
             removeDataMap(mifmapref);
         }
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         mapLoaded = -1;
     }
 
@@ -1354,7 +1354,7 @@ bool MetaGraphDM::makeAllLineMap(Communicator *communicator, const Point2f &seed
         }
 
         setDisplayedShapeGraphRef(m_allLineMapData->index);
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         mapMade = false;
     }
 
@@ -1419,7 +1419,7 @@ bool MetaGraphDM::makeFewestLineMap(Communicator *communicator, int replace) {
 
         setDisplayedShapeGraphRef(m_shapeGraphs.size() - 2);
 
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         mapMade = false;
     }
 
@@ -1460,7 +1460,7 @@ bool MetaGraphDM::analyseAxial(Communicator *communicator, std::set<double> radi
                 AxialLocal()
                     .run(communicator, getDisplayedShapeGraph().getInternalMap(), false)
                     .completed;
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         analysisCompleted = false;
     }
 
@@ -1501,7 +1501,7 @@ bool MetaGraphDM::analyseSegmentsTulip(Communicator *communicator, std::set<doub
                     tulipBins, radiusType, static_cast<int>(*radiusSet.begin()), selOnly)));
             }
         }
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         analysisCompleted = false;
     }
 
@@ -1533,7 +1533,7 @@ bool MetaGraphDM::analyseSegmentsTulipLeafChoice(Communicator *communicator,
         map.setDisplayedAttribute(static_cast<int>(SegmentTulipLeafChoice::getFormattedColumnIdx(
             map.getInternalMap().getAttributeTable(), SegmentTulipLeafChoice::Column::LEAF_CHOICE,
             tulipBins, radiusType, static_cast<int>(*radiusSet.begin()), selOnly)));
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         analysisCompleted = false;
     }
 
@@ -1558,7 +1558,7 @@ bool MetaGraphDM::analyseSegmentsAngular(Communicator *communicator, std::set<do
             SegmentAngular::Column::ANGULAR_MEAN_DEPTH, static_cast<int>(*radiusSet.begin()));
         map.setDisplayedAttribute(depthColText);
 
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         analysisCompleted = false;
     }
 
@@ -1609,7 +1609,7 @@ bool MetaGraphDM::analyseTopoMetMultipleRadii(Communicator *communicator,
                 }
             }
         }
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         analysisCompleted = false;
     }
 
@@ -1656,7 +1656,7 @@ bool MetaGraphDM::analyseTopoMet(Communicator *communicator, AnalysisType output
                     SegmentMetric::Column::METRIC_MEAN_DEPTH, radius));
             }
         }
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         analysisCompleted = false;
     }
 
@@ -1979,7 +1979,7 @@ bool MetaGraphDM::analyseThruVision(Communicator *comm, std::optional<size_t> ga
     try {
         analysisCompleted =
             VGAThroughVision(getDisplayedLatticeMap().getInternalMap()).run(comm).completed;
-    } catch (Communicator::CancelledException) {
+    } catch (Communicator::CancelledException &) {
         analysisCompleted = false;
     }
 
