@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2000-2010 University College London, Alasdair Turner
 // SPDX-FileCopyrightText: 2011-2012 Tasos Varoudis
-// SPDX-FileCopyrightText: 2024 Petros Koutsolampros
+// SPDX-FileCopyrightText: 2024-2026 Petros Koutsolampros
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -163,13 +163,13 @@ class MetaGraphDM {
     bool findNextShape(bool &nextlayer) const;
     const SalaShape &getNextShape() const {
         if (!currentLayer.has_value()) {
-            throw new genlib::RuntimeException("No current layer selected");
+            throw genlib::RuntimeException("No current layer selected");
         }
         auto &currentDrawingFile = m_drawingFiles[currentLayer.value()];
         if (!currentDrawingFile.groupData.getCurrentLayer().has_value()) {
-            throw new genlib::RuntimeException("Current drawing file (" +
-                                               currentDrawingFile.groupData.getName() +
-                                               ") has no layer to match to a map");
+            throw genlib::RuntimeException("Current drawing file (" +
+                                           currentDrawingFile.groupData.getName() +
+                                           ") has no layer to match to a map");
         }
         return currentDrawingFile.maps[currentDrawingFile.groupData.getCurrentLayer().value()]
             .getNextShape();
