@@ -457,7 +457,6 @@ bool MetaGraphDM::analyseGraph(Communicator *communicator, int pointDepthSelecti
                 auto &map = getDisplayedLatticeMap();
                 auto analysis = VGAVisualGlobal(map.getInternalMap(), radius, gatesOnly);
                 analysis.setSimpleVersion(simpleVersion);
-                analysis.setLegacyWriteMiscs(true);
                 auto analysisResult = analysis.run(communicator);
                 analysis.copyResultToMap(analysisResult.getAttributes(),
                                          analysisResult.getAttributeData(), map.getInternalMap(),
